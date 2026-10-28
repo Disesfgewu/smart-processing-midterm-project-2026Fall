@@ -16,6 +16,35 @@ def test_ground_truth_box_rejects_non_increasing_coords():
         GroundTruthBox(label="cat", box_xyxy=(50, 50, 10, 10))
 
 
+def test_ground_truth_box_rejects_wrong_length_box():
+    with pytest.raises(ValueError):
+        GroundTruthBox(label="cat", box_xyxy=(1, 2, 3))
+
+
+def test_ground_truth_box_rejects_negative_coords():
+    with pytest.raises(ValueError):
+        GroundTruthBox(label="cat", box_xyxy=(-5, 0, 10, 10))
+
+
+def test_ground_truth_box_rejects_non_finite_coords():
+    with pytest.raises(ValueError):
+        GroundTruthBox(label="cat", box_xyxy=(0, 0, float("inf"), 10))
+
+
+def test_evaluation_entry_rejects_blank_image():
+    with pytest.raises(ValueError):
+        EvaluationEntry(
+            image="  ", image_license="CC0", category="small_objects", prompt_style="basic_noun", prompt="a cat"
+        )
+
+
+def test_evaluation_entry_rejects_non_string_image():
+    with pytest.raises(ValueError):
+        EvaluationEntry(
+            image=None, image_license="CC0", category="small_objects", prompt_style="basic_noun", prompt="a cat"
+        )
+
+
 def test_ground_truth_box_rejects_blank_label():
     with pytest.raises(ValueError):
         GroundTruthBox(label="  ", box_xyxy=(0, 0, 10, 10))
@@ -91,6 +120,23 @@ def test_load_annotations_reports_entry_index_on_error(tmp_path):
     path = tmp_path / "annotations.json"
     path.write_text(json.dumps(data))
     with pytest.raises(ValueError, match="entry 0"):
+        load_annotations(str(path))
+
+
+def test_load_annotations_rejects_null_field_as_value_error_not_attribute_error(tmp_path):
+    data = [
+        {
+            "image": None,
+            "image_license": "CC0",
+            "category": "small_objects",
+            "prompt_style": "basic_noun",
+            "prompt": "a cat",
+            "ground_truth_boxes": [],
+        }
+    ]
+    path = tmp_path / "annotations.json"
+    path.write_text(json.dumps(data))
+    with pytest.raises(ValueError):  # must not escape as AttributeError
         load_annotations(str(path))
 
 

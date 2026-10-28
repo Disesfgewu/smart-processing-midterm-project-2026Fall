@@ -10,8 +10,16 @@ import json
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from smart_processing.types import BoundingBox
+
 VALID_CATEGORIES = {"similar_objects", "small_objects", "occlusion"}
 VALID_PROMPT_STYLES = {"basic_noun", "descriptive_phrase", "fine_grained"}
+
+
+def _require_non_blank_str(value, field_name: str) -> str:
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"{field_name} must be a non-blank string, got {value!r}")
+    return value
 
 
 @dataclass(frozen=True)
@@ -20,11 +28,12 @@ class GroundTruthBox:
     box_xyxy: tuple[float, float, float, float]
 
     def __post_init__(self) -> None:
-        if not self.label.strip():
-            raise ValueError("label must be a non-blank string")
-        x0, y0, x1, y1 = self.box_xyxy
-        if not (x0 < x1 and y0 < y1):
-            raise ValueError(f"box_xyxy must have x0<x1 and y0<y1, got {self.box_xyxy}")
+        _require_non_blank_str(self.label, "label")
+        if len(self.box_xyxy) != 4:
+            raise ValueError(f"box_xyxy must have exactly 4 values, got {self.box_xyxy}")
+        # Delegates finite/non-negative/x0<x1/y0<y1 checks to #3's BoundingBox
+        # instead of duplicating them.
+        BoundingBox(*self.box_xyxy)
 
 
 @dataclass(frozen=True)
@@ -37,16 +46,15 @@ class EvaluationEntry:
     ground_truth_boxes: list[GroundTruthBox] = field(default_factory=list)
 
     def __post_init__(self) -> None:
+        _require_non_blank_str(self.image, "image")
+        _require_non_blank_str(self.image_license, "image_license")
+        _require_non_blank_str(self.prompt, "prompt")
         if self.category not in VALID_CATEGORIES:
             raise ValueError(f"category must be one of {VALID_CATEGORIES}, got {self.category!r}")
         if self.prompt_style not in VALID_PROMPT_STYLES:
             raise ValueError(
                 f"prompt_style must be one of {VALID_PROMPT_STYLES}, got {self.prompt_style!r}"
             )
-        if not self.prompt.strip():
-            raise ValueError("prompt must be a non-blank string")
-        if not self.image_license.strip():
-            raise ValueError("image_license must be a non-blank string (document how it was verified)")
 
 
 def load_annotations(path: str) -> list[EvaluationEntry]:

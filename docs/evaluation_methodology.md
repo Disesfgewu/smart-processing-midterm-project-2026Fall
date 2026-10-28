@@ -24,6 +24,9 @@ defines it and prepares the dataset it will run on).
 
 - `box_xyxy` is in **pixel coordinates** of the image at its original
   (downloaded) resolution, matching #3's `BoundingBox` contract.
+- `ground_truth_boxes[].label` is descriptive metadata for humans reading
+  this file (e.g. `"lime"`), not a scoring key -- see "Detection accuracy
+  metric" below for why label comparison isn't part of matching.
 - `ground_truth_boxes` can be empty (a prompt that should correctly find
   nothing in that image -- a valid, useful test case).
 - Each image appears once per prompt style it's annotated for (at least 3
@@ -35,12 +38,19 @@ defines it and prepares the dataset it will run on).
 For one (image, prompt) entry, given the detector's predicted boxes (each
 with a label and score) and the ground-truth boxes:
 
-1. **Matching rule**: a predicted box `P` matches a ground-truth box `G` if
-   and only if:
-   - `IoU(P, G) >= 0.5` (standard PASCAL VOC / COCO-style threshold), and
-   - `P.label` equals the prompt's expected label (case-insensitive,
-     stripped) -- there is no multi-class confusion matrix here since each
-     entry is scored against one target prompt at a time.
+1. **Matching rule**: each entry's `detect()` call uses exactly one prompt
+   (`entry.prompt`), so every predicted box `P`'s label equals that prompt
+   string by construction (`OwlViTTextDetector` assigns the searched-for
+   prompt text as each detection's label) -- comparing `P.label` to
+   `G.label` would therefore never match, since `G.label` is a short
+   descriptive noun (`"lime"`) while `P.label` is the full prompt
+   (`"a round citrus fruit"`). `G.label` in the dataset is descriptive
+   metadata for humans reading `annotations.json`, not a matching key.
+   A predicted box `P` matches a ground-truth box `G` if and only if
+   `IoU(P, G) >= 0.5` (standard PASCAL VOC / COCO-style threshold) --
+   there is no label comparison within one entry, since every prediction
+   already targets the single object class `entry.prompt` asked for,
+   and the annotator placed `G` boxes under that same prompt accordingly.
 2. **Greedy one-to-one matching**: sort predictions by descending score;
    for each prediction in that order, match it to the highest-IoU
    unmatched ground-truth box that clears the threshold. Each ground-truth
