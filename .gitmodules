@@ -1,0 +1,6 @@
+[submodule "third_party/nanoowl"]
+	path = third_party/nanoowl
+	url = https://github.com/NVIDIA-AI-IOT/nanoowl.git
+[submodule "third_party/nanosam"]
+	path = third_party/nanosam
+	url = https://github.com/NVIDIA-AI-IOT/nanosam.git

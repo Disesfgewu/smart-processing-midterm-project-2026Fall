@@ -11,9 +11,8 @@ or measured inference result verified for this project yet.
 
 The implementation plan is tracked in
 [GitHub issues](https://github.com/Disesfgewu/smart-processing-midterm-project-2026Fall/issues).
-Contribution rules and a change-size workflow have been prepared locally; they
-become repository policy/checks after review and merge. Required branch protection
-must also be activated before the check blocks merges.
+Contribution rules and the change-size workflow are merged into `main`. Required
+branch protection must still be activated before the check blocks merges.
 
 ## Intended workflow
 
@@ -26,22 +25,36 @@ must also be activated before the check blocks merges.
 macOS substitutes and measurements will be identified explicitly. They are not
 evidence of Jetson execution or performance.
 
+## Upstream submodules
+
+`third_party/nanoowl` and `third_party/nanosam` are pinned Git submodules of the
+official [NVIDIA-AI-IOT/nanoowl](https://github.com/NVIDIA-AI-IOT/nanoowl) and
+[NVIDIA-AI-IOT/nanosam](https://github.com/NVIDIA-AI-IOT/nanosam) (both
+Apache-2.0). Do not edit submodule files in place; see
+[docs/third_party_apis.md](docs/third_party_apis.md) for pinned SHAs, the
+update policy, and the text->boxes / box->masks API contracts and their
+platform-specific (TensorRT) dependencies.
+
 ## Get the repository
 
 ```sh
 git clone --recurse-submodules https://github.com/Disesfgewu/smart-processing-midterm-project-2026Fall.git
 cd smart-processing-midterm-project-2026Fall
+# or, on an existing checkout:
+git submodule update --init --recursive
 ```
 
-The upstream submodules are planned in issue #18; they are not registered yet.
-Do not install NanoOWL/NanoSAM globally or assume their TensorRT paths run on macOS.
+Verified: a fresh `git submodule update --init --recursive` resolves exactly
+the commits recorded in `.gitmodules` (checked on macOS arm64). Neither
+submodule's weights are included. Do not install NanoOWL/NanoSAM globally or
+assume their TensorRT paths run on macOS.
 
 ## Setup and run availability
 
 | Step | Status / tracking issue |
 | --- | --- |
 | Supported Python version and `.venv`/Conda setup | Pending: #17 and #2 |
-| Pinned upstream submodules and dependency installation | Pending: #18 |
+| Pinned upstream submodules and dependency installation | **Done** (this PR); acquisition/engine builds remain #2/#4/#5, #12/#13 |
 | Model/checkpoint download and cache configuration | Pending: #2, #4, #5 |
 | Single-image detection and segmentation command | Pending: #6 |
 | Camera demo and live prompt changes | Pending: #7 |
@@ -59,6 +72,7 @@ expected output, and troubleshooting steps. Do not guess commands from the plan.
 - `CONTRIBUTING.md`: implementation, environment, size and review rules.
 - `AGENTS.md`: instructions for coding agents.
 - `.github/`: review template, ownership and change-size automation.
+- `third_party/`: pinned NanoOWL/NanoSAM submodules; see `docs/third_party_apis.md`.
 - `hw.md`: assignment requirements supplied in the workspace; currently untracked.
 
 The installable package, environment manifests and model adapters are planned;
