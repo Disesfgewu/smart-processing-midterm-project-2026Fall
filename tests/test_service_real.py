@@ -24,13 +24,17 @@ pytestmark = pytest.mark.skipif(
 
 
 @pytest.fixture(scope="module")
-def server():
+def server(tmp_path_factory):
     from smart_processing.adapters.owlvit_text_detector import OwlViTTextDetector
     from smart_processing.service import run_server
     from smart_processing.types import BackendConfig
 
+    # #53: a per-test-module log directory, never this repo's real
+    # artifacts/logs/ -- the opt-in real suite must not pollute the
+    # working tree with app.log files.
+    log_dir = tmp_path_factory.mktemp("service_logs")
     detector = OwlViTTextDetector(BackendConfig(device="cpu"))
-    srv = run_server(detector, device="cpu", port=0)  # port=0 -> OS picks a free port
+    srv = run_server(detector, device="cpu", port=0, log_dir=log_dir)  # port=0 -> OS picks a free port
     thread = threading.Thread(target=srv.serve_forever, daemon=True)
     thread.start()
     yield srv
@@ -39,7 +43,7 @@ def server():
 
 
 @pytest.fixture(scope="module")
-def server_with_segmenter():
+def server_with_segmenter(tmp_path_factory):
     from pathlib import Path
 
     from smart_processing.adapters.owlvit_text_detector import OwlViTTextDetector
@@ -54,9 +58,10 @@ def server_with_segmenter():
     if not Path(CHECKPOINT).exists():
         pytest.skip(f"{CHECKPOINT} not found; see docs/macos_feasibility.md for the download step")
 
+    log_dir = tmp_path_factory.mktemp("service_logs_segment")
     detector = OwlViTTextDetector(BackendConfig(device="cpu"))
     segmenter = SamBoxSegmenter(CHECKPOINT)
-    srv = run_server(detector, device="cpu", port=0, segmenter=segmenter)
+    srv = run_server(detector, device="cpu", port=0, segmenter=segmenter, log_dir=log_dir)
     thread = threading.Thread(target=srv.serve_forever, daemon=True)
     thread.start()
     yield srv

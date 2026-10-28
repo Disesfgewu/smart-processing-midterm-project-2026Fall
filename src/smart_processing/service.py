@@ -12,16 +12,18 @@ from __future__ import annotations
 import base64
 import json
 import logging
-import sys
+import time
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from io import BytesIO
 
+from smart_processing.service_logging import configure_logging, new_request_id
 from smart_processing.types import BoundingBox, DetectionResult
 
+# Handlers (console + rotating file) are attached by configure_logging()
+# in run_server() at startup (#53), not at import time -- importing this
+# module (e.g. for unit tests of handle_infer/handle_segment) must not
+# itself create artifacts/logs/app.log or print to stderr.
 _logger = logging.getLogger("smart_processing.service")
-if not _logger.handlers:
-    _logger.addHandler(logging.StreamHandler(sys.stderr))
-    _logger.setLevel(logging.WARNING)
 
 
 class ServiceError(Exception):
@@ -169,10 +171,36 @@ def make_handler(detector, device: str, segmenter=None):
             self.send_response(status)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
+            # #53: echoes the same ID logged server-side for this request,
+            # so a frontend error can be correlated to its log lines.
+            request_id = getattr(self, "_request_id", None)
+            if request_id is not None:
+                self.send_header("X-Request-ID", request_id)
             self.end_headers()
             self.wfile.write(body)
 
-        def _handle(self, handler_fn, *args) -> None:
+        def _begin_request(self) -> float:
+            # #53: a short per-request correlation ID + start timestamp,
+            # logged here (route only -- never the request body, which
+            # may contain base64 image bytes or prompts) and echoed in
+            # every response via _send_json's X-Request-ID header.
+            self._request_id = new_request_id()
+            _logger.info("request start id=%s method=%s path=%s", self._request_id, self.command, self.path)
+            return time.monotonic()
+
+        def _finish_request(self, status: int, payload: dict, start: float) -> None:
+            elapsed_ms = (time.monotonic() - start) * 1000
+            _logger.info(
+                "request end id=%s method=%s path=%s status=%d elapsed_ms=%.1f",
+                self._request_id,
+                self.command,
+                self.path,
+                status,
+                elapsed_ms,
+            )
+            self._send_json(status, payload)
+
+        def _handle(self, handler_fn, *args, start: float) -> None:
             # PM-Reviwer/Co-Reviewer finding: Content-Length was parsed
             # with a bare int(), uncaught for a non-numeric or negative
             # header value; and json.loads() on non-UTF-8 bytes raises
@@ -184,57 +212,75 @@ def make_handler(detector, device: str, segmenter=None):
             try:
                 length = int(self.headers.get("Content-Length", 0))
             except ValueError:
-                self._send_json(400, {"error": "Content-Length header is not a valid integer"})
+                self._finish_request(400, {"error": "Content-Length header is not a valid integer"}, start)
                 return
             if length < 0 or length > self._MAX_BODY_BYTES:
-                self._send_json(400, {"error": f"Content-Length out of bounds: {length}"})
+                self._finish_request(400, {"error": f"Content-Length out of bounds: {length}"}, start)
                 return
 
             try:
                 body = json.loads(self.rfile.read(length) or b"{}")
             except (json.JSONDecodeError, UnicodeDecodeError) as e:
-                self._send_json(400, {"error": f"invalid JSON body: {e}"})
+                self._finish_request(400, {"error": f"invalid JSON body: {e}"}, start)
                 return
 
             try:
                 result = handler_fn(*args, body)
             except ServiceError as e:
-                self._send_json(400, {"error": str(e)})
+                # A validation failure is a controlled client error (#53):
+                # logged as part of the request-end line above, not with
+                # a traceback -- the request body itself is never logged.
+                self._finish_request(400, {"error": str(e)}, start)
             except Exception:
-                # Real exception logged server-side only, never leaked to
-                # the client body (docs/frontend_service_api.md's error-
-                # response contract) -- previously silently swallowed,
-                # a known gap flagged on #47, fixed here.
-                _logger.exception("internal error handling %s", self.path)
-                self._send_json(500, {"error": "internal error during inference"})
+                # Real exception logged server-side only, with traceback,
+                # never leaked to the client body (docs/frontend_service_
+                # api.md's error-response contract) -- previously silently
+                # swallowed, a known gap flagged on #47, fixed in #54.
+                _logger.exception("request failed id=%s path=%s", self._request_id, self.path)
+                self._finish_request(500, {"error": "internal error during inference"}, start)
             else:
-                self._send_json(200, result)
+                self._finish_request(200, result, start)
 
         def do_GET(self) -> None:
+            start = self._begin_request()
             if self.path == "/health":
-                self._send_json(200, {"status": "ok", "device": device})
+                self._finish_request(200, {"status": "ok", "device": device}, start)
             else:
-                self._send_json(404, {"error": f"no such endpoint: {self.path}"})
+                self._finish_request(404, {"error": f"no such endpoint: {self.path}"}, start)
 
         def do_POST(self) -> None:
+            start = self._begin_request()
             if self.path == "/infer":
-                self._handle(handle_infer, detector)
+                self._handle(handle_infer, detector, start=start)
             elif self.path == "/segment":
                 if segmenter is None:
-                    self._send_json(503, {"error": "segmentation is not available on this server"})
+                    self._finish_request(503, {"error": "segmentation is not available on this server"}, start)
                 else:
-                    self._handle(handle_segment, segmenter)
+                    self._handle(handle_segment, segmenter, start=start)
             else:
-                self._send_json(404, {"error": f"no such endpoint: {self.path}"})
+                self._finish_request(404, {"error": f"no such endpoint: {self.path}"}, start)
 
         def log_message(self, format, *args) -> None:
-            pass  # HTTP access log is quiet by default; 500s are logged via _logger above
+            pass  # HTTP access log is quiet by default; requests are logged via _logger above
 
     return Handler
 
 
 def run_server(
-    detector, device: str = "cpu", host: str = "127.0.0.1", port: int = 8765, segmenter=None
+    detector,
+    device: str = "cpu",
+    host: str = "127.0.0.1",
+    port: int = 8765,
+    segmenter=None,
+    log_dir=None,
+    log_level=None,
 ) -> HTTPServer:
+    # #53: configures the persistent rotating app.log + console logging
+    # before the server starts accepting requests. configure_logging()
+    # raises LoggingConfigError on an unwritable log path or invalid
+    # level, so startup fails loudly here rather than silently running
+    # without the persistent log the Owner asked for.
+    configure_logging(log_dir=log_dir, level=log_level)
+    _logger.info("server starting host=%s port=%d device=%s segmenter=%s", host, port, device, segmenter is not None)
     server = HTTPServer((host, port), make_handler(detector, device, segmenter=segmenter))
     return server
