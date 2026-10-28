@@ -18,13 +18,17 @@ IMAGE = np.zeros((480, 640, 3), dtype=np.uint8)
 
 
 class _StubDetector:
-    def __init__(self, detections):
+    def __init__(self, detections, image_width=640, image_height=480):
         self._detections = detections
+        self._image_width = image_width
+        self._image_height = image_height
         self.calls = []
 
     def detect(self, image, prompts, threshold=0.1):
         self.calls.append((prompts, threshold))
-        return DetectionResult(image_width=640, image_height=480, detections=self._detections)
+        return DetectionResult(
+            image_width=self._image_width, image_height=self._image_height, detections=self._detections
+        )
 
 
 class _StubSegmenter:
@@ -57,6 +61,17 @@ def test_run_with_no_detections_skips_segmenter_entirely():
     assert (result.image_width, result.image_height) == (640, 480)
     assert segmenter.set_image_calls == 0  # no point calling it with nothing to segment
     assert segmenter.segment_calls == []
+
+
+def test_run_rejects_detector_image_dim_mismatch():
+    # Detector claims a different image size than what was actually passed in.
+    detector = _StubDetector([], image_width=320, image_height=240)
+    segmenter = _StubSegmenter()
+    pipeline = DetectSegmentPipeline(detector, segmenter)
+
+    with pytest.raises(ValueError):
+        pipeline.run(IMAGE, ["a cat"])  # IMAGE is 640x480
+    assert segmenter.set_image_calls == 0
 
 
 def test_run_passes_each_detection_box_to_segmenter():

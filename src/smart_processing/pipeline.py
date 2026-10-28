@@ -56,6 +56,12 @@ class DetectSegmentPipeline:
     def run(self, image: ImageArray, prompts: list[str], threshold: float = 0.1) -> PipelineResult:
         height, width = validate_image(image)
         detection_result = self._detector.detect(image, prompts, threshold)
+        if (detection_result.image_width, detection_result.image_height) != (width, height):
+            raise ValueError(
+                f"detector reported image dims "
+                f"{(detection_result.image_width, detection_result.image_height)} "
+                f"but the input image is {(width, height)}"
+            )
 
         if not detection_result.detections:
             return PipelineResult(image_width=width, image_height=height, results=[])

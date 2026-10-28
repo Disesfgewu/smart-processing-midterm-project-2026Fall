@@ -9,8 +9,11 @@ segmentation, and display boxes and masks on a live camera image.
 skeleton and a verified macOS development environment are established, and
 macOS inference feasibility is confirmed with one real text-conditioned
 detection and one real box-prompted segmentation run (see
-[docs/macos_feasibility.md](docs/macos_feasibility.md)). There is no
-end-to-end pipeline, camera application, or Jetson-measured result yet.
+[docs/macos_feasibility.md](docs/macos_feasibility.md)). `DetectSegmentPipeline`
+connects a real `TextDetector` + `BoxSegmenter` pair end to end as a library
+API (`src/smart_processing/pipeline.py`), verified with real models (see
+`tests/test_pipeline_real.py`) -- but there is still no `smart-processing`
+CLI command to run it, no camera application, and no Jetson-measured result.
 
 The implementation plan is tracked in
 [GitHub issues](https://github.com/Disesfgewu/smart-processing-midterm-project-2026Fall/issues).
