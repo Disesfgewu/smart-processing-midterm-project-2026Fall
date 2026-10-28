@@ -70,16 +70,25 @@ def test_score_entry_greedy_actually_uses_descending_score_order():
     """PM-Reviwer finding on #42: the prior version of this test used two
     predictions competing for one GT box, which gives the same (1 TP, 1 FP)
     result regardless of processing order and so couldn't catch a missing
-    sort. Two GT boxes make the order observable: A=(0,0,10,10) only
-    overlaps a low-score prediction at (0,0,10,10); B=(4,0,14,10) only
-    overlaps a high-score prediction at (1,0,11,10) well, but that high
-    prediction ALSO overlaps A reasonably (IoU>=0.5 against both). Processed
-    in descending score order, the high-score prediction claims its best
-    match first (B, since it's a tighter fit there than reusing A costs it
-    nothing -- the greedy pick is whichever unmatched GT gives the highest
-    IoU, which is engineered below to be A), then the low-score one is left
-    to match whatever remains, exercising actual order-dependent behavior
-    rather than two predictions interchangeable by symmetry."""
+    sort. Two GT boxes make the order observable.
+
+    GT: A=(0,0,10,10), B=(4,0,14,10). Predictions: low=(0,0,10,10) (exact
+    match to A: IoU(low,A)=1.0; IoU(low,B)=6/14≈0.429 -- below the 0.5
+    threshold, NOT zero), high=(1,0,11,10) (IoU(high,A)=9/11≈0.818;
+    IoU(high,B)=7/13≈0.538 -- high clears the threshold against BOTH,
+    more so against A).
+
+    Correct descending-score order: `high` is processed first and
+    greedily claims its best-IoU unmatched GT (A, 0.818 > 0.538), leaving
+    only B for `low` -- IoU(low,B)=0.429 misses the threshold, so `low`
+    is a false positive. Result: 1 TP (high-A), 1 FP (low), 1 FN (B).
+
+    Under the mutation this test must catch (no sort, i.e. input/list
+    order -- here low-then-high): `low` is processed first and claims A
+    (its only match), then `high` is left with only B, where
+    IoU(high,B)=0.538 still clears the threshold, so `high` ALSO
+    matches. Result: 2 TP, 0 FP, 0 FN -- confirmed by removing the sort
+    locally during #42's review and observing (2, 0) instead of (1, 1)."""
     gt = [
         GroundTruthBox(label="cat", box_xyxy=(0.0, 0.0, 10.0, 10.0)),  # A
         GroundTruthBox(label="cat", box_xyxy=(4.0, 0.0, 14.0, 10.0)),  # B
@@ -89,12 +98,7 @@ def test_score_entry_greedy_actually_uses_descending_score_order():
         PredictedBox(label="a cat", score=0.9, box_xyxy=(1.0, 0.0, 11.0, 10.0)),  # best IoU against A
     ]
     result = score_entry(_entry(gt), low_then_high)
-    # Descending-score order: the high-score prediction goes first and
-    # claims A (its best-IoU unmatched GT); the low-score exact-match
-    # prediction against A is then left with only B, IoU=0, so it misses.
-    # Processed in LIST order instead (mutation under test), the low-score
-    # prediction would claim A first, forcing the high-score one to also
-    # fail against the now-unmatched B -- a different (lower) TP count.
+    # Correct (descending-score) order: 1 TP, 1 FP, 1 FN -- see docstring.
     assert (result.true_positives, result.false_positives) == (1, 1)
     assert result.false_negatives == 1
 
