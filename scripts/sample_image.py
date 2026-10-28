@@ -26,18 +26,24 @@ DOWNLOAD_TIMEOUT_SECONDS = 30
 def ensure_sample_image(path: str = SAMPLE_IMAGE_PATH) -> str:
     dest = Path(path)
     if dest.exists():
+        if dest.stat().st_size == 0:
+            raise OSError(f"{dest} exists but is empty (0 bytes); refusing to treat it as cached")
         return str(dest)
     if path != SAMPLE_IMAGE_PATH:
         raise FileNotFoundError(
             f"{path} does not exist; auto-fetch only applies to the default "
             f"fixture path {SAMPLE_IMAGE_PATH!r}"
         )
+    with urllib.request.urlopen(SAMPLE_IMAGE_URL, timeout=DOWNLOAD_TIMEOUT_SECONDS) as response:
+        data = response.read()
+    if not data:
+        raise OSError(f"download from {SAMPLE_IMAGE_URL} returned an empty response")
+
     dest.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(dir=dest.parent, prefix=".sample_image_download_")
     try:
-        with urllib.request.urlopen(SAMPLE_IMAGE_URL, timeout=DOWNLOAD_TIMEOUT_SECONDS) as response:
-            with os.fdopen(fd, "wb") as tmp_file:
-                tmp_file.write(response.read())
+        with os.fdopen(fd, "wb") as tmp_file:
+            tmp_file.write(data)
         os.replace(tmp_name, dest)  # atomic: no partial/failed download is ever visible at dest
     except BaseException:
         Path(tmp_name).unlink(missing_ok=True)
