@@ -21,6 +21,7 @@ macos-feasibility = [
     "pillow",
     "segment-anything",
 ]
+camera-demo = ["opencv-python"]
 
 [project.scripts]
 smart-processing = "smart_processing.cli:main"
