@@ -69,17 +69,25 @@ state the SHA changed.
 - **Platform note**: `nanosam/utils/predictor.py` imports `tensorrt` and
   `torch2trt.TRTModule` at **module level**, so this module cannot be
   imported at all without a TensorRT installation — it is Jetson/TensorRT
-  only. Any macOS substitute backend (#2) must not import this module; it
-  needs its own adapter using the vendored MobileSAM/ONNX weights, not a
-  duplicate implementation here (see #4/#5/#13).
+  only, with no torch-only fallback path (unlike `OwlPredictor` above). Any
+  macOS substitute backend (#2) must not import this module; its exact
+  substitute implementation is chosen and documented where it's implemented
+  (#2/#5), not prescribed here.
 
 ## Model/checkpoint acquisition
 
-Neither submodule vendors model weights. Both require a manual download step
-(documented in each submodule's own `README.md`) plus a TensorRT engine
-build via `trtexec`/the provided export scripts — Jetson-only. Weights and
-built `.engine`/`.onnx` files must never be committed; they belong under a
-configurable, git-ignored artifact directory (finalized in #17).
+Neither submodule vendors model weights, but acquisition differs by path:
+- `OwlPredictor`'s **torch-only path** (`encode_image_torch`/`encode_rois`/
+  `predict`, `image_encoder_engine=None` by default) needs no manual
+  download or engine build — `OwlViTForObjectDetection.from_pretrained(...)`
+  fetches weights from the Hugging Face Hub automatically on first use.
+- `OwlPredictor`'s **TensorRT image-encoder path**, and `nanosam.Predictor`
+  (which has no other path), both require a manual export step (documented
+  in each submodule's own `README.md`) plus a TensorRT engine build via
+  `trtexec`/the provided export scripts — Jetson-only.
+
+Weights and built `.engine`/`.onnx` files must never be committed; they
+belong under a configurable, git-ignored artifact directory (finalized in #17).
 
 ## Dependencies (platform-specific)
 
