@@ -6,9 +6,11 @@ segmentation, and display boxes and masks on a live camera image.
 ## Current status
 
 **The application is not runnable yet.** The installable Python package
-skeleton and a verified macOS development environment are established (this
-PR). There is no model integration, detection/segmentation logic, camera
-application, or measured inference result yet.
+skeleton and a verified macOS development environment are established, and
+macOS inference feasibility is confirmed with one real text-conditioned
+detection and one real box-prompted segmentation run (see
+[docs/macos_feasibility.md](docs/macos_feasibility.md)). There is no
+end-to-end pipeline, camera application, or Jetson-measured result yet.
 
 The implementation plan is tracked in
 [GitHub issues](https://github.com/Disesfgewu/smart-processing-midterm-project-2026Fall/issues).
@@ -74,9 +76,10 @@ compatibility there is unverified).
 
 | Step | Status / tracking issue |
 | --- | --- |
-| Supported Python version and `.venv` setup | **Done** (this PR); Conda path pending #2 if needed |
+| Supported Python version and `.venv` setup | **Done**; Conda path pending if needed |
 | Pinned upstream submodules and dependency installation | Pending: #18 |
-| Model/checkpoint download and cache configuration | Pending: #2, #4, #5 |
+| macOS inference feasibility (real detection + segmentation run) | **Done** (this PR), see `docs/macos_feasibility.md` |
+| Model/checkpoint download and cache configuration | Pending: #4, #5 |
 | Single-image detection and segmentation command | Pending: #6 |
 | Camera demo and live prompt changes | Pending: #7 |
 | Manufacturing counting demo | Pending: #8 |
@@ -95,6 +98,9 @@ commands from the plan.
   here as it is implemented (#3-#13); only the package skeleton and a thin
   CLI entry point exist so far.
 - `tests/`: automated tests for the package.
+- `scripts/`: thin, real (non-mocked) smoke-test scripts; not package logic.
+- `docs/macos_feasibility.md`: real macOS detection/segmentation run,
+  platform/version/license record and backend substitution rationale (#2).
 - `environments/macos.md`: verified macOS `.venv` setup, update and removal
   commands. A documented Jetson Orin Nano / JetPack 6.2 environment strategy
   is tracked separately in #12/#13.

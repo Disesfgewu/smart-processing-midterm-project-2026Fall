@@ -10,3 +10,9 @@ __pycache__/
 # Tool-generated local artifacts, not project source
 .agent-artifacts/
 .agent-eye/
+
+# Downloaded model checkpoints: never tracked (#2/#17)
+tests/data/*.pth
+tests/data/*.pt
+tests/data/*.onnx
+tests/data/*.engine
