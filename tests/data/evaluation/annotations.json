@@ -204,5 +204,40 @@
     "ground_truth_boxes": [
       {"label": "paperclip pile", "box_xyxy": [230, 60, 1430, 1060]}
     ]
+  },
+  {
+    "image": "evaluation/similar_objects_mugs.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Align (52873932).jpeg, author Anoop Mukundan). Already small (1152x864, 282KB); no downscaling needed. Only a representative subset of the ~30 visually near-identical mugs is individually boxed -- the rest are packed edge-to-edge with no gap, making per-mug boxes unreliable; this is a known precision limitation, not hidden.",
+    "category": "similar_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a mug",
+    "ground_truth_boxes": [
+      {"label": "mug", "box_xyxy": [0, 95, 108, 230]},
+      {"label": "mug", "box_xyxy": [0, 245, 100, 390]},
+      {"label": "mug", "box_xyxy": [290, 245, 385, 390]},
+      {"label": "mug", "box_xyxy": [860, 245, 960, 390]},
+      {"label": "mug", "box_xyxy": [330, 415, 450, 565]},
+      {"label": "mug", "box_xyxy": [0, 585, 110, 745]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_mugs.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Align (52873932).jpeg, author Anoop Mukundan). Already small (1152x864, 282KB); no downscaling needed. Only a representative subset of the ~30 visually near-identical mugs is individually boxed -- the rest are packed edge-to-edge with no gap, making per-mug boxes unreliable; this is a known precision limitation, not hidden.",
+    "category": "similar_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a pastel green mug",
+    "ground_truth_boxes": [
+      {"label": "mug", "box_xyxy": [0, 245, 100, 390]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_mugs.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Align (52873932).jpeg, author Anoop Mukundan). Already small (1152x864, 282KB); no downscaling needed. Only a representative subset of the ~30 visually near-identical mugs is individually boxed -- the rest are packed edge-to-edge with no gap, making per-mug boxes unreliable; this is a known precision limitation, not hidden.",
+    "category": "similar_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a row of mugs on a shelf",
+    "ground_truth_boxes": [
+      {"label": "mug row", "box_xyxy": [0, 245, 1152, 390]}
+    ]
   }
 ]

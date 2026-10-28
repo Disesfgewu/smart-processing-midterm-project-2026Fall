@@ -3,7 +3,7 @@
 Ground-truth annotations for detection accuracy evaluation (#10
 implements the scorer against `docs/evaluation_methodology.md`'s spec).
 
-## Status: 6 of 10 images (partial, in progress); all 3 categories now represented
+## Status: 7 of 10 images (partial, in progress); all 3 categories now represented
 
 | Image | Category | License | Prompt styles |
 | --- | --- | --- | --- |
@@ -13,6 +13,7 @@ implements the scorer against `docs/evaluation_methodology.md`'s spec).
 | `small_objects_parking.jpg` | small_objects | CC BY-SA 4.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Parking lot, Gross-Gerau (P1090665).jpg`, author Matti Blume | basic_noun ("a car"), fine_grained ("a small red car"), descriptive_phrase ("a vehicle parked in a large aerial parking lot") |
 | `occlusion_pens.jpg` | occlusion | CC0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:NIND Pen-pile ISO100.jpg`, author MB-one. Downscaled 3996x2998 -> 1600x1200 with macOS `sips` (7.1MB -> 300KB); boxes are in the downscaled coordinate space | basic_noun ("a pencil"), fine_grained ("a yellow marker pen with a cap"), descriptive_phrase ("a writing instrument lying on a wooden table") |
 | `small_objects_paperclips.jpg` | small_objects | CC BY-SA 3.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Paperclips.jpg`, author Tdlnx. Downscaled 3264x2448 -> 1600x1200 with macOS `sips` (2.9MB -> 421KB); boxes are in the downscaled coordinate space | basic_noun ("a paperclip"), fine_grained ("a gold-toned paperclip"), descriptive_phrase ("a tangled pile of metal paperclips on a table") |
+| `similar_objects_mugs.jpg` | similar_objects | CC BY-SA 3.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Align (52873932).jpeg`, author Anoop Mukundan. Already small (1152x864, 282KB); no downscaling needed | basic_noun ("a mug"), fine_grained ("a pastel green mug"), descriptive_phrase ("a row of mugs on a shelf") |
 
 Ground-truth boxes in `annotations.json` were determined by manual visual
 inspection of each downloaded image (not guessed/synthesized), in pixel
@@ -32,9 +33,16 @@ pile's periphery were annotated for the basic_noun/fine_grained prompts;
 the descriptive_phrase prompt instead uses one box covering the whole
 pile region. Same rationale as the parking-lot limitation above.
 
+**Known precision limitation**: `similar_objects_mugs.jpg` has ~30
+visually near-identical mugs packed edge-to-edge across 4 shelf rows.
+Only a representative subset (6 clearly separable mugs across different
+rows/colors) is individually boxed for the basic_noun prompt; the rest
+are too tightly packed for reliable per-mug boxes. Same rationale as
+the paperclips/parking-lot limitations above.
+
 ## Remaining work
 
-- 4 more images needed to meet #9's 10-image minimum. All 3 required
+- 3 more images needed to meet #9's 10-image minimum. All 3 required
   categories (`similar_objects`, `small_objects`, `occlusion`) now have at
   least one image; additional images can go to any category for broader
   coverage.
