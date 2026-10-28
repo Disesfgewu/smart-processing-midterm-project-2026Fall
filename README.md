@@ -11,8 +11,13 @@ or measured inference result verified for this project yet.
 
 The implementation plan is tracked in
 [GitHub issues](https://github.com/Disesfgewu/smart-processing-midterm-project-2026Fall/issues).
-Contribution rules and the change-size workflow are merged into `main`. Required
-branch protection must still be activated before the check blocks merges.
+Contribution rules and the change-size CI workflow are merged into `main`.
+Branch protection on `main` is active: the `size` status check is required
+(strict), code-owner review is required with stale-approval dismissal,
+admins are enforced, and force pushes/deletion are disabled (verified via
+the GitHub branch protection API). The `size` check itself is currently
+unable to run on GitHub's hosted runner due to an account billing issue,
+separate from this branch-protection configuration.
 
 ## Intended workflow
 
@@ -45,16 +50,19 @@ git submodule update --init --recursive
 ```
 
 Verified: a fresh `git submodule update --init --recursive` resolves exactly
-the commits recorded in `.gitmodules` (checked on macOS arm64). Neither
-submodule's weights are included. Do not install NanoOWL/NanoSAM globally or
-assume their TensorRT paths run on macOS.
+the pinned commits (checked on macOS arm64) — recorded as gitlinks in this
+repository's tree (`git submodule status`), not literally stored in
+`.gitmodules` itself (which only holds each submodule's URL and path).
+Neither submodule's weights are included. Do not install NanoOWL/NanoSAM
+globally or assume their TensorRT paths run on macOS.
 
 ## Setup and run availability
 
 | Step | Status / tracking issue |
 | --- | --- |
 | Supported Python version and `.venv`/Conda setup | Pending: #17 and #2 |
-| Pinned upstream submodules and dependency installation | **Done** (this PR); acquisition/engine builds remain #2/#4/#5, #12/#13 |
+| Pinned upstream submodules (this PR) | **Done**: `third_party/nanoowl`/`nanosam` pinned, API-mapped in `docs/third_party_apis.md` |
+| Python package/dependency installation using these submodules | Pending: #2, #4, #5 (not provided by this pinning-only PR) |
 | Model/checkpoint download and cache configuration | Pending: #2, #4, #5 |
 | Single-image detection and segmentation command | Pending: #6 |
 | Camera demo and live prompt changes | Pending: #7 |

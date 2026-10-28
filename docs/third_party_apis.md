@@ -36,8 +36,10 @@ state the SHA changed.
 - `encode_image(image: torch.Tensor) -> OwlEncodeImageOutput` — dispatches to
   `encode_image_torch` or `encode_image_trt` depending on whether a TensorRT
   image-encoder engine was loaded at construction. `encode_image_torch`'s
-  `pred_boxes` are **normalized `[0, 1]` center-size boxes converted to
-  corners**, not pixel coordinates.
+  `pred_boxes` are in **normalized (image-fraction) units, not pixel
+  coordinates**: center/size components come from a sigmoid so they lie in
+  `[0, 1]`, but after center-to-corner conversion the resulting `x0/y0/x1/y1`
+  are not guaranteed to stay within `[0, 1]`.
 - `encode_rois(image, rois, pad_square=True) -> OwlEncodeImageOutput` — crops
   and re-encodes each ROI, then rescales `pred_boxes` from normalized to
   **global pixel `xyxy`** via `_owl_box_roi_to_box_global(boxes, rois)`.
@@ -47,7 +49,8 @@ state the SHA changed.
 - `decode(image_output, text_output, threshold=0.1) -> OwlDecodeOutput` with
   fields `boxes` (`[N, 4]`, same coordinate space as `image_output.pred_boxes`
   — pixel `xyxy` only if `image_output` came from `encode_rois`/`predict`,
-  otherwise normalized `[0, 1]`), `scores` (`[N]`), `labels` (`[N]`, index
+  otherwise normalized image-fraction units, not necessarily within
+  `[0, 1]`), `scores` (`[N]`), `labels` (`[N]`, index
   into the input text list), `input_indices`.
 - **Platform note**: `OwlPredictor` itself has no module-level TensorRT
   import — `import tensorrt as trt` / `torch2trt.TRTModule` are imported
