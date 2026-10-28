@@ -47,3 +47,13 @@ def test_handle_infer_rejects_non_base64_image_string():
         handle_infer(
             _NeverCalledDetector(), {"image_base64": "not valid base64 at all!", "prompts": ["a cat"]}
         )
+
+
+@pytest.mark.parametrize("bad_body", [[], None, 123, "a string", True])
+def test_handle_infer_rejects_non_dict_body(bad_body):
+    """PM-Reviwer finding: a syntactically valid JSON body that isn't an
+    object (e.g. `[]`, `null`, `123`) made body.get() raise AttributeError,
+    an unhandled exception the HTTP layer reported as a 500 instead of the
+    400 a malformed request deserves."""
+    with pytest.raises(ServiceError, match="JSON object"):
+        handle_infer(_NeverCalledDetector(), bad_body)

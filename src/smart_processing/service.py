@@ -10,10 +10,17 @@ from __future__ import annotations
 
 import base64
 import json
+import logging
+import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from io import BytesIO
 
 from smart_processing.types import DetectionResult
+
+_logger = logging.getLogger("smart_processing.service")
+if not _logger.handlers:
+    _logger.addHandler(logging.StreamHandler(sys.stderr))
+    _logger.setLevel(logging.WARNING)
 
 
 class ServiceError(Exception):
@@ -64,6 +71,12 @@ def handle_infer(detector, body: dict) -> dict:
     decoding, and most of this function's error paths stay testable in a
     PIL-free dev venv -- only the "everything valid" path needs a real
     image and the macos-feasibility extra."""
+    if not isinstance(body, dict):
+        # PM-Reviwer finding: a syntactically valid JSON body that isn't an
+        # object (e.g. `[]`, `null`, `123`) made body.get() below raise
+        # AttributeError, an unhandled exception the HTTP layer reported
+        # as a 500 instead of the 400 a malformed request deserves.
+        raise ServiceError(f"request body must be a JSON object, got {type(body).__name__}")
     prompts = body.get("prompts")
     threshold = body.get("threshold", 0.1)
     if not isinstance(prompts, list) or not prompts:
@@ -103,21 +116,45 @@ def make_handler(detector, device: str):
             else:
                 self._send_json(404, {"error": f"no such endpoint: {self.path}"})
 
+        # Defensive upper bound on a claimed request size: a single base64
+        # image plus prompts is never anywhere near this, and bounding it
+        # stops a malformed/hostile Content-Length from making the server
+        # attempt an enormous read. PM-Reviwer finding (framing hardening).
+        _MAX_BODY_BYTES = 64 * 1024 * 1024
+
         def do_POST(self) -> None:
             if self.path != "/infer":
                 self._send_json(404, {"error": f"no such endpoint: {self.path}"})
                 return
-            length = int(self.headers.get("Content-Length", 0))
+
+            # PM-Reviwer finding: Content-Length was parsed with a bare
+            # int(), uncaught for a non-numeric or negative header value;
+            # and json.loads() on non-UTF-8 bytes raises UnicodeDecodeError,
+            # which `except json.JSONDecodeError` did not catch -- both
+            # previously fell through to an unhandled exception (and, for
+            # UnicodeDecodeError specifically, a connection reset rather
+            # than any HTTP response at all). Both now get a clean 400.
+            try:
+                length = int(self.headers.get("Content-Length", 0))
+            except ValueError:
+                self._send_json(400, {"error": "Content-Length header is not a valid integer"})
+                return
+            if length < 0 or length > self._MAX_BODY_BYTES:
+                self._send_json(400, {"error": f"Content-Length out of bounds: {length}"})
+                return
+
             try:
                 body = json.loads(self.rfile.read(length) or b"{}")
-            except json.JSONDecodeError as e:
+            except (json.JSONDecodeError, UnicodeDecodeError) as e:
                 self._send_json(400, {"error": f"invalid JSON body: {e}"})
                 return
+
             try:
                 result = handle_infer(detector, body)
             except ServiceError as e:
                 self._send_json(400, {"error": str(e)})
             except Exception:
+                _logger.exception("internal error handling %s", self.path)
                 self._send_json(500, {"error": "internal error during inference"})
             else:
                 self._send_json(200, result)
