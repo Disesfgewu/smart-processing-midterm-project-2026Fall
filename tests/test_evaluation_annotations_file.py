@@ -25,12 +25,10 @@ def test_annotations_file_every_entry_has_verified_license_text():
         assert "verified" in entry.image_license.lower() or "cc0" in entry.image_license.lower()
 
 
-def test_annotations_summary_reports_current_partial_coverage():
+def test_annotations_summary_meets_ten_image_minimum():
     entries = load_annotations(str(ANNOTATIONS_PATH))
     summary = summarize(entries)
-    # Honest partial-progress check: not yet at the 10-image minimum.
-    assert summary["distinct_images"] >= 1
-    assert summary["distinct_images"] < 10
+    assert summary["distinct_images"] >= 10
 
 
 def test_annotations_file_covers_all_three_required_categories():

@@ -307,5 +307,40 @@
     "ground_truth_boxes": [
       {"label": "bird flock", "box_xyxy": [0, 540, 1600, 950]}
     ]
+  },
+  {
+    "image": "evaluation/occlusion_crayons.jpg",
+    "image_license": "CC BY 2.0 (Wikimedia Commons, verified via Commons API extmetadata for File:CrayonLogs.jpg, author Chris Metcalf). Already small (1280x960, 1.1MB); no downscaling needed.",
+    "category": "occlusion",
+    "prompt_style": "basic_noun",
+    "prompt": "a crayon",
+    "ground_truth_boxes": [
+      {"label": "crayon", "box_xyxy": [900, 0, 1050, 70]},
+      {"label": "crayon", "box_xyxy": [1080, 190, 1210, 280]},
+      {"label": "crayon", "box_xyxy": [830, 345, 965, 430]},
+      {"label": "crayon", "box_xyxy": [775, 535, 915, 625]},
+      {"label": "crayon", "box_xyxy": [235, 615, 375, 705]},
+      {"label": "crayon", "box_xyxy": [1125, 700, 1265, 800]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_crayons.jpg",
+    "image_license": "CC BY 2.0 (Wikimedia Commons, verified via Commons API extmetadata for File:CrayonLogs.jpg, author Chris Metcalf). Already small (1280x960, 1.1MB); no downscaling needed.",
+    "category": "occlusion",
+    "prompt_style": "fine_grained",
+    "prompt": "a blue crayon with a visible brand label",
+    "ground_truth_boxes": [
+      {"label": "crayon", "box_xyxy": [490, 440, 625, 520]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_crayons.jpg",
+    "image_license": "CC BY 2.0 (Wikimedia Commons, verified via Commons API extmetadata for File:CrayonLogs.jpg, author Chris Metcalf). Already small (1280x960, 1.1MB); no downscaling needed.",
+    "category": "occlusion",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a stack of crisscrossed crayons",
+    "ground_truth_boxes": [
+      {"label": "crayon stack", "box_xyxy": [230, 0, 1270, 960]}
+    ]
   }
 ]
