@@ -83,8 +83,8 @@ compatibility there is unverified).
 | macOS text detection adapter (`OwlViTTextDetector`) | **Done**: `pip install -e ".[macos-feasibility]"`, then `RUN_FEASIBILITY_SMOKE=1 pytest tests/test_owlvit_text_detector_real.py -v` |
 | macOS box-prompted segmentation adapter (`SamBoxSegmenter`) | **Done** (this PR): `RUN_FEASIBILITY_SMOKE=1 pytest tests/test_sam_box_segmenter_real.py -v` (needs the SAM checkpoint from `docs/macos_feasibility.md`) |
 | Model/checkpoint download command | **Done**: see `docs/macos_feasibility.md` (manual `curl`/HF Hub fetch; `SamBoxSegmenter` takes a caller-supplied `checkpoint_path`, no built-in cache management) |
-| Automated checkpoint cache configuration | Pending: #6 or later, not yet built |
-| Single-image detection and segmentation command | Pending: #6 |
+| Automated checkpoint cache configuration | Pending: later, not yet built |
+| Single-image detection and segmentation pipeline (`DetectSegmentPipeline`) | **Done** (this PR): see `tests/test_pipeline_real.py` for a real text->boxes->masks run saving an overlay image and structured JSON |
 | Camera demo and live prompt changes | Pending: #7 |
 | Manufacturing counting demo | Pending: #8 |
 | Evaluation and benchmark commands | Pending: #10, #11 |
@@ -103,9 +103,12 @@ commands from the plan.
   `DetectionResult`/`SegmentationMask` contracts and `TextDetector`/
   `BoxSegmenter` Protocols (#3; adds a runtime `numpy` dependency).
   `adapters/owlvit_text_detector.py` implements `TextDetector` (#4) and
-  `adapters/sam_box_segmenter.py` implements `BoxSegmenter` (this PR, #5),
-  both against the backends validated in #2. Pipeline, camera, evaluation
-  and benchmarking logic lands as later issues (#6-#13).
+  `adapters/sam_box_segmenter.py` implements `BoxSegmenter` (#5), both
+  against the backends validated in #2. `pipeline.py`'s
+  `DetectSegmentPipeline` composes any `TextDetector` + `BoxSegmenter` pair
+  into a full text->boxes->masks run, plus `save_overlay_image`/
+  `save_structured_output` (this PR, #6). Camera, evaluation and
+  benchmarking logic lands as later issues (#7-#13).
 - `tests/`: automated tests for the package.
 - `scripts/`: thin CLI wrappers over `smart_processing.feasibility` (argv
   parsing + printing only; model loading/inference lives in the package).
