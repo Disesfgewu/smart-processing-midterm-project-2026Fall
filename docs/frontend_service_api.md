@@ -1,11 +1,14 @@
 # Frontend/backend service API contract (Issue #23)
 
 Defines the local HTTP API the frontend talks to, before any UI is built,
-per #23's "backend service contract" delivery step. This PR implements
-only the `/health` and `/infer` (detection-only) endpoints for real;
-segmentation, camera streaming, evaluation/benchmark result endpoints are
-documented here but left for follow-up PRs, consistent with #23's
-"coherent small PRs" guidance.
+per #23's "backend service contract" delivery step. **This PR is
+documentation-only** (Co-Reviewer finding: an earlier draft of this intro
+wrongly said "this PR implements... for real" -- corrected here). The
+`/health` and `/infer` (detection-only) endpoints are implemented for
+real in stacked PR #47; `/segment` in further-stacked PR #51. Camera
+streaming and evaluation/benchmark result endpoints remain documented
+here but left for later follow-up PRs, consistent with #23's "coherent
+small PRs" guidance.
 
 ## Design decisions (resolved before any UI work, per #23's acceptance)
 
@@ -94,7 +97,8 @@ Error responses (`4xx`/`5xx`), all `{"error": "<message>"}`:
 
 ## Not yet built
 
-No actual UI exists yet. This PR is backend-only: the HTTP service and
-its real, tested `/infer` wiring. The agent-eye skill and a visible
-browser are required for the next PR that adds any frontend code, per
-#23's acceptance criteria -- not needed for this backend-only PR.
+No actual UI exists yet, and (as stated above) this PR itself contains
+no implementation code -- it only defines the contract the stacked
+implementation PRs (#47, #51) build against. The agent-eye skill and a
+visible browser are required for the eventual PR that adds frontend
+code, per #23's acceptance criteria -- not needed for this docs-only PR.

@@ -93,6 +93,7 @@ compatibility there is unverified).
 | Manufacturing counting demo | Pending: #8 |
 | Evaluation and benchmark commands | Pending: #10, #11 |
 | Jetson setup, engine builds and run commands | Pending: #12, #13 |
+| Frontend/backend service API contract | **Done** (this PR, docs-only): `docs/frontend_service_api.md` defines `/health`, `/infer`, `/segment` request/response schemas and the camera-ownership/transport/coordinate/cancellation/resource-cleanup design decisions, resolved before any implementation or UI code. Real implementation lands in stacked PRs #47 (`/health`/`/infer`) and #51 (`/segment`) |
 
 There is currently no verified application launch command. As each feature
 lands, this section must be replaced with the exact tested commands,
