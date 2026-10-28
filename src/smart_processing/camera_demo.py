@@ -96,27 +96,35 @@ def run_loop(pipeline, prompt_state: PromptState, frame_source, on_result, shoul
     return frames_processed
 
 
+def read_stdin_prompts(prompt_state: PromptState, lines) -> None:
+    """Parses comma-separated prompt lines from `lines` (any iterable of
+    strings -- real stdin, or an injected fake in tests) and applies each
+    non-blank result to `prompt_state`. Extracted out of camera_demo_main's
+    closure specifically so this parsing/wiring is unit-testable with a
+    fake stdin, no real camera/display/thread involved -- a comma-only (or
+    blank) line is ignored rather than crashing this loop, so one bad line
+    doesn't kill prompt updates for the rest of the session."""
+    for line in lines:
+        parsed = [p.strip() for p in line.split(",") if p.strip()]
+        if not parsed:
+            continue  # blank/comma-only input: ignore, don't crash this thread
+        prompt_state.set(parsed)
+
+
 def camera_demo_main(pipeline, initial_prompts: list[str], device_index: int = 0) -> None:
     """Thin real-hardware wiring: opens the camera, displays boxes/masks
     with cv2.imshow, reads new prompts from stdin in a background thread
     (comma-separated, one line per change), and exits cleanly on 'q' or
     camera failure. Not unit-tested -- genuinely needs a camera and display.
     """
+    import sys
+
     import cv2
 
     prompt_state = PromptState(initial_prompts)
     stop_event = threading.Event()
 
-    def read_stdin_prompts():
-        import sys
-
-        for line in sys.stdin:
-            parsed = [p.strip() for p in line.split(",") if p.strip()]
-            if not parsed:
-                continue  # blank/comma-only input: ignore, don't crash this thread
-            prompt_state.set(parsed)
-
-    threading.Thread(target=read_stdin_prompts, daemon=True).start()
+    threading.Thread(target=read_stdin_prompts, args=(prompt_state, sys.stdin), daemon=True).start()
 
     def on_result(frame_rgb, result):
         from smart_processing.pipeline import render_overlay_image

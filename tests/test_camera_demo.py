@@ -10,7 +10,7 @@ import threading
 import numpy as np
 import pytest
 
-from smart_processing.camera_demo import PromptState, open_camera, run_loop
+from smart_processing.camera_demo import PromptState, open_camera, read_stdin_prompts, run_loop
 from smart_processing.types import DetectionResult
 
 
@@ -83,6 +83,47 @@ class _FakeCv2VideoCapture:
 
     def release(self):
         self.released = True
+
+
+def test_read_stdin_prompts_survives_comma_only_line_then_applies_valid_prompt():
+    """PM-Reviwer finding on #33/#35: this is a persistent repository
+    regression test for the stdin-wiring behavior, not a one-off manual
+    probe. Injects a fake stdin iterable (no real terminal/thread needed)
+    with a comma-only line followed by a valid prompt line, and asserts
+    the comma-only line is ignored (not a crash, not applied) while the
+    valid line that follows still takes effect -- one bad line must not
+    kill prompt updates for the rest of the session."""
+    prompt_state = PromptState(["initial prompt"])
+    fake_stdin = [",,,\n", "a bolt, a nut\n"]
+
+    read_stdin_prompts(prompt_state, fake_stdin)
+
+    assert prompt_state.get() == ["a bolt", "a nut"]
+
+
+def test_read_stdin_prompts_ignores_blank_line_between_valid_updates():
+    prompt_state = PromptState(["initial prompt"])
+    fake_stdin = ["a cat\n", "\n", "   \n", "a dog\n"]
+
+    read_stdin_prompts(prompt_state, fake_stdin)
+
+    assert prompt_state.get() == ["a dog"]
+
+
+def test_read_stdin_prompts_works_from_a_real_background_thread():
+    """Closer to the real wiring (camera_demo_main runs this in a daemon
+    thread): confirms read_stdin_prompts is safe to run off-main-thread
+    and that PromptState.get() on the main thread observes the update
+    after the thread finishes, exercising the actual thread boundary."""
+    prompt_state = PromptState(["initial prompt"])
+    fake_stdin = [",,,\n", "a bolt\n"]
+
+    thread = threading.Thread(target=read_stdin_prompts, args=(prompt_state, fake_stdin))
+    thread.start()
+    thread.join(timeout=5)
+
+    assert not thread.is_alive()
+    assert prompt_state.get() == ["a bolt"]
 
 
 def test_open_camera_raises_clear_error_when_not_authorized(monkeypatch):
