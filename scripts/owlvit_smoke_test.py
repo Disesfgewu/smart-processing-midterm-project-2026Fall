@@ -1,49 +1,27 @@
-"""Real macOS feasibility smoke test for the OWL-ViT backbone NanoOWL wraps.
+"""Thin CLI wrapper for smart_processing.feasibility.run_owlvit_detection.
 
-Runs actual text-conditioned detection (no mocks). Not the TensorRT-optimized
-NanoOWL path; documents the torch-only backend as the macOS substitute.
+Real macOS feasibility smoke test for the OWL-ViT backbone NanoOWL wraps
+(no mocks). Not the TensorRT-optimized NanoOWL path; documents the
+torch-only backend as the macOS substitute.
 """
 import sys
-import time
-
-import torch
-from PIL import Image
-from transformers import OwlViTForObjectDetection, OwlViTProcessor
 
 from sample_image import SAMPLE_IMAGE_PATH, ensure_sample_image
-
-MODEL_NAME = "google/owlvit-base-patch32"
+from smart_processing.feasibility import run_owlvit_detection
 
 
 def main():
     image_path = ensure_sample_image(sys.argv[1] if len(sys.argv) > 1 else SAMPLE_IMAGE_PATH)
     prompts = ["a photo of a cat", "a remote control"]
 
-    device = "mps" if torch.backends.mps.is_available() else "cpu"
-    print(f"device={device} torch={torch.__version__}")
+    result = run_owlvit_detection(image_path, prompts)
 
-    t0 = time.time()
-    processor = OwlViTProcessor.from_pretrained(MODEL_NAME)
-    model = OwlViTForObjectDetection.from_pretrained(MODEL_NAME).to(device).eval()
-    print(f"model load: {time.time() - t0:.2f}s")
-
-    image = Image.open(image_path).convert("RGB")
-    inputs = processor(text=[prompts], images=image, return_tensors="pt").to(device)
-
-    t0 = time.time()
-    with torch.no_grad():
-        outputs = model(**inputs)
-    print(f"inference: {time.time() - t0:.3f}s")
-
-    target_sizes = torch.tensor([image.size[::-1]])
-    results = processor.post_process_grounded_object_detection(
-        outputs=outputs, threshold=0.1, target_sizes=target_sizes
-    )[0]
-
-    print(f"image={image_path} size={image.size} prompts={prompts}")
-    for box, score, label in zip(results["boxes"], results["scores"], results["labels"]):
-        box = [round(v, 1) for v in box.tolist()]
-        print(f"  label={prompts[label]!r} score={score:.3f} box_xyxy={box}")
+    print(f"device={result['device']} torch={result['torch_version']}")
+    print(f"model load: {result['model_load_seconds']:.2f}s")
+    print(f"inference: {result['inference_seconds']:.3f}s")
+    print(f"image={result['image_path']} size={result['image_size']} prompts={result['prompts']}")
+    for d in result["detections"]:
+        print(f"  label={d['label']!r} score={d['score']:.3f} box_xyxy={d['box_xyxy']}")
 
 
 if __name__ == "__main__":

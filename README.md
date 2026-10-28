@@ -93,12 +93,13 @@ commands from the plan.
 
 ## Repository map
 
-- `src/smart_processing/`: the installable package. Reusable detection,
-  segmentation, pipeline, camera, evaluation and benchmarking logic will live
-  here as it is implemented (#3-#13); only the package skeleton and a thin
-  CLI entry point exist so far.
+- `src/smart_processing/`: the installable package. `feasibility.py` holds
+  the real OWL-ViT/SAM model-loading and inference logic for #2's smoke
+  tests. Detection/segmentation contracts, pipeline, camera, evaluation and
+  benchmarking logic lands as later issues implement it (#3-#13).
 - `tests/`: automated tests for the package.
-- `scripts/`: thin, real (non-mocked) smoke-test scripts; not package logic.
+- `scripts/`: thin CLI wrappers over `smart_processing.feasibility` (argv
+  parsing + printing only; model loading/inference lives in the package).
 - `docs/macos_feasibility.md`: real macOS detection/segmentation run,
   platform/version/license record and backend substitution rationale (#2).
 - `environments/macos.md`: verified macOS `.venv` setup, update and removal
