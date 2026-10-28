@@ -80,7 +80,7 @@ compatibility there is unverified).
 | Pinned upstream submodules and dependency installation | Pending: #18 |
 | macOS inference feasibility (real detection + segmentation run) | **Done**: `pip install -e ".[macos-feasibility]"`, then see `docs/macos_feasibility.md` for the checkpoint download and exact commands |
 | Portable detection/segmentation data contracts (`src/smart_processing/types.py`) | **Done**: pure data/interface contracts, no model code |
-| macOS text detection adapter (`OwlViTTextDetector`) | **Done** (this PR); real model, targeted + opt-in real-model tests |
+| macOS text detection adapter (`OwlViTTextDetector`) | **Done** (this PR): `pip install -e ".[macos-feasibility]"`, then `RUN_FEASIBILITY_SMOKE=1 pytest tests/test_owlvit_text_detector_real.py -v` |
 | Model/checkpoint download and cache configuration | Pending: #5 |
 | Single-image detection and segmentation command | Pending: #6 |
 | Camera demo and live prompt changes | Pending: #7 |

@@ -9,20 +9,26 @@ this module never requires them.
 """
 from __future__ import annotations
 
-from smart_processing.types import BackendConfig, BoundingBox, Detection, DetectionResult
+from smart_processing.types import (
+    BackendConfig,
+    BoundingBox,
+    Detection,
+    DetectionResult,
+    validate_image,
+)
 
 DEFAULT_MODEL_NAME = "google/owlvit-base-patch32"
 
 
-def validate_detect_inputs(image, prompts: list[str]) -> None:
+def validate_detect_inputs(image, prompts: list[str], threshold: float) -> None:
     """Pure input validation, importable/testable without loading any model."""
-    if image is None or getattr(image, "ndim", None) != 3 or image.shape[2] != 3:
-        shape = getattr(image, "shape", None)
-        raise ValueError(f"image must be an HWC RGB array, got shape {shape}")
-    if not prompts:
+    validate_image(image)
+    if not isinstance(prompts, list) or not prompts:
         raise ValueError("prompts must be a non-empty list of text strings")
-    if any(not p or not p.strip() for p in prompts):
-        raise ValueError("prompts must not contain empty/blank strings")
+    if any(not isinstance(p, str) or not p.strip() for p in prompts):
+        raise ValueError("prompts must be non-empty, non-blank strings")
+    if not (0.0 <= threshold <= 1.0):
+        raise ValueError(f"threshold must be in [0, 1], got {threshold}")
 
 
 class OwlViTTextDetector:
@@ -40,7 +46,7 @@ class OwlViTTextDetector:
         )
 
     def detect(self, image, prompts: list[str], threshold: float = 0.1) -> DetectionResult:
-        validate_detect_inputs(image, prompts)
+        validate_detect_inputs(image, prompts, threshold)
 
         height, width = image.shape[0], image.shape[1]
         inputs = self.processor(text=[prompts], images=image, return_tensors="pt").to(self.device)

@@ -5,11 +5,8 @@ with RUN_FEASIBILITY_SMOKE=1, same convention as #2's smoke tests.
 """
 import os
 
-import numpy as np
 import pytest
-from PIL import Image
 
-from smart_processing.adapters.owlvit_text_detector import OwlViTTextDetector
 from smart_processing.types import BackendConfig, DetectionResult
 
 RUN = os.environ.get("RUN_FEASIBILITY_SMOKE") == "1"
@@ -20,18 +17,29 @@ pytestmark = pytest.mark.skipif(
 
 @pytest.fixture(scope="module")
 def detector():
+    # Deferred import: Pillow/torch/transformers are the macos-feasibility
+    # optional extra, not a default dependency, so a plain `pytest` in a
+    # clean .venv must not import them even when this module is collected.
+    from smart_processing.adapters.owlvit_text_detector import OwlViTTextDetector
+
     return OwlViTTextDetector(BackendConfig(device="cpu"))
 
 
 @pytest.fixture(scope="module")
 def sample_image():
+    import numpy as np
+    from PIL import Image
+
     return np.array(Image.open("tests/data/sample_cats.jpg").convert("RGB"))
 
 
 def test_real_detection_finds_cats(detector, sample_image):
     result = detector.detect(sample_image, ["a photo of a cat"], threshold=0.1)
     assert isinstance(result, DetectionResult)
-    assert result.image_width, result.image_height == sample_image.shape[1::-1]
+    assert (result.image_width, result.image_height) == (
+        sample_image.shape[1],
+        sample_image.shape[0],
+    )
     assert len(result.detections) >= 1
     assert all(0.0 <= d.score <= 1.0 for d in result.detections)
     assert all(d.label == "a photo of a cat" for d in result.detections)
