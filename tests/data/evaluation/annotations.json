@@ -40,32 +40,32 @@
   },
   {
     "image": "evaluation/similar_objects_hardware.jpg",
-    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83)",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83). File has EXIF orientation tag 6 (rotate 90deg CW to display upright); PIL's Image.open() without exif_transpose loads the RAW unrotated frame (3264x2448), so these boxes are in that raw landscape coordinate space, not the upright-displayed portrait view. PM-Reviwer found the washer box exceeded bounds because it had been computed in the displayed (portrait) frame instead; corrected here for all 3 entries and verified by cropping each box from the actual PIL-loaded array and visually confirming it contains the right object.",
     "category": "similar_objects",
     "prompt_style": "basic_noun",
     "prompt": "a bolt",
     "ground_truth_boxes": [
-      {"label": "bolt", "box_xyxy": [359, 293, 1972, 1875]}
+      {"label": "bolt", "box_xyxy": [293, 475, 1875, 2088]}
     ]
   },
   {
     "image": "evaluation/similar_objects_hardware.jpg",
-    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83)",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83). File has EXIF orientation tag 6 (rotate 90deg CW to display upright); PIL's Image.open() without exif_transpose loads the RAW unrotated frame (3264x2448), so these boxes are in that raw landscape coordinate space, not the upright-displayed portrait view. PM-Reviwer found the washer box exceeded bounds because it had been computed in the displayed (portrait) frame instead; corrected here for all 3 entries and verified by cropping each box from the actual PIL-loaded array and visually confirming it contains the right object.",
     "category": "similar_objects",
     "prompt_style": "fine_grained",
     "prompt": "a hexagonal nut with a hole in the center",
     "ground_truth_boxes": [
-      {"label": "nut", "box_xyxy": [1353, 1337, 1875, 1875]}
+      {"label": "nut", "box_xyxy": [1337, 572, 1875, 1094]}
     ]
   },
   {
     "image": "evaluation/similar_objects_hardware.jpg",
-    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83)",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83). File has EXIF orientation tag 6 (rotate 90deg CW to display upright); PIL's Image.open() without exif_transpose loads the RAW unrotated frame (3264x2448), so these boxes are in that raw landscape coordinate space, not the upright-displayed portrait view. PM-Reviwer found this washer box exceeded bounds (y1=2804 > 2448) because it had been computed in the displayed (portrait) frame instead; corrected here for all 3 entries in this image and verified by cropping each box from the actual PIL-loaded array and visually confirming it contains the right object.",
     "category": "similar_objects",
     "prompt_style": "descriptive_phrase",
     "prompt": "a round metal washer",
     "ground_truth_boxes": [
-      {"label": "washer", "box_xyxy": [554, 1989, 1434, 2804]}
+      {"label": "washer", "box_xyxy": [1989, 1013, 2804, 1893]}
     ]
   },
   {
