@@ -81,10 +81,11 @@ compatibility there is unverified).
 | macOS inference feasibility (real detection + segmentation run) | **Done**: `pip install -e ".[macos-feasibility]"`, then see `docs/macos_feasibility.md` for the checkpoint download and exact commands |
 | Portable detection/segmentation data contracts (`src/smart_processing/types.py`) | **Done**: pure data/interface contracts, no model code |
 | macOS text detection adapter (`OwlViTTextDetector`) | **Done**: `pip install -e ".[macos-feasibility]"`, then `RUN_FEASIBILITY_SMOKE=1 pytest tests/test_owlvit_text_detector_real.py -v` |
-| macOS box-prompted segmentation adapter (`SamBoxSegmenter`) | **Done** (this PR): `RUN_FEASIBILITY_SMOKE=1 pytest tests/test_sam_box_segmenter_real.py -v` (needs the SAM checkpoint from `docs/macos_feasibility.md`) |
+| macOS box-prompted segmentation adapter (`SamBoxSegmenter`) | **Done**: `RUN_FEASIBILITY_SMOKE=1 pytest tests/test_sam_box_segmenter_real.py -v` (needs the SAM checkpoint from `docs/macos_feasibility.md`) |
 | Model/checkpoint download command | **Done**: see `docs/macos_feasibility.md` (manual `curl`/HF Hub fetch; `SamBoxSegmenter` takes a caller-supplied `checkpoint_path`, no built-in cache management) |
 | Automated checkpoint cache configuration | Pending: later, not yet built |
-| Single-image detection and segmentation pipeline (`DetectSegmentPipeline`) | **Done** (this PR): see `tests/test_pipeline_real.py` for a real text->boxes->masks run saving an overlay image and structured JSON |
+| Single-image detect+segment pipeline API (`DetectSegmentPipeline`) | **Done** (this PR): see `tests/test_pipeline_real.py` for a real text->boxes->masks run saving an overlay image and structured JSON |
+| `smart-processing` CLI command to run the pipeline | Pending: the `smart-processing` entry point has no subcommand for this yet; only the library API above is wired |
 | Camera demo and live prompt changes | Pending: #7 |
 | Manufacturing counting demo | Pending: #8 |
 | Evaluation and benchmark commands | Pending: #10, #11 |

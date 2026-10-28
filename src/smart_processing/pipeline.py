@@ -32,6 +32,21 @@ class PipelineResult:
     image_height: int
     results: list[PipelineDetection] = field(default_factory=list)
 
+    def __post_init__(self) -> None:
+        if self.image_width <= 0 or self.image_height <= 0:
+            raise ValueError("image_width/image_height must be positive")
+        for r in self.results:
+            if (r.mask.height, r.mask.width) != (self.image_height, self.image_width):
+                raise ValueError(
+                    f"mask shape {(r.mask.height, r.mask.width)} does not match "
+                    f"image dims {(self.image_height, self.image_width)}"
+                )
+            if r.detection.box.x1 > self.image_width or r.detection.box.y1 > self.image_height:
+                raise ValueError(
+                    f"detection box {r.detection.box.as_xyxy()} exceeds image dims "
+                    f"{(self.image_width, self.image_height)}"
+                )
+
 
 class DetectSegmentPipeline:
     def __init__(self, detector: TextDetector, segmenter: BoxSegmenter):
@@ -68,6 +83,7 @@ def save_structured_output(result: PipelineResult, path: str) -> None:
             for r in result.results
         ],
     }
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     Path(path).write_text(json.dumps(payload, indent=2))
 
 
@@ -76,6 +92,13 @@ def save_overlay_image(image: ImageArray, result: PipelineResult, path: str) -> 
     plain numpy (no PIL dependency for the drawing itself; PIL is only used
     to encode/save, deferred-imported since it's an optional extra)."""
     import numpy as np
+
+    height, width = validate_image(image)
+    if (height, width) != (result.image_height, result.image_width):
+        raise ValueError(
+            f"image shape {(height, width)} does not match result dims "
+            f"{(result.image_height, result.image_width)}"
+        )
 
     overlay = image.copy()
     for i, r in enumerate(result.results):
@@ -94,4 +117,5 @@ def save_overlay_image(image: ImageArray, result: PipelineResult, path: str) -> 
 
     from PIL import Image
 
+    Path(path).parent.mkdir(parents=True, exist_ok=True)
     Image.fromarray(overlay).save(path)

@@ -97,6 +97,33 @@ def test_save_structured_output_writes_expected_json(tmp_path):
     assert payload["detections"][0]["mask_pixel_count"] == 1600  # 40x40
 
 
+def test_save_structured_output_creates_missing_parent_dirs(tmp_path):
+    result = PipelineResult(image_width=640, image_height=480, results=[])
+    out = tmp_path / "nested" / "dir" / "result.json"
+    save_structured_output(result, str(out))
+    assert out.exists()
+
+
+def test_pipeline_result_rejects_mask_shape_mismatch():
+    detection = _detection(10, 10, 50, 50)
+    wrong_shape_mask = SegmentationMask(mask=np.zeros((100, 100), dtype=np.bool_), score=0.9)
+    with pytest.raises(ValueError):
+        PipelineResult(
+            image_width=640,
+            image_height=480,
+            results=[PipelineDetection(detection=detection, mask=wrong_shape_mask)],
+        )
+
+
+def test_pipeline_result_rejects_box_exceeding_image_dims():
+    oversized = _detection(10, 10, 999, 999)
+    mask = SegmentationMask(mask=np.zeros((480, 640), dtype=np.bool_), score=0.9)
+    with pytest.raises(ValueError):
+        PipelineResult(
+            image_width=640, image_height=480, results=[PipelineDetection(detection=oversized, mask=mask)]
+        )
+
+
 def test_save_overlay_image_requires_pil():
     pytest.importorskip("PIL")
     import tempfile
@@ -117,3 +144,19 @@ def test_save_overlay_image_requires_pil():
         saved = np.array(PILImage.open(tmp.name).convert("RGB"))
         assert saved.shape == IMAGE.shape
         assert saved[30, 30].tolist() != [0, 0, 0]  # mask region got colored
+
+
+def test_save_overlay_image_rejects_image_shape_mismatch():
+    pytest.importorskip("PIL")
+    wrong_size_image = np.zeros((100, 100, 3), dtype=np.uint8)
+    empty_result = PipelineResult(image_width=640, image_height=480, results=[])
+    with pytest.raises(ValueError):
+        save_overlay_image(wrong_size_image, empty_result, "/tmp/unused.png")
+
+
+def test_save_overlay_image_creates_missing_parent_dirs(tmp_path):
+    pytest.importorskip("PIL")
+    empty_result = PipelineResult(image_width=640, image_height=480, results=[])
+    out = tmp_path / "nested" / "dir" / "overlay.png"
+    save_overlay_image(IMAGE, empty_result, str(out))
+    assert out.exists()
