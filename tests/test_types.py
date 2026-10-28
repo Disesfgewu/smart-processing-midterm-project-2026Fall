@@ -8,6 +8,7 @@ from smart_processing.types import (
     Detection,
     DetectionResult,
     SegmentationMask,
+    validate_image,
 )
 
 
@@ -20,6 +21,37 @@ def test_bounding_box_valid():
 def test_bounding_box_rejects_non_increasing_coords(x0, y0, x1, y1):
     with pytest.raises(ValueError):
         BoundingBox(x0, y0, x1, y1)
+
+
+@pytest.mark.parametrize("x0,y0", [(-5, 10), (5, -10), (-5, -10)])
+def test_bounding_box_rejects_negative_origin(x0, y0):
+    with pytest.raises(ValueError):
+        BoundingBox(x0, y0, 50, 50)
+
+
+@pytest.mark.parametrize("bad", [float("nan"), float("inf"), float("-inf")])
+def test_bounding_box_rejects_non_finite_coords(bad):
+    with pytest.raises(ValueError):
+        BoundingBox(bad, 0, 10, 10)
+
+
+def test_validate_image_accepts_hwc_uint8():
+    assert validate_image(np.zeros((480, 640, 3), dtype=np.uint8)) == (480, 640)
+
+
+@pytest.mark.parametrize(
+    "image",
+    [
+        np.zeros((480, 640), dtype=np.uint8),
+        np.zeros((480, 640, 4), dtype=np.uint8),
+        np.zeros((480, 640, 3), dtype=np.float32),
+        np.zeros((0, 640, 3), dtype=np.uint8),
+        None,
+    ],
+)
+def test_validate_image_rejects_invalid_images(image):
+    with pytest.raises(ValueError):
+        validate_image(image)
 
 
 def test_detection_rejects_out_of_range_score():

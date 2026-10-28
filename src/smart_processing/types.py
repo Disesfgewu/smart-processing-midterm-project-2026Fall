@@ -8,6 +8,7 @@ so every contract defined here is explicit pixel space.
 """
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Protocol
 
@@ -16,6 +17,19 @@ import numpy as np
 # Images are HWC uint8 RGB numpy arrays. Height/width are read from the
 # array's shape; no separate Image wrapper to avoid duplicating that state.
 ImageArray = np.ndarray
+
+
+def validate_image(image: ImageArray) -> tuple[int, int]:
+    """Validate the HWC uint8 RGB contract; returns (height, width)."""
+    if not isinstance(image, np.ndarray) or image.ndim != 3 or image.shape[2] != 3:
+        shape = getattr(image, "shape", None)
+        raise ValueError(f"image must be an HWC RGB array, got shape {shape}")
+    if image.dtype != np.uint8:
+        raise ValueError(f"image dtype must be uint8, got {image.dtype}")
+    height, width = image.shape[0], image.shape[1]
+    if height <= 0 or width <= 0:
+        raise ValueError(f"image must have positive height and width, got {(height, width)}")
+    return height, width
 
 
 @dataclass(frozen=True)
@@ -28,6 +42,13 @@ class BoundingBox:
     y1: float
 
     def __post_init__(self) -> None:
+        for name, value in (("x0", self.x0), ("y0", self.y0), ("x1", self.x1), ("y1", self.y1)):
+            if not math.isfinite(value):
+                raise ValueError(f"BoundingBox.{name} must be finite, got {value}")
+        if self.x0 < 0 or self.y0 < 0:
+            raise ValueError(
+                f"BoundingBox requires x0>=0 and y0>=0, got ({self.x0}, {self.y0})"
+            )
         if not (self.x0 < self.x1 and self.y0 < self.y1):
             raise ValueError(
                 f"BoundingBox requires x0<x1 and y0<y1, got "

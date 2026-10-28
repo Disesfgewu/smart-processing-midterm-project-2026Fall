@@ -78,7 +78,8 @@ compatibility there is unverified).
 | --- | --- |
 | Supported Python version and `.venv` setup | **Done**; Conda path pending if needed |
 | Pinned upstream submodules and dependency installation | Pending: #18 |
-| macOS inference feasibility (real detection + segmentation run) | **Done** (this PR): `pip install -e ".[macos-feasibility]"`, then see `docs/macos_feasibility.md` for the checkpoint download and exact commands |
+| macOS inference feasibility (real detection + segmentation run) | **Done**: `pip install -e ".[macos-feasibility]"`, then see `docs/macos_feasibility.md` for the checkpoint download and exact commands |
+| Portable detection/segmentation data contracts (`src/smart_processing/types.py`) | **Done** (this PR): pure data/interface contracts, no model code; wiring real adapters (`OwlPredictor`/SAM) to these contracts is #4/#5, not done here |
 | Model/checkpoint download and cache configuration | Pending: #4, #5 |
 | Single-image detection and segmentation command | Pending: #6 |
 | Camera demo and live prompt changes | Pending: #7 |
@@ -95,8 +96,11 @@ commands from the plan.
 
 - `src/smart_processing/`: the installable package. `feasibility.py` holds
   the real OWL-ViT/SAM model-loading and inference logic for #2's smoke
-  tests. Detection/segmentation contracts, pipeline, camera, evaluation and
-  benchmarking logic lands as later issues implement it (#3-#13).
+  tests. `types.py` defines the portable `BoundingBox`/`Detection`/
+  `DetectionResult`/`SegmentationMask` contracts and `TextDetector`/
+  `BoxSegmenter` Protocols (this PR, #3; adds a runtime `numpy` dependency).
+  Adapters, pipeline, camera, evaluation and benchmarking logic lands as
+  later issues implement it (#4-#13).
 - `tests/`: automated tests for the package.
 - `scripts/`: thin CLI wrappers over `smart_processing.feasibility` (argv
   parsing + printing only; model loading/inference lives in the package).
