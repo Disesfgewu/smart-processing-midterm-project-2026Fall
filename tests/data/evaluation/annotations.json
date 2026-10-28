@@ -170,5 +170,39 @@
       {"label": "pen", "box_xyxy": [715, 265, 1185, 460]},
       {"label": "pencil", "box_xyxy": [120, 480, 1225, 570]}
     ]
+  },
+  {
+    "image": "evaluation/small_objects_paperclips.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Paperclips.jpg, author Tdlnx). Downscaled from 3264x2448 to 1600x1200 with macOS sips (2.9MB -> 421KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only the isolated paperclips on the pile's periphery are annotated -- the dense central cluster has too much overlap for confident individual boxes, which is itself relevant evidence for #10's small-object/occlusion failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a paperclip",
+    "ground_truth_boxes": [
+      {"label": "paperclip", "box_xyxy": [720, 48, 1056, 156]},
+      {"label": "paperclip", "box_xyxy": [1248, 0, 1376, 120]},
+      {"label": "paperclip", "box_xyxy": [0, 228, 160, 408]},
+      {"label": "paperclip", "box_xyxy": [0, 456, 288, 600]},
+      {"label": "paperclip", "box_xyxy": [1488, 852, 1600, 1032]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_paperclips.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Paperclips.jpg, author Tdlnx). Downscaled from 3264x2448 to 1600x1200 with macOS sips (2.9MB -> 421KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only the isolated paperclips on the pile's periphery are annotated -- the dense central cluster has too much overlap for confident individual boxes, which is itself relevant evidence for #10's small-object/occlusion failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a gold-toned paperclip",
+    "ground_truth_boxes": [
+      {"label": "paperclip", "box_xyxy": [950, 380, 1080, 600]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_paperclips.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Paperclips.jpg, author Tdlnx). Downscaled from 3264x2448 to 1600x1200 with macOS sips (2.9MB -> 421KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only the isolated paperclips on the pile's periphery are annotated -- the dense central cluster has too much overlap for confident individual boxes, which is itself relevant evidence for #10's small-object/occlusion failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a tangled pile of metal paperclips on a table",
+    "ground_truth_boxes": [
+      {"label": "paperclip pile", "box_xyxy": [230, 60, 1430, 1060]}
+    ]
   }
 ]
