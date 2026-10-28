@@ -79,8 +79,9 @@ compatibility there is unverified).
 | Supported Python version and `.venv` setup | **Done**; Conda path pending if needed |
 | Pinned upstream submodules and dependency installation | Pending: #18 |
 | macOS inference feasibility (real detection + segmentation run) | **Done**: `pip install -e ".[macos-feasibility]"`, then see `docs/macos_feasibility.md` for the checkpoint download and exact commands |
-| Portable detection/segmentation data contracts (`src/smart_processing/types.py`) | **Done** (this PR): pure data/interface contracts, no model code; wiring real adapters (`OwlPredictor`/SAM) to these contracts is #4/#5, not done here |
-| Model/checkpoint download and cache configuration | Pending: #4, #5 |
+| Portable detection/segmentation data contracts (`src/smart_processing/types.py`) | **Done**: pure data/interface contracts, no model code |
+| macOS text detection adapter (`OwlViTTextDetector`) | **Done** (this PR); real model, targeted + opt-in real-model tests |
+| Model/checkpoint download and cache configuration | Pending: #5 |
 | Single-image detection and segmentation command | Pending: #6 |
 | Camera demo and live prompt changes | Pending: #7 |
 | Manufacturing counting demo | Pending: #8 |
