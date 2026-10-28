@@ -3,7 +3,7 @@
 Ground-truth annotations for detection accuracy evaluation (#10
 implements the scorer against `docs/evaluation_methodology.md`'s spec).
 
-## Status: 4 of 10 images (partial, in progress); all 3 categories now represented
+## Status: 5 of 10 images (partial, in progress); all 3 categories now represented
 
 | Image | Category | License | Prompt styles |
 | --- | --- | --- | --- |
@@ -11,6 +11,7 @@ implements the scorer against `docs/evaluation_methodology.md`'s spec).
 | `similar_objects_hardware.jpg` | similar_objects | CC BY-SA 4.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Bolts,Nuts & Washers.jpg`, author Sbrennan83 | basic_noun ("a bolt"), fine_grained ("a hexagonal nut..."), descriptive_phrase ("a round metal washer") |
 | `occlusion_books.jpg` | occlusion | CC0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Stack of multicolored books on a table.jpg`, author Alexander Grey | basic_noun ("a book"), fine_grained ("a pink hardcover book..."), descriptive_phrase ("a book spine in a stacked pile...") |
 | `small_objects_parking.jpg` | small_objects | CC BY-SA 4.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Parking lot, Gross-Gerau (P1090665).jpg`, author Matti Blume | basic_noun ("a car"), fine_grained ("a small red car"), descriptive_phrase ("a vehicle parked in a large aerial parking lot") |
+| `occlusion_pens.jpg` | occlusion | CC0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:NIND Pen-pile ISO100.jpg`, author MB-one. Downscaled 3996x2998 -> 1600x1200 with macOS `sips` (7.1MB -> 300KB); boxes are in the downscaled coordinate space | basic_noun ("a pencil"), fine_grained ("a yellow marker pen with a cap"), descriptive_phrase ("a writing instrument lying on a wooden table") |
 
 Ground-truth boxes in `annotations.json` were determined by manual visual
 inspection of each downloaded image (not guessed/synthesized), in pixel

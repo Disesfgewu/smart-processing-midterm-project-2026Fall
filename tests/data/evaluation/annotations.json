@@ -136,5 +136,39 @@
       {"label": "car", "box_xyxy": [1162, 1173, 1190, 1202]},
       {"label": "car", "box_xyxy": [2093, 1242, 2122, 1271]}
     ]
+  },
+  {
+    "image": "evaluation/occlusion_pens.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:NIND Pen-pile ISO100.jpg, author MB-one). Downscaled from 3996x2998 to 1600x1200 with macOS sips (7.1MB -> 300KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "basic_noun",
+    "prompt": "a pencil",
+    "ground_truth_boxes": [
+      {"label": "pencil", "box_xyxy": [90, 600, 855, 770]},
+      {"label": "pencil", "box_xyxy": [120, 480, 1225, 570]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_pens.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:NIND Pen-pile ISO100.jpg, author MB-one). Downscaled from 3996x2998 to 1600x1200 with macOS sips (7.1MB -> 300KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "fine_grained",
+    "prompt": "a yellow marker pen with a cap",
+    "ground_truth_boxes": [
+      {"label": "marker", "box_xyxy": [225, 265, 735, 765]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_pens.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:NIND Pen-pile ISO100.jpg, author MB-one). Downscaled from 3996x2998 to 1600x1200 with macOS sips (7.1MB -> 300KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a writing instrument lying on a wooden table",
+    "ground_truth_boxes": [
+      {"label": "marker", "box_xyxy": [225, 265, 735, 765]},
+      {"label": "pencil", "box_xyxy": [90, 600, 855, 770]},
+      {"label": "pen", "box_xyxy": [715, 265, 1185, 460]},
+      {"label": "pencil", "box_xyxy": [120, 480, 1225, 570]}
+    ]
   }
 ]
