@@ -9,6 +9,7 @@ from smart_processing.pipeline import (
     DetectSegmentPipeline,
     PipelineDetection,
     PipelineResult,
+    render_overlay_image,
     save_overlay_image,
     save_structured_output,
 )
@@ -137,6 +138,31 @@ def test_pipeline_result_rejects_box_exceeding_image_dims():
         PipelineResult(
             image_width=640, image_height=480, results=[PipelineDetection(detection=oversized, mask=mask)]
         )
+
+
+def test_render_overlay_image_colors_mask_region_no_pil_needed():
+    detection = _detection(10, 10, 50, 50)
+    mask = np.zeros((480, 640), dtype=np.bool_)
+    mask[10:50, 10:50] = True
+    result = PipelineResult(
+        image_width=640,
+        image_height=480,
+        results=[PipelineDetection(detection=detection, mask=SegmentationMask(mask=mask, score=0.9))],
+    )
+
+    overlay = render_overlay_image(IMAGE, result)
+
+    assert overlay.shape == IMAGE.shape
+    assert overlay.dtype == IMAGE.dtype
+    assert overlay[30, 30].tolist() != [0, 0, 0]  # mask region got colored
+    assert overlay is not IMAGE  # must not mutate the caller's array
+
+
+def test_render_overlay_image_rejects_shape_mismatch():
+    empty_result = PipelineResult(image_width=640, image_height=480, results=[])
+    wrong_size_image = np.zeros((100, 100, 3), dtype=np.uint8)
+    with pytest.raises(ValueError):
+        render_overlay_image(wrong_size_image, empty_result)
 
 
 def test_save_overlay_image_requires_pil():

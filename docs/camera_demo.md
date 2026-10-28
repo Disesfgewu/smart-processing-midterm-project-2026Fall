@@ -62,13 +62,30 @@ but **not exercised by any test or by this session**, because doing so
 would require the camera access above. To produce the required manual demo
 evidence:
 
-1. Run `python -c "from smart_processing.camera_demo import camera_demo_main; ..."`
-   (or a thin CLI wrapper, not yet wired into `smart-processing`) locally,
-   interactively, as the Owner.
-2. Approve the camera permission prompt macOS shows on first access.
-3. Type comma-separated prompts into the terminal to change them at runtime
+1. `pip install -e ".[macos-feasibility,camera-demo]"` (adds `torch`,
+   `transformers`, `segment-anything`, `opencv-python`), and download the
+   SAM checkpoint per `docs/macos_feasibility.md` to
+   `tests/data/sam_vit_b_01ec64.pth`.
+2. Run this exact command locally, interactively, as the Owner:
+   ```sh
+   python -c "
+   from smart_processing.adapters.owlvit_text_detector import OwlViTTextDetector
+   from smart_processing.adapters.sam_box_segmenter import SamBoxSegmenter
+   from smart_processing.camera_demo import camera_demo_main
+   from smart_processing.pipeline import DetectSegmentPipeline
+   from smart_processing.types import BackendConfig
+
+   pipeline = DetectSegmentPipeline(
+       OwlViTTextDetector(BackendConfig(device='cpu')),
+       SamBoxSegmenter('tests/data/sam_vit_b_01ec64.pth'),
+   )
+   camera_demo_main(pipeline, ['a person'])
+   "
+   ```
+3. Approve the camera permission prompt macOS shows on first access.
+4. Type comma-separated prompts into the terminal to change them at runtime
    without restarting; press `q` in the display window to quit.
-4. Record the actual command, output, and a screenshot/recording as the
+5. Record the actual command, output, and a screenshot/recording as the
    manual evidence this issue requires.
 
 Issue #7 should **not** be considered closed by this PR alone; the

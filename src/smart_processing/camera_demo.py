@@ -12,12 +12,18 @@ from __future__ import annotations
 import threading
 
 
+def _validate_prompts(prompts) -> None:
+    if not isinstance(prompts, (list, tuple)) or not prompts:
+        raise ValueError(f"prompts must be a non-empty list of strings, got {prompts!r}")
+    if any(not isinstance(p, str) or not p.strip() for p in prompts):
+        raise ValueError(f"prompts must be non-empty, non-blank strings, got {prompts!r}")
+
+
 class PromptState:
     """Thread-safe current prompt list, swappable at runtime without restart."""
 
     def __init__(self, initial_prompts: list[str]):
-        if not initial_prompts:
-            raise ValueError("initial_prompts must be a non-empty list")
+        _validate_prompts(initial_prompts)
         self._lock = threading.Lock()
         self._prompts = list(initial_prompts)
 
@@ -26,8 +32,7 @@ class PromptState:
             return list(self._prompts)
 
     def set(self, prompts: list[str]) -> None:
-        if not prompts:
-            raise ValueError("prompts must be a non-empty list")
+        _validate_prompts(prompts)
         with self._lock:
             self._prompts = list(prompts)
 
@@ -106,23 +111,18 @@ def camera_demo_main(pipeline, initial_prompts: list[str], device_index: int = 0
         import sys
 
         for line in sys.stdin:
-            line = line.strip()
-            if not line:
-                continue
-            prompt_state.set([p.strip() for p in line.split(",") if p.strip()])
+            parsed = [p.strip() for p in line.split(",") if p.strip()]
+            if not parsed:
+                continue  # blank/comma-only input: ignore, don't crash this thread
+            prompt_state.set(parsed)
 
     threading.Thread(target=read_stdin_prompts, daemon=True).start()
 
     def on_result(frame_rgb, result):
-        from smart_processing.pipeline import save_overlay_image
-        import tempfile
-        from pathlib import Path
+        from smart_processing.pipeline import render_overlay_image
 
-        tmp = Path(tempfile.gettempdir()) / "smart_processing_camera_frame.png"
-        save_overlay_image(frame_rgb, result, str(tmp))
-        display = cv2.imread(str(tmp))
-        if display is not None:
-            cv2.imshow("smart-processing", display)
+        overlay_rgb = render_overlay_image(frame_rgb, result)
+        cv2.imshow("smart-processing", cv2.cvtColor(overlay_rgb, cv2.COLOR_RGB2BGR))
         if cv2.waitKey(1) & 0xFF == ord("q"):
             stop_event.set()
 

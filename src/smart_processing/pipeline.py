@@ -93,10 +93,10 @@ def save_structured_output(result: PipelineResult, path: str) -> None:
     Path(path).write_text(json.dumps(payload, indent=2))
 
 
-def save_overlay_image(image: ImageArray, result: PipelineResult, path: str) -> None:
+def render_overlay_image(image: ImageArray, result: PipelineResult) -> ImageArray:
     """Draws a translucent mask fill plus a box border per detection, using
-    plain numpy (no PIL dependency for the drawing itself; PIL is only used
-    to encode/save, deferred-imported since it's an optional extra)."""
+    plain numpy only -- no PIL/disk dependency, so callers (e.g. a live
+    camera loop) can use this in-memory per frame."""
     import numpy as np
 
     height, width = validate_image(image)
@@ -120,6 +120,13 @@ def save_overlay_image(image: ImageArray, result: PipelineResult, path: str) -> 
         overlay[max(y0, y1 - thickness) : y1, x0:x1] = color
         overlay[y0:y1, x0 : x0 + thickness] = color
         overlay[y0:y1, max(x0, x1 - thickness) : x1] = color
+    return overlay
+
+
+def save_overlay_image(image: ImageArray, result: PipelineResult, path: str) -> None:
+    """Renders the overlay (see render_overlay_image) and saves it to disk.
+    PIL is only needed here, deferred-imported since it's an optional extra."""
+    overlay = render_overlay_image(image, result)
 
     from PIL import Image
 

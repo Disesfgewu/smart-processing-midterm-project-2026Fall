@@ -33,6 +33,19 @@ def test_prompt_state_set_rejects_empty_list():
     assert state.get() == ["a cat"]  # unchanged
 
 
+@pytest.mark.parametrize("bad", ["a cat", 123, None, ["a cat", ""], ["a cat", "   "], ["a cat", 5]])
+def test_prompt_state_rejects_non_list_or_non_string_items(bad):
+    # A bare str is truthy and iterable, so a naive `if not prompts` check
+    # would accept PromptState("a cat") and silently explode it into
+    # single-character "prompts" -- must be rejected explicitly instead.
+    with pytest.raises(ValueError):
+        PromptState(bad)
+    state = PromptState(["a cat"])
+    with pytest.raises(ValueError):
+        state.set(bad)
+    assert state.get() == ["a cat"]  # unchanged
+
+
 def test_prompt_state_set_takes_effect_for_next_get():
     state = PromptState(["a cat"])
     state.set(["a dog", "a bird"])
