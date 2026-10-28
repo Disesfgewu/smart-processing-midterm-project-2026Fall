@@ -16,3 +16,7 @@ tests/data/*.pth
 tests/data/*.pt
 tests/data/*.onnx
 tests/data/*.engine
+
+# Sample image fetched on demand (scripts/sample_image.py): its individual
+# source photo license is unverified, so it is never redistributed here.
+tests/data/sample_cats.jpg

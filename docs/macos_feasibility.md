@@ -28,16 +28,15 @@ engine was built; no TensorRT import was attempted on macOS.
 
 ## Real detection run
 
-Command: `.venv/bin/python scripts/owlvit_smoke_test.py tests/data/sample_cats.jpg`
+Command: `.venv/bin/python scripts/owlvit_smoke_test.py`
 
 Image: COCO val2017 `000000039769.jpg`, the same image used in upstream HF
-OWL-ViT docs/examples — two cats and two remote controls. COCO's own
-annotations/dataset are CC BY 4.0; this specific photo's original
-Flickr source/photographer license is not individually re-verified here
-(COCO dataset membership alone is not proof of an individual photo's
-license — noted per review). Used only as a local, non-redistributed test
-fixture to reproduce this smoke test, consistent with its common use as an
-ML documentation/testing image.
+OWL-ViT docs/examples — two cats and two remote controls. Its individual
+Flickr source photo's license was not independently verified, so it is
+**not committed to this repository**; `scripts/sample_image.py`'s
+`ensure_sample_image()` downloads it on demand to the git-ignored
+`tests/data/sample_cats.jpg` the first time either smoke-test script runs,
+and both scripts/tests call it automatically.
 
 Actual output:
 
@@ -58,7 +57,7 @@ load. Both are real, not fabricated.)
 
 ## Real box-prompted segmentation run
 
-Command: `.venv/bin/python scripts/sam_box_segment_smoke_test.py tests/data/sample_cats.jpg tests/data/sam_vit_b_01ec64.pth`
+Command: `.venv/bin/python scripts/sam_box_segment_smoke_test.py tests/data/sample_cats.jpg tests/data/sam_vit_b_01ec64.pth` (or with no args; the sample image is fetched on demand the same way)
 
 Box prompt: the `[1.5, 55.3, 315.6, 472.2]` cat box from the detection run
 above, fed directly into SAM's box prompt.
@@ -80,5 +79,6 @@ mask pixel count=49968 of 307200 (16.3%)
   NanoOWL/NanoSAM submodules end-to-end (`OwlPredictor`/`nanosam.Predictor`
   wiring is #4/#5) and not any TensorRT engine or Jetson measurement
   (#12/#13/#14).
-- Model weights are not committed; `tests/data/sam_vit_b_01ec64.pth` and
-  downloaded Hugging Face caches are git-ignored.
+- Model weights are not committed; `tests/data/sam_vit_b_01ec64.pth`, the
+  fetched-on-demand `tests/data/sample_cats.jpg`, and downloaded Hugging
+  Face caches are all git-ignored.

@@ -10,11 +10,13 @@ import torch
 from PIL import Image
 from transformers import OwlViTForObjectDetection, OwlViTProcessor
 
+from sample_image import SAMPLE_IMAGE_PATH, ensure_sample_image
+
 MODEL_NAME = "google/owlvit-base-patch32"
 
 
 def main():
-    image_path = sys.argv[1] if len(sys.argv) > 1 else "tests/data/sample_cats.jpg"
+    image_path = ensure_sample_image(sys.argv[1] if len(sys.argv) > 1 else SAMPLE_IMAGE_PATH)
     prompts = ["a photo of a cat", "a remote control"]
 
     device = "mps" if torch.backends.mps.is_available() else "cpu"
