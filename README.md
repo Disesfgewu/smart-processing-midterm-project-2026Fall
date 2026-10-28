@@ -99,9 +99,10 @@ commands from the plan.
   the real OWL-ViT/SAM model-loading and inference logic for #2's smoke
   tests. `types.py` defines the portable `BoundingBox`/`Detection`/
   `DetectionResult`/`SegmentationMask` contracts and `TextDetector`/
-  `BoxSegmenter` Protocols (this PR, #3; adds a runtime `numpy` dependency).
-  Adapters, pipeline, camera, evaluation and benchmarking logic lands as
-  later issues implement it (#4-#13).
+  `BoxSegmenter` Protocols (#3; adds a runtime `numpy` dependency).
+  `adapters/owlvit_text_detector.py` implements `TextDetector` against the
+  OWL-ViT backend validated in #2 (this PR, #4). Pipeline, camera,
+  evaluation and benchmarking logic lands as later issues (#6-#13).
 - `tests/`: automated tests for the package.
 - `scripts/`: thin CLI wrappers over `smart_processing.feasibility` (argv
   parsing + printing only; model loading/inference lives in the package).
