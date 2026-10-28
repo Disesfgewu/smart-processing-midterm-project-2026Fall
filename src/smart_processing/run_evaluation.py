@@ -12,7 +12,7 @@ from pathlib import Path
 from typing import Protocol
 
 from smart_processing.evaluation_dataset import EvaluationEntry, load_annotations
-from smart_processing.prompt_evaluation import EntryScore, PredictedBox, score_dataset
+from smart_processing.prompt_evaluation import IOU_THRESHOLD, EntryScore, PredictedBox, score_dataset
 
 
 class _Detector(Protocol):
@@ -39,7 +39,15 @@ def run_evaluation(
 
     I/O wrapper around `score_and_export`, which holds the pure (no PIL, no
     model) scoring/export logic and is unit-testable on its own with a
-    fabricated predictions list."""
+    fabricated predictions list.
+
+    Attaches top-level run metadata (model identity, device, dataset
+    path/entry count, detection/IoU thresholds) to the result regardless
+    of whether the run passed or failed -- PM-Reviwer finding on #43: a
+    perfect run previously exported no configuration at all, and even a
+    failing run's config was incomplete (threshold only, no model/
+    device/dataset identity), making exported comparisons impossible to
+    reproduce or attribute to a specific detector/dataset combination."""
     annotations_file = Path(annotations_path)
     base_dir = Path(images_dir) if images_dir else annotations_file.resolve().parent.parent
 
@@ -54,16 +62,33 @@ def run_evaluation(
         ]
         entries_with_predictions.append((entry, predictions))
 
-    return score_and_export(entries_with_predictions, threshold=threshold)
+    run_metadata = {
+        "annotations_path": str(annotations_path),
+        "images_dir": str(base_dir),
+        "entry_count": len(entries),
+        "model_name": getattr(detector, "model_name", "unknown"),
+        "device": getattr(detector, "device", "unknown"),
+        "detection_threshold": threshold,
+        "iou_threshold": IOU_THRESHOLD,
+    }
+    return score_and_export(entries_with_predictions, run_metadata=run_metadata)
 
 
 def score_and_export(
     entries_with_predictions: list[tuple[EvaluationEntry, list[PredictedBox]]],
-    threshold: float = 0.1,
+    run_metadata: dict | None = None,
 ) -> dict:
     """Pure scoring + failed-examples assembly: no image loading, no model.
-    Unit-tested directly with fabricated (entry, predictions) pairs."""
+    Unit-tested directly with fabricated (entry, predictions) pairs.
+
+    `run_metadata` is attached to the result's top level unconditionally
+    (both perfect and failing runs); callers who don't have a detector to
+    introspect (e.g. unit tests) may omit it and get a minimal default
+    with only `entry_count` and `iou_threshold` filled in."""
     from smart_processing.prompt_evaluation import score_entry
+
+    if run_metadata is None:
+        run_metadata = {"entry_count": len(entries_with_predictions), "iou_threshold": IOU_THRESHOLD}
 
     scores = score_dataset(entries_with_predictions)
 
@@ -77,7 +102,6 @@ def score_and_export(
                     "category": entry.category,
                     "prompt_style": entry.prompt_style,
                     "prompt": entry.prompt,
-                    "config": {"threshold": threshold},
                     "ground_truth_boxes": [
                         {"label": g.label, "box_xyxy": list(g.box_xyxy)}
                         for g in entry.ground_truth_boxes
@@ -91,6 +115,7 @@ def score_and_export(
             )
 
     return {
+        "run_metadata": run_metadata,
         "scores": _scores_to_dict(scores),
         "failed_examples": failed_examples,
     }

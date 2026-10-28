@@ -35,19 +35,37 @@ def test_score_and_export_omits_perfect_entries_from_failed_examples():
     assert result["failed_examples"] == []
 
 
-def test_score_and_export_includes_failed_entries_with_config_and_boxes():
+def test_score_and_export_includes_failed_entries_with_boxes():
     gt = [GroundTruthBox(label="cat", box_xyxy=(0.0, 0.0, 10.0, 10.0))]
     entry = _entry(gt=gt, prompt="a cat")
     preds = [PredictedBox(label="a dog", score=0.9, box_xyxy=(0.0, 0.0, 10.0, 10.0))]
-    result = score_and_export([(entry, preds)], threshold=0.25)
+    result = score_and_export([(entry, preds)])
     assert len(result["failed_examples"]) == 1
     failed = result["failed_examples"][0]
     assert failed["image"] == "evaluation/x.jpg"
-    assert failed["config"] == {"threshold": 0.25}
     assert failed["ground_truth_boxes"] == [{"label": "cat", "box_xyxy": [0.0, 0.0, 10.0, 10.0]}]
     assert failed["predicted_boxes"][0]["label"] == "a dog"
     assert failed["score"]["false_positives"] == 1
     assert failed["score"]["false_negatives"] == 1
+
+
+def test_score_and_export_attaches_run_metadata_for_perfect_run():
+    """PM-Reviwer finding on #43: a perfect run previously exported no
+    configuration at all. Top-level run_metadata must be present
+    regardless of whether the run passed or failed."""
+    entry = _entry(gt=[GroundTruthBox(label="cat", box_xyxy=(0.0, 0.0, 10.0, 10.0))])
+    preds = [PredictedBox(label="a cat", score=0.9, box_xyxy=(0.0, 0.0, 10.0, 10.0))]
+    result = score_and_export([(entry, preds)])
+    assert result["failed_examples"] == []
+    assert "run_metadata" in result
+    assert result["run_metadata"]["entry_count"] == 1
+
+
+def test_score_and_export_attaches_explicit_run_metadata():
+    entry = _entry(gt=[])
+    metadata = {"model_name": "test-model", "device": "cpu", "detection_threshold": 0.3}
+    result = score_and_export([(entry, [])], run_metadata=metadata)
+    assert result["run_metadata"] == metadata
 
 
 def test_export_results_writes_valid_json(tmp_path):
