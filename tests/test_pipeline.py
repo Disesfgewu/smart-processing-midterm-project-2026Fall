@@ -119,6 +119,38 @@ def test_save_structured_output_creates_missing_parent_dirs(tmp_path):
     assert out.exists()
 
 
+@pytest.mark.parametrize(
+    "width", [float("nan"), float("inf"), float("-inf"), 0.5, True, False, "640", None, 0, -1]
+)
+def test_pipeline_result_rejects_invalid_width(width):
+    with pytest.raises(ValueError):
+        PipelineResult(image_width=width, image_height=480)
+
+
+@pytest.mark.parametrize(
+    "height", [float("nan"), float("inf"), float("-inf"), 0.5, True, False, "480", None, 0, -1]
+)
+def test_pipeline_result_rejects_invalid_height(height):
+    with pytest.raises(ValueError):
+        PipelineResult(image_width=640, image_height=height)
+
+
+def test_pipeline_result_accepts_valid_integer_dims_with_no_results():
+    result = PipelineResult(image_width=640, image_height=480)
+    assert (result.image_width, result.image_height) == (640, 480)
+
+
+def test_pipeline_result_invalid_dims_never_reach_json(tmp_path):
+    """PM-Reviwer's reproduction: before the fix, PipelineResult(nan, 10)
+    was accepted and save_structured_output() emitted NaN into the JSON
+    body -- not standards-compliant JSON. Confirms the constructor now
+    raises before any output file is ever written."""
+    with pytest.raises(ValueError):
+        PipelineResult(image_width=float("nan"), image_height=10)
+    out_path = tmp_path / "should_not_exist.json"
+    assert not out_path.exists()
+
+
 def test_pipeline_result_rejects_mask_shape_mismatch():
     detection = _detection(10, 10, 50, 50)
     wrong_shape_mask = SegmentationMask(mask=np.zeros((100, 100), dtype=np.bool_), score=0.9)

@@ -20,6 +20,23 @@ from smart_processing.types import (
 _OVERLAY_COLORS = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (255, 255, 0), (255, 0, 255)]
 
 
+def _require_positive_int(value, name: str) -> None:
+    """Rejects NaN and +inf (both compare False against <= 0, so a naive
+    check alone accepts them; -inf correctly fails the same naive check),
+    fractional values, and bool (a bool is an int subclass in Python, so
+    True would otherwise pass as 1). Mirrors #3/#40's DetectionResult fix
+    (PM-Reviwer finding on #32: PipelineResult's dimension check only
+    tested `<= 0`, so NaN/+inf/1.5/True all passed and could reach
+    save_structured_output()'s json.dumps() as non-standard JSON tokens).
+    Duplicated here rather than imported from types.py because #40's fix
+    isn't in this branch's ancestry yet (#32 is stacked on #26 directly,
+    not on #40 -- see loop-state.json's tracked downstream-rebase gap)."""
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"{name} must be a positive int, got {value!r} ({type(value).__name__})")
+    if value <= 0:
+        raise ValueError(f"{name} must be positive, got {value}")
+
+
 @dataclass(frozen=True)
 class PipelineDetection:
     detection: Detection
@@ -33,8 +50,8 @@ class PipelineResult:
     results: list[PipelineDetection] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        if self.image_width <= 0 or self.image_height <= 0:
-            raise ValueError("image_width/image_height must be positive")
+        _require_positive_int(self.image_width, "image_width")
+        _require_positive_int(self.image_height, "image_height")
         for r in self.results:
             if (r.mask.height, r.mask.width) != (self.image_height, self.image_width):
                 raise ValueError(
