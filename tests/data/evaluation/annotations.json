@@ -239,5 +239,39 @@
     "ground_truth_boxes": [
       {"label": "mug row", "box_xyxy": [0, 245, 1152, 390]}
     ]
+  },
+  {
+    "image": "evaluation/occlusion_sandals.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:DSC 8297 A colorful market stall piled high with assorted sandals and slip-on shoes on display with a price sign reading 69 hanging above.jpg, author PattayaPatrol). Downscaled from 6048x4024 to 1600x1064 with macOS sips (11.7MB -> 308KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "basic_noun",
+    "prompt": "a sandal",
+    "ground_truth_boxes": [
+      {"label": "sandal", "box_xyxy": [265, 355, 655, 580]},
+      {"label": "sandal", "box_xyxy": [0, 560, 390, 855]},
+      {"label": "sandal", "box_xyxy": [640, 495, 880, 695]},
+      {"label": "sandal", "box_xyxy": [1105, 720, 1435, 920]},
+      {"label": "sandal", "box_xyxy": [0, 850, 230, 1064]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_sandals.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:DSC 8297 A colorful market stall piled high with assorted sandals and slip-on shoes on display with a price sign reading 69 hanging above.jpg, author PattayaPatrol). Downscaled from 6048x4024 to 1600x1064 with macOS sips (11.7MB -> 308KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "fine_grained",
+    "prompt": "a black rubber slide sandal with a visible brand logo",
+    "ground_truth_boxes": [
+      {"label": "sandal", "box_xyxy": [1105, 720, 1435, 920]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_sandals.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:DSC 8297 A colorful market stall piled high with assorted sandals and slip-on shoes on display with a price sign reading 69 hanging above.jpg, author PattayaPatrol). Downscaled from 6048x4024 to 1600x1064 with macOS sips (11.7MB -> 308KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a pile of sandals on a market stall",
+    "ground_truth_boxes": [
+      {"label": "sandal pile", "box_xyxy": [0, 350, 1600, 1064]}
+    ]
   }
 ]
