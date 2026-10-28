@@ -27,23 +27,36 @@ state the SHA changed.
 
 ## Text -> boxes: `nanoowl.owl_predictor.OwlPredictor`
 
+- `OwlPredictor(model_name="google/owlvit-base-patch32", device="cuda", ...)` —
+  `device` **defaults to `"cuda"`** and is applied via `.to(self.device)` to
+  the model, box bias and mesh grid; callers must pass `device="cpu"` (or
+  `"mps"` if supported) explicitly on macOS or construction fails/targets CUDA.
 - `encode_text(text: List[str]) -> OwlEncodeTextOutput` — CLIP/OWL-ViT text
   embeddings for one or more text prompts.
 - `encode_image(image: torch.Tensor) -> OwlEncodeImageOutput` — dispatches to
   `encode_image_torch` or `encode_image_trt` depending on whether a TensorRT
-  image-encoder engine was loaded at construction.
+  image-encoder engine was loaded at construction. `encode_image_torch`'s
+  `pred_boxes` are **normalized `[0, 1]` center-size boxes converted to
+  corners**, not pixel coordinates.
+- `encode_rois(image, rois, pad_square=True) -> OwlEncodeImageOutput` — crops
+  and re-encodes each ROI, then rescales `pred_boxes` from normalized to
+  **global pixel `xyxy`** via `_owl_box_roi_to_box_global(boxes, rois)`.
+- `predict(image: PIL.Image, text, text_encodings, threshold=0.1, pad_square=True) -> OwlDecodeOutput` —
+  the high-level entry point: builds one ROI covering the whole image, calls
+  `encode_rois` (so `decode`'s output boxes end up in pixel `xyxy`), then `decode`.
 - `decode(image_output, text_output, threshold=0.1) -> OwlDecodeOutput` with
-  fields `boxes` (`[N, 4]`, `xyxy` pixel coordinates), `scores` (`[N]`),
-  `labels` (`[N]`, index into the input text list), `input_indices`.
-- Input image: a normalized `torch.Tensor` sized to the model's configured
-  patch grid; see `owl_predictor.py`'s `encode_image_torch`/preprocessing.
-- Device selection: standard `torch` device of the module/tensors; no
-  separate device argument.
+  fields `boxes` (`[N, 4]`, same coordinate space as `image_output.pred_boxes`
+  — pixel `xyxy` only if `image_output` came from `encode_rois`/`predict`,
+  otherwise normalized `[0, 1]`), `scores` (`[N]`), `labels` (`[N]`, index
+  into the input text list), `input_indices`.
 - **Platform note**: `OwlPredictor` itself has no module-level TensorRT
   import — `import tensorrt as trt` / `torch2trt.TRTModule` are imported
   lazily inside `load_image_encoder_engine`, so the module *imports* on
-  macOS as long as a TensorRT engine is never loaded. Torch-only inference
-  (`encode_image_torch`) is the macOS-feasible path; validated in #2.
+  macOS as long as a TensorRT engine is never loaded. `predict`/`encode_rois`
+  with an explicit non-CUDA `device` is the candidate macOS-feasible path;
+  it also calls `torchvision.ops.roi_align` inside `extract_rois`, whose
+  macOS CPU/MPS device support must still be checked — both are pending
+  validation in #2, not yet validated by this issue.
 
 ## Box -> masks: `nanosam.utils.predictor.Predictor`
 
