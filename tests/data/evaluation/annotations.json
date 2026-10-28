@@ -1,0 +1,41 @@
+[
+  {
+    "image": "evaluation/similar_objects_fruits.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Fruits in bowl oranges lime apples (1).jpg, author Gerardolagunes)",
+    "category": "similar_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a lime",
+    "ground_truth_boxes": [
+      {"label": "lime", "box_xyxy": [614, 294, 1011, 717]},
+      {"label": "lime", "box_xyxy": [794, 934, 1216, 1395]},
+      {"label": "lime", "box_xyxy": [870, 1779, 1331, 2240]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_fruits.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Fruits in bowl oranges lime apples (1).jpg, author Gerardolagunes)",
+    "category": "similar_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a red and yellow apple",
+    "ground_truth_boxes": [
+      {"label": "apple", "box_xyxy": [1126, 1242, 1830, 1830]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_fruits.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Fruits in bowl oranges lime apples (1).jpg, author Gerardolagunes)",
+    "category": "similar_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a round citrus fruit",
+    "ground_truth_boxes": [
+      {"label": "lime", "box_xyxy": [614, 294, 1011, 717]},
+      {"label": "lime", "box_xyxy": [794, 934, 1216, 1395]},
+      {"label": "lime", "box_xyxy": [870, 1779, 1331, 2240]},
+      {"label": "orange", "box_xyxy": [13, 563, 768, 1152]},
+      {"label": "orange", "box_xyxy": [768, 666, 1216, 1024]},
+      {"label": "orange", "box_xyxy": [538, 1254, 1139, 1894]},
+      {"label": "lemon", "box_xyxy": [1254, 730, 1830, 1216]},
+      {"label": "lemon", "box_xyxy": [13, 1229, 550, 1766]}
+    ]
+  }
+]
