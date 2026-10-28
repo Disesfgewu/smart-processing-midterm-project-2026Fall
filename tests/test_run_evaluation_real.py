@@ -47,7 +47,10 @@ def sample_image_dir(tmp_path_factory):
     annotations = [
         {
             "image": "evaluation/sample_cats.jpg",
-            "image_license": "CC0 (verified; see docs/macos_feasibility.md for provenance)",
+            "image_license": "Flickr source license NOT independently verified (see "
+            "docs/macos_feasibility.md's real-detection-run section) -- this is a "
+            "wiring/integration test fixture reusing the existing sample image, not "
+            "a license-verified entry for #9's accuracy dataset",
             "category": "similar_objects",
             "prompt_style": "basic_noun",
             "prompt": "a photo of a cat",
