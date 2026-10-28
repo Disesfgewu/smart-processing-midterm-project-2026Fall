@@ -68,6 +68,8 @@ class Detection:
     def __post_init__(self) -> None:
         if not (0.0 <= self.score <= 1.0):
             raise ValueError(f"score must be in [0, 1], got {self.score}")
+        if not isinstance(self.label, str) or not self.label.strip():
+            raise ValueError(f"label must be a non-empty, non-blank string, got {self.label!r}")
 
 
 @dataclass(frozen=True)
@@ -99,6 +101,8 @@ class SegmentationMask:
             raise ValueError(f"mask dtype must be bool, got {self.mask.dtype}")
         if self.mask.ndim != 2:
             raise ValueError(f"mask must be 2-D (height, width), got ndim={self.mask.ndim}")
+        if self.mask.shape[0] <= 0 or self.mask.shape[1] <= 0:
+            raise ValueError(f"mask must have positive height and width, got {self.mask.shape}")
         if not (0.0 <= self.score <= 1.0):
             raise ValueError(f"score must be in [0, 1], got {self.score}")
 

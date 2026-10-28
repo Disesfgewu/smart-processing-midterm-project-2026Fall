@@ -59,6 +59,12 @@ def test_detection_rejects_out_of_range_score():
         Detection(box=BoundingBox(0, 0, 10, 10), score=1.5, label="cat")
 
 
+@pytest.mark.parametrize("label", ["", "   ", None, 123])
+def test_detection_rejects_invalid_label(label):
+    with pytest.raises(ValueError):
+        Detection(box=BoundingBox(0, 0, 10, 10), score=0.5, label=label)
+
+
 def test_detection_result_rejects_box_exceeding_image_bounds():
     oversized = Detection(box=BoundingBox(0, 0, 999, 999), score=0.5, label="cat")
     with pytest.raises(ValueError):
@@ -79,6 +85,12 @@ def test_segmentation_mask_requires_bool_dtype():
 def test_segmentation_mask_requires_2d():
     with pytest.raises(ValueError):
         SegmentationMask(mask=np.zeros((1, 4, 4), dtype=np.bool_), score=0.9)
+
+
+@pytest.mark.parametrize("shape", [(0, 640), (480, 0), (0, 0)])
+def test_segmentation_mask_rejects_zero_dimension(shape):
+    with pytest.raises(ValueError):
+        SegmentationMask(mask=np.zeros(shape, dtype=np.bool_), score=0.9)
 
 
 def test_segmentation_mask_reports_dims():
