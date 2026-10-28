@@ -273,5 +273,39 @@
     "ground_truth_boxes": [
       {"label": "sandal pile", "box_xyxy": [0, 350, 1600, 1064]}
     ]
+  },
+  {
+    "image": "evaluation/small_objects_birds.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Large flocks of birds flying, Pallithode, Kerala (2).jpg, author Gannu03). Downscaled from 6000x4000 to 1600x1066 with macOS sips (5.8MB -> 110KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only clearly isolated birds away from the dense central flock are annotated -- the hundreds of birds in the main cluster are too small and overlapping for confident individual boxes, which is itself relevant evidence for #10's small-object failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a bird",
+    "ground_truth_boxes": [
+      {"label": "bird", "box_xyxy": [140, 513, 178, 540]},
+      {"label": "bird", "box_xyxy": [35, 697, 120, 706]},
+      {"label": "bird", "box_xyxy": [565, 923, 585, 940]},
+      {"label": "bird", "box_xyxy": [1240, 672, 1270, 692]},
+      {"label": "bird", "box_xyxy": [1405, 696, 1430, 706]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_birds.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Large flocks of birds flying, Pallithode, Kerala (2).jpg, author Gannu03). Downscaled from 6000x4000 to 1600x1066 with macOS sips (5.8MB -> 110KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only clearly isolated birds away from the dense central flock are annotated -- the hundreds of birds in the main cluster are too small and overlapping for confident individual boxes, which is itself relevant evidence for #10's small-object failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a single bird flying apart from the main flock",
+    "ground_truth_boxes": [
+      {"label": "bird", "box_xyxy": [140, 513, 178, 540]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_birds.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Large flocks of birds flying, Pallithode, Kerala (2).jpg, author Gannu03). Downscaled from 6000x4000 to 1600x1066 with macOS sips (5.8MB -> 110KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only clearly isolated birds away from the dense central flock are annotated -- the hundreds of birds in the main cluster are too small and overlapping for confident individual boxes, which is itself relevant evidence for #10's small-object failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a flock of birds flying in formation against the sky",
+    "ground_truth_boxes": [
+      {"label": "bird flock", "box_xyxy": [0, 540, 1600, 950]}
+    ]
   }
 ]

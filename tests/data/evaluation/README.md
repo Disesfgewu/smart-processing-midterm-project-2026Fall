@@ -3,7 +3,7 @@
 Ground-truth annotations for detection accuracy evaluation (#10
 implements the scorer against `docs/evaluation_methodology.md`'s spec).
 
-## Status: 8 of 10 images (partial, in progress); all 3 categories now represented
+## Status: 9 of 10 images (partial, in progress); all 3 categories now represented
 
 | Image | Category | License | Prompt styles |
 | --- | --- | --- | --- |
@@ -15,6 +15,7 @@ implements the scorer against `docs/evaluation_methodology.md`'s spec).
 | `small_objects_paperclips.jpg` | small_objects | CC BY-SA 3.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Paperclips.jpg`, author Tdlnx. Downscaled 3264x2448 -> 1600x1200 with macOS `sips` (2.9MB -> 421KB); boxes are in the downscaled coordinate space | basic_noun ("a paperclip"), fine_grained ("a gold-toned paperclip"), descriptive_phrase ("a tangled pile of metal paperclips on a table") |
 | `similar_objects_mugs.jpg` | similar_objects | CC BY-SA 3.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Align (52873932).jpeg`, author Anoop Mukundan. Already small (1152x864, 282KB); no downscaling needed | basic_noun ("a mug"), fine_grained ("a pastel green mug"), descriptive_phrase ("a row of mugs on a shelf") |
 | `occlusion_sandals.jpg` | occlusion | CC BY-SA 4.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:DSC 8297 A colorful market stall piled high with assorted sandals and slip-on shoes...jpg`, author PattayaPatrol. Downscaled 6048x4024 -> 1600x1064 with macOS `sips` (11.7MB -> 308KB); boxes are in the downscaled coordinate space | basic_noun ("a sandal"), fine_grained ("a black rubber slide sandal with a visible brand logo"), descriptive_phrase ("a pile of sandals on a market stall") |
+| `small_objects_birds.jpg` | small_objects | CC BY-SA 4.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Large flocks of birds flying, Pallithode, Kerala (2).jpg`, author Gannu03. Downscaled 6000x4000 -> 1600x1066 with macOS `sips` (5.8MB -> 110KB); boxes are in the downscaled coordinate space | basic_noun ("a bird"), fine_grained ("a single bird flying apart from the main flock"), descriptive_phrase ("a flock of birds flying in formation against the sky") |
 
 Ground-truth boxes in `annotations.json` were determined by manual visual
 inspection of each downloaded image (not guessed/synthesized), in pixel
@@ -41,9 +42,16 @@ rows/colors) is individually boxed for the basic_noun prompt; the rest
 are too tightly packed for reliable per-mug boxes. Same rationale as
 the paperclips/parking-lot limitations above.
 
+**Known precision limitation**: `small_objects_birds.jpg`'s flock has
+hundreds of birds clustered in a dense central group, each only a few
+pixels across. Only 5 clearly isolated birds flying apart from the main
+cluster are individually boxed; the descriptive_phrase prompt instead
+uses one box covering the whole flock region. Same rationale as the
+other small_objects/occlusion limitations above.
+
 ## Remaining work
 
-- 2 more images needed to meet #9's 10-image minimum. All 3 required
+- 1 more image needed to meet #9's 10-image minimum. All 3 required
   categories (`similar_objects`, `small_objects`, `occlusion`) now have at
   least one image; additional images can go to any category for broader
   coverage.
