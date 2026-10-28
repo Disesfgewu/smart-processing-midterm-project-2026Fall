@@ -7,10 +7,14 @@ Verified on real hardware; no mocked models or fabricated numbers.
 - macOS 26.6 (BuildVersion 25G72), arm64, Apple M5.
 - Python 3.11.16 (pyenv), project-local `.venv` per `environments/macos.md` (#17).
 - `torch==2.14.1`, `torchvision==0.29.1`, `transformers==5.21.0`,
-  `pillow==13.0.0`, `segment-anything==1.0`, declared reproducibly as the
-  `pyproject.toml` `macos-feasibility` optional dependency group (install
-  with `pip install -e ".[macos-feasibility]"`); this is a feasibility
-  spike, not the package's default dependency set (adapters land in #4/#5).
+  `pillow==13.0.0`, `segment-anything==1.0` were the exact versions
+  installed and used for the runs below. The `pyproject.toml`
+  `macos-feasibility` optional dependency group (install with
+  `pip install -e ".[macos-feasibility]"`) declares these packages but is
+  **not version-pinned** (only `transformers>=4.40` has a lower bound); a
+  fresh install may resolve newer versions than the ones recorded here.
+  This is a feasibility spike, not the package's default dependency set
+  (adapters #4/#5 declare their own exact needs).
 - Apple Silicon `mps` backend available and used for both models
   (`torch.backends.mps.is_available() == True`).
 - SAM checkpoint acquisition (not committed, ~375MB):
@@ -20,7 +24,7 @@ Verified on real hardware; no mocked models or fabricated numbers.
 
 | Capability | Backend used here | License | Why |
 | --- | --- | --- | --- |
-| Text -> boxes | `transformers.OwlViTForObjectDetection` (`google/owlvit-base-patch32`) | Apache-2.0 (both the `transformers` library and the `google/owlvit-base-patch32` model weights — verified via the Hugging Face Hub model card's `license:apache-2.0` tag) | This is the **exact backbone NanoOWL wraps** (`nanoowl.owl_predictor.OwlPredictor.__init__` calls `OwlViTForObjectDetection.from_pretrained`, see `docs/third_party_apis.md`). `OwlPredictor` itself only imports TensorRT lazily, so it is macOS-importable, but running it end-to-end here uses the underlying HF classes directly since #18's submodule isn't wired into this environment yet (#4 adapts `OwlPredictor` directly). |
+| Text -> boxes | `transformers.OwlViTForObjectDetection` (`google/owlvit-base-patch32`) | Apache-2.0 (both the `transformers` library and the `google/owlvit-base-patch32` model weights — verified via the Hugging Face Hub model card's `license:apache-2.0` tag) | This is the **exact backbone NanoOWL wraps** (`nanoowl.owl_predictor.OwlPredictor.__init__` calls `OwlViTForObjectDetection.from_pretrained`, see `docs/third_party_apis.md`). `OwlPredictor` itself only imports TensorRT lazily, so it is macOS-importable, but running it end-to-end here uses the underlying HF classes directly since #18's submodule isn't wired into this environment yet. #4's `OwlViTTextDetector` adapter also calls `transformers.OwlViTForObjectDetection` directly (not `OwlPredictor`); wiring the actual pinned `nanoowl.owl_predictor.OwlPredictor` submodule remains future work. |
 | Box -> masks | `segment_anything.SamPredictor` (`vit_b`, official Meta checkpoint `sam_vit_b_01ec64.pth`) | Apache-2.0 | `nanosam.utils.predictor.Predictor` imports `tensorrt`/`torch2trt` at **module level** and cannot be imported on macOS at all (confirmed in #18). NanoSAM's own engine-build docs reference a MobileSAM checkpoint from the same SAM/TinyViT family; the official `segment-anything` PyPI package with the smallest public checkpoint (`vit_b`, ~375MB) is used here as the explicit macOS substitute. This is **not** nanosam and is documented as a substitute, not evidence of nanosam or TensorRT performance. |
 
 Neither substitute claims to run on, or represent, Jetson/TensorRT. No
