@@ -92,7 +92,7 @@ compatibility there is unverified).
 | Single-image detect+segment pipeline API (`DetectSegmentPipeline`) | **Done** (this PR): see `tests/test_pipeline_real.py` for a real text->boxes->masks run saving an overlay image and structured JSON |
 | `smart-processing` CLI command to run the pipeline | Pending: the `smart-processing` entry point has no subcommand for this yet; only the library API above is wired |
 | Camera demo and live prompt changes | **Partial** (this PR): prompt-swap, camera-open-failure handling and clean shutdown are implemented and unit-tested; the live interactive demo itself is NOT manually verified -- camera access is not authorized in this autonomous session, see `docs/camera_demo.md` for the real verification command/output and why Owner follow-up is required |
-| Manufacturing counting demo | Pending: #8 |
+| Manufacturing counting demo | **Partial** (this PR): `count_detections`/`run_counting_demo` implemented and verified with real models (two different prompts -> two different real counts); no real manufacturing-parts photo with reliable detection was sourced -- uses a documented substitute scene, see `docs/manufacturing_counting.md` |
 | Evaluation and benchmark commands | Pending: #10, #11 |
 | Jetson setup, engine builds and run commands | Pending: #12, #13 |
 
@@ -113,10 +113,12 @@ commands from the plan.
   against the backends validated in #2. `pipeline.py`'s
   `DetectSegmentPipeline` composes any `TextDetector` + `BoxSegmenter` pair
   into a full text->boxes->masks run, plus `save_overlay_image`/
-  `save_structured_output` (#6). `camera_demo.py` (this PR, #7) has the
+  `save_structured_output` (#6). `camera_demo.py` (#7) has the
   prompt-swap/camera-failure/clean-shutdown logic, unit-tested without
   hardware; see `docs/camera_demo.md` for what is and isn't manually
-  verified. Evaluation and benchmarking logic lands as later issues (#8-#13).
+  verified. `manufacturing_counting.py` (this PR, #8) counts detections
+  per prompt; see `docs/manufacturing_counting.md` for the substitute-scene
+  rationale. Evaluation and benchmarking logic lands as later issues (#9-#13).
 - `tests/`: automated tests for the package.
 - `scripts/`: thin CLI wrappers over `smart_processing.feasibility` (argv
   parsing + printing only; model loading/inference lives in the package).
