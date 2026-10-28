@@ -27,10 +27,16 @@ def segmenter():
 
 @pytest.fixture(scope="module")
 def sample_image():
+    import sys
+    from pathlib import Path
+
     import numpy as np
     from PIL import Image
 
-    return np.array(Image.open("tests/data/sample_cats.jpg").convert("RGB"))
+    sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "scripts"))
+    from sample_image import SAMPLE_IMAGE_PATH, ensure_sample_image
+
+    return np.array(Image.open(ensure_sample_image(SAMPLE_IMAGE_PATH)).convert("RGB"))
 
 
 def test_real_segmentation_produces_aligned_mask(segmenter, sample_image):
