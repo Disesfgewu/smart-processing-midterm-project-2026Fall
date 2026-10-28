@@ -1,9 +1,8 @@
 """Wires #11's measurement harness to the real detection/segmentation/
 pipeline calls (#4/#5/#6), producing actual macOS latency/FPS/memory
 numbers -- never fabricated, never claimed as Jetson results. Heavy
-imports (PIL/torch) stay deferred so importing this module never requires
-the macos-feasibility optional extra.
-"""
+imports (PIL/torch) stay deferred so importing this module never
+requires the macos-feasibility optional extra."""
 from __future__ import annotations
 
 import json
@@ -29,8 +28,7 @@ def run_pipeline_benchmarks(
     separately"). Detection and end-to-end each re-run inference for every
     sample (the real cost a caller pays); segmentation is benchmarked on a
     fixed box from one real detection run, isolating SAM's own cost from
-    OWL-ViT's.
-    """
+    OWL-ViT's."""
     from smart_processing.pipeline import DetectSegmentPipeline
 
     detection_result = detector.detect(image, prompts, threshold=threshold)
@@ -79,7 +77,9 @@ def export_benchmark_results(results: dict[str, BenchmarkResult], out_path: str)
                 "max_seconds": r.latency.max_seconds,
                 "fps": r.latency.fps,
             },
-            "peak_rss_delta_bytes": r.peak_rss_delta_bytes,
+            "peak_rss_before_bytes": r.peak_rss.before_bytes,
+            "peak_rss_after_bytes": r.peak_rss.after_bytes,
+            "peak_rss_delta_bytes": r.peak_rss.delta_bytes,
         }
         for name, r in results.items()
     }
