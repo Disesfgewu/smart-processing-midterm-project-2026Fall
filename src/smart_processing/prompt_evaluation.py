@@ -8,9 +8,10 @@ tests/data/evaluation/annotations.json's ground truth (#9).
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from smart_processing.evaluation_dataset import EvaluationEntry
+from smart_processing.types import BoundingBox
 
 IOU_THRESHOLD = 0.5
 
@@ -18,11 +19,26 @@ IOU_THRESHOLD = 0.5
 @dataclass(frozen=True)
 class PredictedBox:
     """One detector output: label is expected to be the full prompt text
-    used for the query (#39's fix), not a short ground-truth noun."""
+    used for the query (#39's fix), not a short ground-truth noun.
+
+    Validates eagerly so a malformed prediction (NaN score, score outside
+    [0, 1], degenerate/non-finite box) raises here rather than silently
+    becoming a scored true/false positive -- a PM-Reviwer finding on #42."""
 
     label: str
     score: float
     box_xyxy: tuple[float, float, float, float]
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.label, str) or not self.label.strip():
+            raise ValueError(f"label must be a non-blank string, got {self.label!r}")
+        if not isinstance(self.score, (int, float)) or isinstance(self.score, bool):
+            raise ValueError(f"score must be a number, got {self.score!r}")
+        if not (0.0 <= self.score <= 1.0):
+            raise ValueError(f"score must be in [0, 1], got {self.score}")
+        if len(self.box_xyxy) != 4:
+            raise ValueError(f"box_xyxy must have exactly 4 coordinates, got {self.box_xyxy}")
+        BoundingBox(*self.box_xyxy)  # reuses #3's finite/non-negative/ordered checks
 
 
 @dataclass(frozen=True)
@@ -97,7 +113,14 @@ def score_dataset(
     entries_with_predictions: list[tuple[EvaluationEntry, list[PredictedBox]]],
 ) -> dict:
     """Overall micro-averaged metrics plus per-category and per-prompt-style
-    breakdowns, per docs/evaluation_methodology.md point 6."""
+    breakdowns, per docs/evaluation_methodology.md point 6.
+
+    Raises on an empty dataset rather than silently reporting the
+    zero-ground-truth "perfect" 1.0/1.0/1.0 special case for nothing ever
+    evaluated -- a PM-Reviwer finding on #42: that case is for a single
+    entry correctly finding no objects, not for "no data was scored"."""
+    if not entries_with_predictions:
+        raise ValueError("score_dataset() requires at least one (entry, predictions) pair")
     per_entry = [score_entry(entry, preds) for entry, preds in entries_with_predictions]
     by_category: dict[str, list[EntryScore]] = {}
     by_prompt_style: dict[str, list[EntryScore]] = {}

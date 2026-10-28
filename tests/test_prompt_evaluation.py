@@ -66,17 +66,37 @@ def test_score_entry_duplicate_predictions_only_one_true_positive():
     assert (result.true_positives, result.false_positives, result.false_negatives) == (1, 1, 0)
 
 
-def test_score_entry_greedy_prefers_higher_score_order():
-    """Two predictions both overlap the single ground-truth box; the
-    higher-scoring one should claim the match, not whichever is listed
-    first in the predictions list."""
-    gt = [GroundTruthBox(label="cat", box_xyxy=(0.0, 0.0, 10.0, 10.0))]
-    low_first = [
-        PredictedBox(label="a cat", score=0.4, box_xyxy=(0.0, 0.0, 10.0, 10.0)),
-        PredictedBox(label="a cat", score=0.9, box_xyxy=(0.0, 0.0, 10.0, 10.0)),
+def test_score_entry_greedy_actually_uses_descending_score_order():
+    """PM-Reviwer finding on #42: the prior version of this test used two
+    predictions competing for one GT box, which gives the same (1 TP, 1 FP)
+    result regardless of processing order and so couldn't catch a missing
+    sort. Two GT boxes make the order observable: A=(0,0,10,10) only
+    overlaps a low-score prediction at (0,0,10,10); B=(4,0,14,10) only
+    overlaps a high-score prediction at (1,0,11,10) well, but that high
+    prediction ALSO overlaps A reasonably (IoU>=0.5 against both). Processed
+    in descending score order, the high-score prediction claims its best
+    match first (B, since it's a tighter fit there than reusing A costs it
+    nothing -- the greedy pick is whichever unmatched GT gives the highest
+    IoU, which is engineered below to be A), then the low-score one is left
+    to match whatever remains, exercising actual order-dependent behavior
+    rather than two predictions interchangeable by symmetry."""
+    gt = [
+        GroundTruthBox(label="cat", box_xyxy=(0.0, 0.0, 10.0, 10.0)),  # A
+        GroundTruthBox(label="cat", box_xyxy=(4.0, 0.0, 14.0, 10.0)),  # B
     ]
-    result = score_entry(_entry(gt), low_first)
+    low_then_high = [
+        PredictedBox(label="a cat", score=0.1, box_xyxy=(0.0, 0.0, 10.0, 10.0)),  # exact match to A
+        PredictedBox(label="a cat", score=0.9, box_xyxy=(1.0, 0.0, 11.0, 10.0)),  # best IoU against A
+    ]
+    result = score_entry(_entry(gt), low_then_high)
+    # Descending-score order: the high-score prediction goes first and
+    # claims A (its best-IoU unmatched GT); the low-score exact-match
+    # prediction against A is then left with only B, IoU=0, so it misses.
+    # Processed in LIST order instead (mutation under test), the low-score
+    # prediction would claim A first, forcing the high-score one to also
+    # fail against the now-unmatched B -- a different (lower) TP count.
     assert (result.true_positives, result.false_positives) == (1, 1)
+    assert result.false_negatives == 1
 
 
 def test_score_entry_empty_ground_truth_and_empty_predictions_is_perfect():
@@ -123,3 +143,40 @@ def test_score_dataset_breaks_down_by_category_and_prompt_style():
     assert set(result["by_category"]) == {"occlusion"}
     assert set(result["by_prompt_style"]) == {"fine_grained"}
     assert result["by_category"]["occlusion"].true_positives == 1
+
+
+def test_score_dataset_rejects_empty_input():
+    """An empty dataset must not silently report the zero-GT "perfect"
+    1.0/1.0/1.0 special case, which is for one entry correctly finding
+    nothing -- not for "nothing was ever scored." PM-Reviwer finding."""
+    with pytest.raises(ValueError):
+        score_dataset([])
+
+
+@pytest.mark.parametrize("bad_label", ["", "   ", None, 123])
+def test_predicted_box_rejects_invalid_label(bad_label):
+    with pytest.raises(ValueError):
+        PredictedBox(label=bad_label, score=0.5, box_xyxy=(0.0, 0.0, 10.0, 10.0))
+
+
+@pytest.mark.parametrize("bad_score", [float("nan"), float("inf"), -0.1, 1.1, "0.5", True])
+def test_predicted_box_rejects_invalid_score(bad_score):
+    with pytest.raises(ValueError):
+        PredictedBox(label="a cat", score=bad_score, box_xyxy=(0.0, 0.0, 10.0, 10.0))
+
+
+@pytest.mark.parametrize(
+    "bad_box",
+    [
+        (0.0, 0.0, 10.0),  # wrong length
+        (10.0, 0.0, 0.0, 10.0),  # x0 >= x1
+        (0.0, 10.0, 10.0, 0.0),  # y0 >= y1
+        (-1.0, 0.0, 10.0, 10.0),  # negative origin
+        (float("nan"), 0.0, 10.0, 10.0),  # non-finite
+    ],
+)
+def test_predicted_box_rejects_invalid_box(bad_box):
+    with pytest.raises(ValueError):
+        PredictedBox(label="a cat", score=0.5, box_xyxy=bad_box)
+
+

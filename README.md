@@ -93,13 +93,52 @@ compatibility there is unverified).
 | `smart-processing` CLI command to run the pipeline | Pending: the `smart-processing` entry point has no subcommand for this yet; only the library API above is wired |
 | Camera demo and live prompt changes | **Partial** (this PR): prompt-swap, camera-open-failure handling and clean shutdown are implemented and unit-tested; the live interactive demo itself is NOT manually verified -- camera access is not authorized in this autonomous session, see `docs/camera_demo.md` for the real verification command/output and why Owner follow-up is required |
 | Manufacturing counting demo | **Partial** (this PR): `count_detections`/`run_counting_demo` implemented and verified with real models (two different prompts -> two different real counts); no real manufacturing-parts photo with reliable detection was sourced -- uses a documented substitute scene, see `docs/manufacturing_counting.md` |
-| Evaluation and benchmark commands | Pending: #10, #11 |
+| Prompt evaluation scorer (`smart_processing.prompt_evaluation`) | **Partial** (this PR): `iou()`/`score_entry()`/`score_dataset()` implement `docs/evaluation_methodology.md`'s matching/metric spec, unit-tested with fabricated predictions; this PR does NOT run a real detector or export results -- see `tests/test_prompt_evaluation.py`. No dataset execution/export/CLI yet (tracked separately) |
+| Evaluation and benchmark commands | Pending: #10 (scorer wiring/export), #11 |
 | Jetson setup, engine builds and run commands | Pending: #12, #13 |
 
 There is currently no verified application launch command. As each feature
 lands, this section must be replaced with the exact tested commands,
 prerequisites, expected output, and troubleshooting steps. Do not guess
 commands from the plan.
+
+### Prompt evaluation scorer (#10)
+
+`smart_processing.prompt_evaluation` is a pure, no-model library (no
+detector run or dataset export here -- that's a separate, dependent PR).
+It implements `docs/evaluation_methodology.md`'s IoU-matching metric
+exactly, and is unit-tested directly:
+
+```python
+from smart_processing.evaluation_dataset import EvaluationEntry, GroundTruthBox
+from smart_processing.prompt_evaluation import PredictedBox, score_entry
+
+entry = EvaluationEntry(
+    image="evaluation/example.jpg", image_license="CC0 (verified)",
+    category="occlusion", prompt_style="basic_noun", prompt="a cat",
+    ground_truth_boxes=[GroundTruthBox(label="cat", box_xyxy=(10.0, 20.0, 100.0, 150.0))],
+)
+predictions = [PredictedBox(label="a cat", score=0.9, box_xyxy=(12.0, 18.0, 98.0, 152.0))]
+score = score_entry(entry, predictions)  # EntryScore(true_positives=1, ...)
+```
+
+- `PredictedBox` validates eagerly: `label` must be a non-blank string,
+  `score` a finite number in `[0, 1]`, `box_xyxy` exactly 4 finite,
+  non-negative, correctly-ordered pixel coordinates (reuses `#3`'s
+  `BoundingBox` checks) -- a malformed prediction raises `ValueError`
+  rather than silently becoming a scored result.
+- `score_entry(entry, predictions) -> EntryScore` (`true_positives`,
+  `false_positives`, `false_negatives`, `precision`, `recall`, `f1`) scores
+  one `(image, prompt)` entry. A predicted box's `label` is compared
+  against `entry.prompt` itself (case-insensitive, stripped) -- this
+  module only ever scores one prompt per entry, so there is no multi-class
+  label confusion matrix to reconcile against a ground-truth box's own
+  (purely descriptive) `label`.
+- `score_dataset(entries_with_predictions) -> dict` aggregates
+  `EntryScore`s overall plus broken down `by_category` and
+  `by_prompt_style`. Raises `ValueError` on an empty input list rather
+  than reporting the zero-ground-truth "nothing here, correctly" 1.0
+  special case for "nothing was ever scored."
 
 ## Repository map
 
