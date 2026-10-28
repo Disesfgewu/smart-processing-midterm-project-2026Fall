@@ -78,7 +78,7 @@ compatibility there is unverified).
 | --- | --- |
 | Supported Python version and `.venv` setup | **Done**; Conda path pending if needed |
 | Pinned upstream submodules and dependency installation | Pending: #18 |
-| macOS inference feasibility (real detection + segmentation run) | **Done** (this PR), see `docs/macos_feasibility.md` |
+| macOS inference feasibility (real detection + segmentation run) | **Done** (this PR): `pip install -e ".[macos-feasibility]"`, then see `docs/macos_feasibility.md` for the checkpoint download and exact commands |
 | Model/checkpoint download and cache configuration | Pending: #4, #5 |
 | Single-image detection and segmentation command | Pending: #6 |
 | Camera demo and live prompt changes | Pending: #7 |

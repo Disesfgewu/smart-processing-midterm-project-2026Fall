@@ -7,17 +7,20 @@ Verified on real hardware; no mocked models or fabricated numbers.
 - macOS 26.6 (BuildVersion 25G72), arm64, Apple M5.
 - Python 3.11.16 (pyenv), project-local `.venv` per `environments/macos.md` (#17).
 - `torch==2.14.1`, `torchvision==0.29.1`, `transformers==5.21.0`,
-  `pillow==13.0.0`, `segment-anything==1.0` — none pinned into
-  `pyproject.toml` yet; this is a feasibility spike, not the package
-  dependency set (adapters land in #4/#5).
+  `pillow==13.0.0`, `segment-anything==1.0`, declared reproducibly as the
+  `pyproject.toml` `macos-feasibility` optional dependency group (install
+  with `pip install -e ".[macos-feasibility]"`); this is a feasibility
+  spike, not the package's default dependency set (adapters land in #4/#5).
 - Apple Silicon `mps` backend available and used for both models
   (`torch.backends.mps.is_available() == True`).
+- SAM checkpoint acquisition (not committed, ~375MB):
+  `curl -L -o tests/data/sam_vit_b_01ec64.pth https://dl.fbaipublicfiles.com/segment_anything/sam_vit_b_01ec64.pth`
 
 ## Backend selection and licenses
 
 | Capability | Backend used here | License | Why |
 | --- | --- | --- | --- |
-| Text -> boxes | `transformers.OwlViTForObjectDetection` (`google/owlvit-base-patch32`) | Apache-2.0 (transformers); model weights under the original OWL-ViT license (Apple Sample Code / research use, see model card) | This is the **exact backbone NanoOWL wraps** (`nanoowl.owl_predictor.OwlPredictor.__init__` calls `OwlViTForObjectDetection.from_pretrained`, see `docs/third_party_apis.md`). `OwlPredictor` itself only imports TensorRT lazily, so it is macOS-importable, but running it end-to-end here uses the underlying HF classes directly since #18's submodule isn't wired into this environment yet (#4 adapts `OwlPredictor` directly). |
+| Text -> boxes | `transformers.OwlViTForObjectDetection` (`google/owlvit-base-patch32`) | Apache-2.0 (both the `transformers` library and the `google/owlvit-base-patch32` model weights — verified via the Hugging Face Hub model card's `license:apache-2.0` tag) | This is the **exact backbone NanoOWL wraps** (`nanoowl.owl_predictor.OwlPredictor.__init__` calls `OwlViTForObjectDetection.from_pretrained`, see `docs/third_party_apis.md`). `OwlPredictor` itself only imports TensorRT lazily, so it is macOS-importable, but running it end-to-end here uses the underlying HF classes directly since #18's submodule isn't wired into this environment yet (#4 adapts `OwlPredictor` directly). |
 | Box -> masks | `segment_anything.SamPredictor` (`vit_b`, official Meta checkpoint `sam_vit_b_01ec64.pth`) | Apache-2.0 | `nanosam.utils.predictor.Predictor` imports `tensorrt`/`torch2trt` at **module level** and cannot be imported on macOS at all (confirmed in #18). NanoSAM's own engine-build docs reference a MobileSAM checkpoint from the same SAM/TinyViT family; the official `segment-anything` PyPI package with the smallest public checkpoint (`vit_b`, ~375MB) is used here as the explicit macOS substitute. This is **not** nanosam and is documented as a substitute, not evidence of nanosam or TensorRT performance. |
 
 Neither substitute claims to run on, or represent, Jetson/TensorRT. No
@@ -27,8 +30,14 @@ engine was built; no TensorRT import was attempted on macOS.
 
 Command: `.venv/bin/python scripts/owlvit_smoke_test.py tests/data/sample_cats.jpg`
 
-Image: COCO val2017 `000000039769.jpg` (CC BY 4.0, the same image used in
-upstream HF OWL-ViT docs/examples), two cats and two remote controls.
+Image: COCO val2017 `000000039769.jpg`, the same image used in upstream HF
+OWL-ViT docs/examples — two cats and two remote controls. COCO's own
+annotations/dataset are CC BY 4.0; this specific photo's original
+Flickr source/photographer license is not individually re-verified here
+(COCO dataset membership alone is not proof of an individual photo's
+license — noted per review). Used only as a local, non-redistributed test
+fixture to reproduce this smoke test, consistent with its common use as an
+ML documentation/testing image.
 
 Actual output:
 

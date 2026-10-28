@@ -13,9 +13,19 @@ license-files = ["LICENSE"]
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
+macos-feasibility = [
+    "torch",
+    "torchvision",
+    "transformers>=4.40",
+    "pillow",
+    "segment-anything",
+]
 
 [project.scripts]
 smart-processing = "smart_processing.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
