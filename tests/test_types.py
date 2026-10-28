@@ -77,6 +77,29 @@ def test_detection_result_accepts_in_bounds_detection():
     assert len(result.detections) == 1
 
 
+@pytest.mark.parametrize(
+    "width",
+    [float("nan"), float("inf"), float("-inf"), 0.5, True, False, "640", None],
+)
+def test_detection_result_rejects_invalid_width(width):
+    with pytest.raises(ValueError):
+        DetectionResult(image_width=width, image_height=480)
+
+
+@pytest.mark.parametrize(
+    "height",
+    [float("nan"), float("inf"), float("-inf"), 0.5, True, False, "480", None],
+)
+def test_detection_result_rejects_invalid_height(height):
+    with pytest.raises(ValueError):
+        DetectionResult(image_width=640, image_height=height)
+
+
+def test_detection_result_accepts_valid_integer_dims_with_no_detections():
+    result = DetectionResult(image_width=640, image_height=480)
+    assert (result.image_width, result.image_height) == (640, 480)
+
+
 def test_segmentation_mask_requires_bool_dtype():
     with pytest.raises(ValueError):
         SegmentationMask(mask=np.zeros((4, 4), dtype=np.uint8), score=0.9)

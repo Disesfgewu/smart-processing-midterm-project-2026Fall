@@ -19,6 +19,16 @@ import numpy as np
 ImageArray = np.ndarray
 
 
+def _require_positive_int(value, name: str) -> None:
+    """Rejects NaN/inf (both compare False against <= 0, so a naive check
+    silently accepts them), fractional values, and bool (a bool is an int
+    subclass in Python, so True would otherwise pass as 1)."""
+    if isinstance(value, bool) or not isinstance(value, int):
+        raise ValueError(f"{name} must be a positive int, got {value!r} ({type(value).__name__})")
+    if value <= 0:
+        raise ValueError(f"{name} must be positive, got {value}")
+
+
 def validate_image(image: ImageArray) -> tuple[int, int]:
     """Validate the HWC uint8 RGB contract; returns (height, width)."""
     if not isinstance(image, np.ndarray) or image.ndim != 3 or image.shape[2] != 3:
@@ -79,8 +89,8 @@ class DetectionResult:
     detections: list[Detection] = field(default_factory=list)
 
     def __post_init__(self) -> None:
-        if self.image_width <= 0 or self.image_height <= 0:
-            raise ValueError("image_width/image_height must be positive")
+        _require_positive_int(self.image_width, "image_width")
+        _require_positive_int(self.image_height, "image_height")
         for d in self.detections:
             if d.box.x1 > self.image_width or d.box.y1 > self.image_height:
                 raise ValueError(
