@@ -91,7 +91,8 @@ compatibility there is unverified).
 | `smart-processing` CLI command to run the pipeline | Pending: the `smart-processing` entry point has no subcommand for this yet; only the library API above is wired |
 | Camera demo and live prompt changes | Pending: #7 |
 | Manufacturing counting demo | Pending: #8 |
-| Evaluation and benchmark commands | Pending: #10, #11 |
+| Performance measurement harness (`smart_processing.performance_harness`) | **Partial** (this PR): `measure_latency()`/`measure_peak_rss_bytes()`/`run_benchmark()` with warmup/sampling/platform-capture, unit-tested with real wall-clock timing of synthetic callables (`tests/test_performance_harness.py`). Does NOT yet benchmark the real detector/segmenter/pipeline (#4/#5/#6) -- a follow-up PR wires it up for real macOS numbers, kept separate from any eventual Jetson results |
+| Evaluation and benchmark commands | Pending: #10 (scorer wiring/export, see #42-#44), #11 (real-model benchmark wiring, see above) |
 | Jetson setup, engine builds and run commands | Pending: #12, #13 |
 
 There is currently no verified application launch command. As each feature
