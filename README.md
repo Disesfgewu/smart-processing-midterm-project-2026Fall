@@ -27,7 +27,21 @@ check blocks merges.
 macOS substitutes and measurements will be identified explicitly. They are not
 evidence of Jetson execution or performance.
 
+## Get the repository
+
+```sh
+git clone --recurse-submodules https://github.com/Disesfgewu/smart-processing-midterm-project-2026Fall.git
+cd smart-processing-midterm-project-2026Fall
+```
+
+The upstream NanoOWL/NanoSAM submodules are planned in issue #18; they are
+not registered on `main` yet. Do not install NanoOWL/NanoSAM globally or
+assume their TensorRT paths run on macOS.
+
 ## Environment setup (macOS, verified)
+
+Prerequisite: `pyenv` installed, and you are inside the cloned repository
+(see "Get the repository" above).
 
 ```sh
 pyenv install -s 3.11.16
@@ -51,17 +65,6 @@ All of the above have been run on macOS arm64 with Python 3.11.16 and pass.
 `environments/macos.md` documents update/removal commands and why Python
 3.11 is pinned instead of this machine's default Python 3.14 (model
 compatibility there is unverified).
-
-## Get the repository
-
-```sh
-git clone --recurse-submodules https://github.com/Disesfgewu/smart-processing-midterm-project-2026Fall.git
-cd smart-processing-midterm-project-2026Fall
-```
-
-The upstream NanoOWL/NanoSAM submodules are planned in issue #18; they are
-not registered on `main` yet. Do not install NanoOWL/NanoSAM globally or
-assume their TensorRT paths run on macOS.
 
 ## Setup and run availability
 
