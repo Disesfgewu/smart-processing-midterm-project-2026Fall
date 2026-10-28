@@ -3,21 +3,32 @@
 Ground-truth annotations for detection accuracy evaluation (#10
 implements the scorer against `docs/evaluation_methodology.md`'s spec).
 
-## Status: 1 of 10 images (partial, in progress)
+## Status: 4 of 10 images (partial, in progress); all 3 categories now represented
 
 | Image | Category | License | Prompt styles |
 | --- | --- | --- | --- |
 | `similar_objects_fruits.jpg` | similar_objects | CC0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Fruits in bowl oranges lime apples (1).jpg`, author Gerardolagunes | basic_noun ("a lime"), fine_grained ("a red and yellow apple"), descriptive_phrase ("a round citrus fruit") |
+| `similar_objects_hardware.jpg` | similar_objects | CC BY-SA 4.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Bolts,Nuts & Washers.jpg`, author Sbrennan83 | basic_noun ("a bolt"), fine_grained ("a hexagonal nut..."), descriptive_phrase ("a round metal washer") |
+| `occlusion_books.jpg` | occlusion | CC0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Stack of multicolored books on a table.jpg`, author Alexander Grey | basic_noun ("a book"), fine_grained ("a pink hardcover book..."), descriptive_phrase ("a book spine in a stacked pile...") |
+| `small_objects_parking.jpg` | small_objects | CC BY-SA 4.0, Wikimedia Commons, verified via Commons API `extmetadata` for `File:Parking lot, Gross-Gerau (P1090665).jpg`, author Matti Blume | basic_noun ("a car"), fine_grained ("a small red car"), descriptive_phrase ("a vehicle parked in a large aerial parking lot") |
 
 Ground-truth boxes in `annotations.json` were determined by manual visual
-inspection of the downloaded image (not guessed/synthesized), in pixel
-coordinates at the image's native 1920x2560 resolution.
+inspection of each downloaded image (not guessed/synthesized), in pixel
+coordinates at each image's native resolution.
+
+**Known precision limitation**: `small_objects_parking.jpg`'s cars are only
+~25-30px across in a 2304x1444 aerial photo, and most are white/gray/black
+and visually indistinguishable from their neighbors at this scale. Only the
+2 red cars that could be confidently and individually located were
+annotated; this difficulty is itself relevant evidence for #10's
+small-object failure analysis, not hidden.
 
 ## Remaining work
 
-- 9 more images needed to meet #9's 10-image minimum, spanning
-  `small_objects` and `occlusion` categories (currently 0 images in
-  either) in addition to more `similar_objects` coverage.
+- 6 more images needed to meet #9's 10-image minimum. All 3 required
+  categories (`similar_objects`, `small_objects`, `occlusion`) now have at
+  least one image; additional images can go to any category for broader
+  coverage.
 - Each additional image needs 3+ prompt styles and manually-verified
   ground-truth boxes, following the same per-file Wikimedia Commons
   license verification pattern used here and in #8 (never infer license

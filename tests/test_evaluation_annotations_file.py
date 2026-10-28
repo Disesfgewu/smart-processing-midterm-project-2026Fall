@@ -31,3 +31,10 @@ def test_annotations_summary_reports_current_partial_coverage():
     # Honest partial-progress check: not yet at the 10-image minimum.
     assert summary["distinct_images"] >= 1
     assert summary["distinct_images"] < 10
+
+
+def test_annotations_file_covers_all_three_required_categories():
+    entries = load_annotations(str(ANNOTATIONS_PATH))
+    summary = summarize(entries)
+    assert set(summary["by_category"]) == {"similar_objects", "small_objects", "occlusion"}
+    assert set(summary["by_prompt_style"]) == {"basic_noun", "fine_grained", "descriptive_phrase"}
