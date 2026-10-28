@@ -102,9 +102,10 @@ commands from the plan.
   tests. `types.py` defines the portable `BoundingBox`/`Detection`/
   `DetectionResult`/`SegmentationMask` contracts and `TextDetector`/
   `BoxSegmenter` Protocols (#3; adds a runtime `numpy` dependency).
-  `adapters/owlvit_text_detector.py` implements `TextDetector` against the
-  OWL-ViT backend validated in #2 (this PR, #4). Pipeline, camera,
-  evaluation and benchmarking logic lands as later issues (#6-#13).
+  `adapters/owlvit_text_detector.py` implements `TextDetector` (#4) and
+  `adapters/sam_box_segmenter.py` implements `BoxSegmenter` (this PR, #5),
+  both against the backends validated in #2. Pipeline, camera, evaluation
+  and benchmarking logic lands as later issues (#6-#13).
 - `tests/`: automated tests for the package.
 - `scripts/`: thin CLI wrappers over `smart_processing.feasibility` (argv
   parsing + printing only; model loading/inference lives in the package).
