@@ -1,8 +1,9 @@
 """Unit tests for #23's service request-handling logic. No PIL/model here
--- prompts/threshold validation happens before image decoding (see
-handle_infer's docstring), so these paths are testable in a PIL-free dev
-venv. The full real flow (image decode + real detection + real HTTP
-round-trip) is in the opt-in tests/test_service_real.py instead."""
+-- prompts/threshold (and box_xyxy) validation happens before image
+decoding (see handle_infer/handle_segment's docstrings), so these paths
+are testable in a PIL-free dev venv. The full real flow (image decode +
+real detection/segmentation + real HTTP round-trip) is in the opt-in
+tests/test_service_real.py instead."""
 import base64
 
 import pytest
@@ -101,17 +102,32 @@ def test_handle_segment_rejects_missing_box_xyxy():
         handle_segment(_NeverCalledSegmenter(), {"image_base64": "anything"})
 
 
-@pytest.mark.parametrize("bad_box", [[1, 2, 3], [1, 2, 3, 4, 5], "a box", None, 123])
-def test_handle_segment_rejects_malformed_box_xyxy_shape(bad_box):
-    with pytest.raises(ServiceError, match="box_xyxy"):
-        handle_segment(_NeverCalledSegmenter(), {"box_xyxy": bad_box})
-
-
-def test_handle_segment_rejects_invalid_box():
-    """box_xyxy must still fail validation (reusing #3's BoundingBox
-    checks) even with no image_base64 key at all -- confirms box
-    validation, not missing-image handling, is what raises here."""
-    bad_box = [10.0, 10.0, 5.0, 5.0]  # x1 < x0, y1 < y0
+@pytest.mark.parametrize(
+    "bad_box",
+    [
+        None,
+        [],
+        [0.0, 0.0, 10.0],  # wrong length
+        [1, 2, 3, 4, 5],  # wrong length
+        "not a list",
+        123,
+        [10.0, 0.0, 0.0, 10.0],  # x0 >= x1
+        [0.0, 10.0, 10.0, 0.0],  # y0 >= y1
+        [-1.0, 0.0, 10.0, 10.0],  # negative origin
+        [float("nan"), 0.0, 10.0, 10.0],  # non-finite
+        ["a", "b", "c", "d"],  # non-numeric
+    ],
+)
+def test_handle_segment_rejects_invalid_box(bad_box):
+    """PM-Reviwer finding: the original version of this test used
+    image_base64="anything" and only asserted ServiceError generically.
+    "anything" happens to be valid base64 but not a valid image, so even
+    with box validation disabled (reviewer's mutation: hardcoding a valid
+    box), the call still raised ServiceError -- from image decoding, not
+    box validation -- making the test pass for the wrong reason. Matching
+    "box_xyxy" in the message, and never supplying image_base64 at all
+    (box validation runs first and must raise before image_base64 is
+    ever read), makes this test fail if box validation is bypassed."""
     with pytest.raises(ServiceError, match="box_xyxy"):
         handle_segment(_NeverCalledSegmenter(), {"box_xyxy": bad_box})
 
