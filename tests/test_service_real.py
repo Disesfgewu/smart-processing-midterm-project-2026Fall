@@ -40,10 +40,19 @@ def server():
 
 @pytest.fixture(scope="module")
 def server_with_segmenter():
+    from pathlib import Path
+
     from smart_processing.adapters.owlvit_text_detector import OwlViTTextDetector
     from smart_processing.adapters.sam_box_segmenter import SamBoxSegmenter
     from smart_processing.service import run_server
     from smart_processing.types import BackendConfig
+
+    # Co-Reviewer finding: RUN_FEASIBILITY_SMOKE=1 alone doesn't guarantee
+    # the ~375MB SAM checkpoint is present (it's untracked per repo
+    # hygiene rules), so instantiating SamBoxSegmenter unconditionally
+    # crashed with an unhandled FileNotFoundError instead of a clean skip.
+    if not Path(CHECKPOINT).exists():
+        pytest.skip(f"{CHECKPOINT} not found; see docs/macos_feasibility.md for the download step")
 
     detector = OwlViTTextDetector(BackendConfig(device="cpu"))
     segmenter = SamBoxSegmenter(CHECKPOINT)
