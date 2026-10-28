@@ -45,7 +45,7 @@ def main():
         lat = result.latency
         print(
             f"{name}: mean={lat.mean_seconds * 1000:.1f}ms median={lat.median_seconds * 1000:.1f}ms "
-            f"fps={lat.fps:.2f} peak_rss_delta={result.peak_rss_delta_bytes / 1024 / 1024:.2f}MB"
+            f"fps={lat.fps:.2f} peak_rss_delta={result.peak_rss.delta_bytes / 1024 / 1024:.2f}MB"
         )
 
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
