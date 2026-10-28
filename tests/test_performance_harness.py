@@ -126,6 +126,36 @@ def test_measure_peak_rss_bytes_reports_plausible_absolute_values():
     assert measurement.delta_bytes >= 0
 
 
+def test_measure_peak_rss_bytes_calls_synchronize_around_fn_and_readings():
+    """Co-Reviewer finding on #49: measure_peak_rss_bytes() accepted no
+    synchronize callback at all, so an async device's outstanding work
+    could leak across the before/after RSS reading boundary. Confirms
+    synchronize is called once before the "before" reading and once
+    after fn() but before the "after" reading."""
+    call_log = []
+    measure_peak_rss_bytes(
+        lambda: call_log.append("fn"),
+        synchronize=lambda: call_log.append("sync"),
+    )
+    assert call_log == ["sync", "fn", "sync"]
+
+
+def test_run_benchmark_passes_synchronize_to_peak_rss_measurement():
+    call_log = []
+    run_benchmark(
+        "stage",
+        lambda: call_log.append("fn"),
+        device="mps",
+        warmup=1,
+        samples=1,
+        synchronize=lambda: call_log.append("sync"),
+    )
+    # 1 warmup + 1 timed sample in measure_latency (2 fn+sync pairs), then
+    # 1 more fn+sync pair (x2 sync) in measure_peak_rss_bytes.
+    assert call_log.count("fn") == 3
+    assert call_log.count("sync") == 4
+
+
 def test_run_benchmark_returns_full_result_shape():
     result = run_benchmark("synthetic_stage", lambda: time.sleep(0.001), device="cpu", warmup=1, samples=3)
     assert isinstance(result, BenchmarkResult)

@@ -128,7 +128,7 @@ class PeakRssMeasurement:
         return max(0, self.after_bytes - self.before_bytes)
 
 
-def measure_peak_rss_bytes(fn) -> PeakRssMeasurement:
+def measure_peak_rss_bytes(fn, synchronize=None) -> PeakRssMeasurement:
     """Runs `fn()` once and returns the process's peak resident-set size in
     bytes, before vs. after the call. `delta_bytes` is a lower-bound
     estimate of `fn`'s own allocation (shared with everything else
@@ -137,10 +137,20 @@ def measure_peak_rss_bytes(fn) -> PeakRssMeasurement:
     `resource` has no per-call RSS delta). macOS reports `ru_maxrss` in
     bytes; Linux reports it in KiB, so this normalizes by platform to
     avoid silently misreporting units.
-    """
+
+    `synchronize`, if given, is called both before the "before" reading
+    and after `fn()` and before the "after" reading -- Co-Reviewer finding
+    on #49: without it, an async device's outstanding work (not yet
+    staged/freed) can leak across the before/after boundary in either
+    direction, under- or over-counting this call's own allocation. Same
+    contract as `measure_latency`'s `synchronize` parameter."""
+    if synchronize is not None:
+        synchronize()
     unit_multiplier = 1 if platform.system() == "Darwin" else 1024
     before = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * unit_multiplier
     fn()
+    if synchronize is not None:
+        synchronize()
     after = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss * unit_multiplier
     return PeakRssMeasurement(before_bytes=before, after_bytes=after)
 
@@ -181,7 +191,7 @@ def run_benchmark(
             "device='cpu' for a function known to be fully synchronous"
         )
     latency = measure_latency(fn, warmup=warmup, samples=samples, synchronize=synchronize)
-    peak_rss = measure_peak_rss_bytes(fn)
+    peak_rss = measure_peak_rss_bytes(fn, synchronize=synchronize)
     return BenchmarkResult(
         name=name,
         platform_info=PlatformInfo.capture(device=device),
