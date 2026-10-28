@@ -82,6 +82,8 @@ compatibility there is unverified).
 | Portable detection/segmentation data contracts (`src/smart_processing/types.py`) | **Done**: pure data/interface contracts, no model code |
 | macOS text detection adapter (`OwlViTTextDetector`) | **Done**: `pip install -e ".[macos-feasibility]"`, then `RUN_FEASIBILITY_SMOKE=1 pytest tests/test_owlvit_text_detector_real.py -v` |
 | macOS box-prompted segmentation adapter (`SamBoxSegmenter`) | **Done** (this PR): `RUN_FEASIBILITY_SMOKE=1 pytest tests/test_sam_box_segmenter_real.py -v` (needs the SAM checkpoint from `docs/macos_feasibility.md`) |
+| Model/checkpoint download command | **Done**: see `docs/macos_feasibility.md` (manual `curl`/HF Hub fetch; `SamBoxSegmenter` takes a caller-supplied `checkpoint_path`, no built-in cache management) |
+| Automated checkpoint cache configuration | Pending: #6 or later, not yet built |
 | Single-image detection and segmentation command | Pending: #6 |
 | Camera demo and live prompt changes | Pending: #7 |
 | Manufacturing counting demo | Pending: #8 |

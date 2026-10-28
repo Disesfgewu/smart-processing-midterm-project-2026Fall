@@ -13,8 +13,10 @@ from smart_processing.types import BackendConfig, BoundingBox, SegmentationMask,
 DEFAULT_MODEL_TYPE = "vit_b"
 
 
-def validate_segment_inputs(image_shape, box: BoundingBox) -> None:
+def validate_segment_inputs(image_shape, box) -> None:
     """Pure input validation, importable/testable without loading any model."""
+    if not isinstance(box, BoundingBox):
+        raise ValueError(f"box must be a BoundingBox, got {type(box)!r}")
     if image_shape is None:
         raise RuntimeError("set_image() must be called before segment()")
     height, width = image_shape
@@ -52,5 +54,10 @@ class SamBoxSegmenter:
         box_array = np.array(box.as_xyxy())
         masks, scores, _ = self._predictor.predict(box=box_array, multimask_output=False)
         mask = masks[0].astype(bool)
+        if mask.shape != self._image_shape:
+            raise ValueError(
+                f"predicted mask shape {mask.shape} does not match the image "
+                f"shape {self._image_shape} set by set_image()"
+            )
         score = float(min(1.0, max(0.0, scores[0])))
         return SegmentationMask(mask=mask, score=score)
