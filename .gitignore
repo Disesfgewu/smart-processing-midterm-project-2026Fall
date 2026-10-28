@@ -1,0 +1,11 @@
+# Tool-generated local artifacts, not project source
+.agent-artifacts/
+.agent-eye/
+
+# Project-local environments and caches (locations configured per #17)
+.venv/
+.conda/
+*.egg-info/
+__pycache__/
+*.pyc
+.pytest_cache/
