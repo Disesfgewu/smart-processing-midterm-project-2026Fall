@@ -13,8 +13,12 @@ application, or measured inference result yet.
 The implementation plan is tracked in
 [GitHub issues](https://github.com/Disesfgewu/smart-processing-midterm-project-2026Fall/issues).
 Contribution rules and the change-size CI workflow are merged into `main`.
-Required branch protection must still be activated by the Owner before the
-check blocks merges.
+Branch protection on `main` is active: the `size` status check is required
+(strict), code-owner review is required with stale-approval dismissal,
+admins are enforced, and force pushes/deletion are disabled (verified via
+the GitHub branch protection API). The `size` check itself is currently
+unable to run on GitHub's hosted runner due to an account billing issue,
+separate from this branch-protection configuration.
 
 ## Intended workflow
 
