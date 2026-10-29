@@ -45,12 +45,25 @@ class Detection:
 
 class OpenVocabSegmenter:
     def __init__(self, sam_checkpoint="data/models/mobile_sam.pt", owl_name="google/owlvit-base-patch32",
-                 owl_engine=None, device="cuda"):
+                 owl_engine=None, device="cuda", student_checkpoint=None):
+        """student_checkpoint：自行蒸餾的 ResNet18 image encoder（training/train_nanosam.py 的 best.pth / checkpoint.pth）。
+        給了就和 baseline（MobileSAM 的 TinyViT encoder）一起載入、可用 set_sam_encoder() 即時切換比較；
+        prompt encoder / mask decoder 一律用 baseline 的（NanoSAM 本來就共用同一個 decoder）。baseline 權重不會被修改。"""
         t0 = time.perf_counter()
         try:
             self.owl = OwlPredictor(owl_name, device=device, image_encoder_engine=owl_engine)
             sam = sam_model_registry["vit_t"](checkpoint=sam_checkpoint).to(device).eval()
             self.sam = SamPredictor(sam)
+            self.sam_encoders = {"mobilesam": sam.image_encoder}               # baseline
+            self.sam_encoder = "mobilesam"
+            if student_checkpoint:
+                from nanosam.models.timm_image_encoder import TimmImageEncoder
+                stu = TimmImageEncoder("resnet18")                              # 預設 pretrained=False；權重由 checkpoint 載入，離線也能用
+                ck = torch.load(student_checkpoint, map_location="cpu")
+                stu.load_state_dict(ck["model"])
+                stu.img_size = sam.image_encoder.img_size                       # SamPredictor 需要此屬性（1024）
+                self.sam_encoders["student"] = stu.to(device).eval()
+                self.student_info = {"checkpoint": student_checkpoint, "epoch": ck.get("epoch"), "val_loss": ck.get("val_loss")}
         except Exception as e:
             logger.error(f"[OpenVocabSegmenter.__init__]: input=(owl={owl_name}, engine={owl_engine}, sam={sam_checkpoint}), "
                          f"error={type(e).__name__}: {e}", exc_info=True)
@@ -66,6 +79,15 @@ class OpenVocabSegmenter:
         self.best_scores = {}  # 每個提示詞的最高分（含低於門檻者），診斷「為什麼沒偵測到」用
         logger.info(f"[OpenVocabSegmenter.__init__]: input=(owl={owl_name}, engine={owl_engine}, sam={sam_checkpoint}, device={device}), "
                     f"output=models loaded in {(time.perf_counter() - t0):.2f}s")
+
+    def set_sam_encoder(self, name: str):
+        """切換 SAM 的 image encoder（'mobilesam' = baseline；'student' = 自訓練 ResNet18）。呼叫端需自行避免與推論同時進行。"""
+        if name not in self.sam_encoders:
+            raise ValueError(f"unknown SAM encoder {name!r}; available: {list(self.sam_encoders)}")
+        self.sam.model.image_encoder = self.sam_encoders[name]
+        self.sam_encoder = name
+        self.sam.reset_image()
+        logger.info(f"[OpenVocabSegmenter.set_sam_encoder]: input=(name={name}), output=active encoder = {type(self.sam_encoders[name]).__name__}")
 
     def set_prompts(self, prompts: List[str], groups: Optional[dict] = None):
         """可在執行中隨時呼叫；只重算文字編碼，不需重啟。

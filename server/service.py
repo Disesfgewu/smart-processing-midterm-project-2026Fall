@@ -20,10 +20,10 @@ MAX_IMAGE_SIDE = 4096
 
 
 class SegmentService:
-    def __init__(self, sam_checkpoint="data/models/mobile_sam.pt", owl_engine: Optional[str] = None):
+    def __init__(self, sam_checkpoint="data/models/mobile_sam.pt", owl_engine: Optional[str] = None, student_checkpoint: Optional[str] = None):
         self.started = time.time()
         t0 = time.perf_counter()
-        self.seg = OpenVocabSegmenter(sam_checkpoint=sam_checkpoint, owl_engine=owl_engine)
+        self.seg = OpenVocabSegmenter(sam_checkpoint=sam_checkpoint, owl_engine=owl_engine, student_checkpoint=student_checkpoint)
         self.load_s = time.perf_counter() - t0
         self.backend = "tensorrt" if owl_engine else "pytorch-fp32"
         self.lock = threading.Lock()
@@ -51,8 +51,11 @@ class SegmentService:
         if len(data) > 30 * 2**20:
             raise ValueError("image too large (>30MB)")
         img = PIL.ImageOps.exif_transpose(PIL.Image.open(io.BytesIO(data))).convert("RGB")
+        img.info["original_size"] = img.size          # 縮圖前的尺寸（EXIF 轉正之後）；偵測結果的座標系是縮圖後的尺寸
         if max(img.size) > MAX_IMAGE_SIDE:
             img.thumbnail((MAX_IMAGE_SIDE, MAX_IMAGE_SIDE))
+            logger.warning(f"[SegmentService.decode_image]: image downscaled {img.info['original_size']} -> {img.size} (MAX_IMAGE_SIDE={MAX_IMAGE_SIDE}); "
+                           f"result coordinates are in the downscaled space, client must rescale")
         return img
 
     @log_call
@@ -98,12 +101,22 @@ class SegmentService:
         timing.update({"text_encode_ms": text_ms, "lock_wait_ms": lock_wait_ms, "serialize_ms": serialize_ms,
                        "total_ms": (time.perf_counter() - t_all) * 1e3})
         self.n_requests += 1
-        result = {"image": {"width": image.width, "height": image.height}, "prompts": prompts, "threshold": threshold,
-                  "nms_iou": nms_iou, "with_masks": with_masks, "top_per_group": top_per_group, "hyde": hyde_info, "detections": out_dets, "summary": summary,
-                  "timing": timing, "backend": self.backend, "memory": self.gpu_stats()}
+        ow, oh = image.info.get("original_size", image.size)
+        # image.width × height 是偵測結果（框 / 輪廓 / 面積）的座標系；original_* 是縮圖前的尺寸
+        result = {"image": {"width": image.width, "height": image.height, "original_width": ow, "original_height": oh},
+                  "prompts": prompts, "threshold": threshold, "nms_iou": nms_iou, "with_masks": with_masks, "top_per_group": top_per_group, "hyde": hyde_info, "detections": out_dets, "summary": summary,
+                  "timing": timing, "backend": self.backend, "sam_encoder": self.seg.sam_encoder, "memory": self.gpu_stats()}
         self.history.appendleft({"time": time.strftime("%H:%M:%S"), "prompts": prompts, "n": len(out_dets),
                                  "total_ms": timing["total_ms"], "owl_ms": timing["owl_ms"], "sam_ms": timing["sam_ms"]})
         return result
+
+    def sam_encoder_info(self) -> Dict:
+        return {"active": self.seg.sam_encoder, "available": list(self.seg.sam_encoders), "student": getattr(self.seg, "student_info", None)}
+
+    def switch_sam_encoder(self, name: str) -> Dict:
+        with self.lock:                                   # 與推論互斥：不會在某一幀中途換 encoder
+            self.seg.set_sam_encoder(name)
+        return self.sam_encoder_info()
 
     def token_count(self, text: str) -> int:
         return len(self.seg.owl.processor.tokenizer(text)["input_ids"])

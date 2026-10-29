@@ -106,7 +106,7 @@ function stopAll() {
   if (state.camStream) { state.camStream.getTracks().forEach((t) => t.stop()); state.camStream = null; }
   if (state.srv.on) serverStop(true);
   $("btn-camstart").disabled = false; $("btn-camstop").disabled = true;
-  $("btn-vstart").disabled = !state.video.url; $("btn-vstop").disabled = true; state.paused = false; updateHydeChip();
+  $("btn-vstart").disabled = !state.video.url; $("btn-vstop").disabled = true; state.paused = false; updateHydeChip(); rebuildCheckRows();
 }
 
 // ================= 取得影格 / 呼叫後端 =================
@@ -139,7 +139,24 @@ async function callSegment(blob, quiet = false) {
   body.client_ms = performance.now() - t0; body.request_id = body.request_id || rid;
   return body;
 }
+// 後端對過大的圖（長邊 > 4096）會先縮小再偵測，回傳的框 / 輪廓 / 面積都在縮小後的座標系。
+// 這裡一次換算成「畫面上那張圖」的座標系，下游（畫圖、面積、比例尺、報表）就都一致。影片 / 攝影機的影格本來就一樣大，不受影響。
+function toDisplayCoords(r, w, h) {
+  const sw = r.image.width, sh = r.image.height;
+  if (!sw || !sh || (Math.abs(sw - w) <= 1 && Math.abs(sh - h) <= 1)) return;
+  const sx = w / sw, sy = h / sh, sa = sx * sy;
+  r.processed = { width: sw, height: sh };
+  r.detections.forEach((d) => {
+    d.box = [d.box[0] * sx, d.box[1] * sy, d.box[2] * sx, d.box[3] * sy]; d.box_area *= sa;
+    if (d.mask_area != null) d.mask_area *= sa;
+    d.contours = d.contours.map((c) => c.map(([x, y]) => [x * sx, y * sy]));
+  });
+  r.summary.forEach((s) => { s.box_area *= sa; if (s.mask_area != null) s.mask_area *= sa; });
+  r.image = { width: w, height: h };
+  if (Math.abs(sx - sy) / sx > 0.02) showError(`後端與瀏覽器看到的影像長寬比不同（${sw}×${sh} vs ${w}×${h}），疊圖可能變形；常見原因是 EXIF 方向`, true);
+}
 function accept(r, src, w, h, { history = true } = {}) {
+  toDisplayCoords(r, w, h);
   state.src = src; state.srcW = w; state.srcH = h; state.result = r; state.lastRid = r.request_id;
   if (r.hyde.requested && !r.hyde.applied) showError(`HyDE：${r.hyde.note}`, true);
   if (history) pushRun(r);
@@ -381,7 +398,7 @@ function renderPromptChips() {
 }
 let autoTimer = null;
 $("prompts").addEventListener("input", () => {
-  renderPromptChips();
+  renderPromptChips(); rebuildCheckRows();
   clearTimeout(autoTimer);
   updateHydeChip();
   if (state.srv.on) { if (!state.hydeOn) autoTimer = setTimeout(pushServerParams, 400); }   // HyDE 關閉：串流即時換提示；開啟：按「套用」
@@ -394,6 +411,25 @@ $("nms").addEventListener("input", (e) => { $("nms-out").textContent = (+e.targe
 $("threshold").addEventListener("change", onParam); $("nms").addEventListener("change", onParam);
 $("style").addEventListener("change", () => { draw(); onParam(); });
 $("masks").addEventListener("change", onParam); $("top1").addEventListener("change", onParam);
+// SAM image encoder 切換（baseline MobileSAM ↔ 自訓練 ResNet18；後端以 SAM_STUDENT 載入自訓練的才會出現）
+const SAM_ENC_LABEL = (k, info) => (k === "mobilesam" ? "MobileSAM（baseline）" : `自訓練 ResNet18${info && info.epoch != null ? `（epoch ${info.epoch}）` : ""}`);
+async function samEncInit() {
+  try {
+    const j = await (await fetch("/api/sam/encoder")).json(), sel = $("sam-enc");
+    $("sam-enc-wrap").hidden = !(j.available && j.available.length > 1);
+    sel.replaceChildren(...(j.available || []).map((k) => el("option", { value: k, textContent: SAM_ENC_LABEL(k, j.student) })));
+    sel.value = j.active;
+  } catch { /* 後端沒有這個 API 就不顯示 */ }
+}
+$("sam-enc").addEventListener("change", async (e) => {
+  showError("");
+  try {
+    const fd = new FormData(); fd.append("name", e.target.value);
+    const res = await fetch("/api/sam/encoder", { method: "POST", body: fd }), b = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(b.detail || `HTTP ${res.status}`);
+    if (state.mode === "image" && state.file) run();          // 圖片模式：切換後立刻用新 encoder 重跑同一張圖，方便並排比較
+  } catch (err) { showError("切換 SAM 編碼器失敗：" + err.message); samEncInit(); }
+});
 async function hydeStatus() {
   const b = $("hyde-badge");
   try {
@@ -412,8 +448,8 @@ function draw() {
   if (!state.src || state.mode === "server") return;
   const W = state.srcW, H = state.srcH; canvas.width = W; canvas.height = H;
   ctx.drawImage(state.src, 0, 0, W, H); state.paths = [];
-  const r = state.result; if (!r) return;
-  const style = $("style").value, lw = Math.max(2, Math.round(Math.max(W, H) / 400));
+  const r = state.result; if (!r) { drawCalibration(); return; }
+  const style = $("style").value, lw = Math.max(2, Math.round(Math.max(W, H) / 400)), calK = calScale(r.image);
   for (const d of r.detections) {
     const color = colorOf(d.label, r.prompts), path = new Path2D(), thick = r.hyde && r.hyde.applied && d.primary ? 2 : 1;
     d.contours.forEach((c) => { c.forEach(([x, y], i) => (i ? path.lineTo(x, y) : path.moveTo(x, y))); path.closePath(); });
@@ -423,9 +459,10 @@ function draw() {
     if (d.mask_area != null && (style === "contour" || style === "both")) { ctx.lineWidth = lw * thick; ctx.strokeStyle = color; ctx.lineJoin = "round"; ctx.stroke(path); }
     if (style === "box" || d.mask_area == null) { ctx.lineWidth = lw; ctx.strokeStyle = color; const [x0, y0, x1, y1] = d.box; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0); }
     const fs = Math.max(12, Math.round(Math.max(W, H) / 50)); ctx.font = `600 ${fs}px system-ui, sans-serif`;
-    const star = r.hyde && r.hyde.applied && d.primary, text = `${star ? "★ " : ""}${d.label} ${d.score.toFixed(2)}`, tw = ctx.measureText(text).width, [x0, y0] = d.box, ty = Math.max(y0, fs + 4);
+    const star = r.hyde && r.hyde.applied && d.primary, text = `${star ? "★ " : ""}${d.label} ${d.score.toFixed(2)}${calK && d.mask_area != null ? ` · ${(d.mask_area * calK * calK).toFixed(0)} mm²` : ""}`, tw = ctx.measureText(text).width, [x0, y0] = d.box, ty = Math.max(y0, fs + 4);
     ctx.fillStyle = color; ctx.fillRect(x0, ty - fs - 4, tw + 8, fs + 6); ctx.fillStyle = "#fff"; ctx.fillText(text, x0 + 4, ty - 3);
   }
+  drawCalibration();
 }
 canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect(), sx = canvas.width / rect.width, x = (e.clientX - rect.left) * sx, y = (e.clientY - rect.top) * sx;
@@ -487,7 +524,8 @@ function renderTiming(r) {
   const kv = $("timing-kv"); kv.replaceChildren(); const add = (k, v) => kv.append(el("dt", { textContent: k }), el("dd", { textContent: v }));
   add("含網路往返", r.client_ms == null ? "—（伺服器端迴圈）" : `${fmt(r.client_ms)} ms`);
   add("連續處理速度", $("loop-fps").textContent || "—");
-  add("影像大小", `${r.image.width}×${r.image.height}`); add("原始框 → NMS 後", `${t.num_raw_boxes ?? "—"} → ${r.detections.length}`);
+  add("影像大小", r.processed ? `${r.image.width}×${r.image.height}（後端縮至 ${r.processed.width}×${r.processed.height} 處理，座標已換算）` : `${r.image.width}×${r.image.height}`); add("原始框 → NMS 後", `${t.num_raw_boxes ?? "—"} → ${r.detections.length}`);
+  add("SAM 編碼器", r.sam_encoder ? SAM_ENC_LABEL(r.sam_encoder === "student" ? "student" : "mobilesam", null) : "—");
   add("SAM 平均每個框", r.detections.length ? `${fmt(t.sam_ms / r.detections.length)} ms（含整張影像編碼）` : "—"); add("後端", r.backend);
   state.latencies.push(t.total_ms); if (state.latencies.length > 40) state.latencies.shift(); spark();
 }
@@ -521,34 +559,244 @@ function renderHyde(r) {
   drawHydeCard(h.expanded, r);
 }
 
-// ================= 製造情境：數量檢查 =================
+// ================= 製造情境：零件檢查（工單 / 面積 mm² / 判定 / 紀錄） =================
+state.areaMin = {}; state.areaMax = {}; state.cal = null; state.calMode = false; state.calPts = [];
+state.log = []; state.lastLogSig = ""; state.lastLogAt = 0;
+const WO_PRESETS = {
+  "範本｜螺絲包（螺絲 4 / 螺帽 4 / 墊片 4）": [{ prompt: "a screw", expected: 4 }, { prompt: "a nut", expected: 4 }, { prompt: "a washer", expected: 4 }],
+  "範本｜電子零件盤（電阻 10 / 電容 2 / LED 1）": [{ prompt: "a resistor", expected: 10 }, { prompt: "a capacitor", expected: 2 }, { prompt: "a led", expected: 1 }],
+  "範本｜貓與遙控器（測試用，對應範例圖）": [{ prompt: "a cat", expected: 2 }, { prompt: "a remote control", expected: 2 }],
+};
+// localStorage 可能被封鎖（私密視窗等），一律包 try/catch，失敗時功能照常、只是不保存
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
+const isNum = (v) => v !== "" && v != null && !Number.isNaN(+v);
+
+// ---- 工單 ----
+function refreshWoSelect(selected) {
+  const sel = $("wo-sel"), saved = lsGet("workorders", {}); sel.replaceChildren(el("option", { value: "", textContent: "（選擇工單）" }));
+  Object.keys(WO_PRESETS).forEach((n) => sel.append(el("option", { value: "p:" + n, textContent: n })));
+  Object.keys(saved).forEach((n) => sel.append(el("option", { value: "s:" + n, textContent: "已存｜" + n })));
+  if (selected) sel.value = selected; $("wo-del").disabled = !sel.value.startsWith("s:");
+}
+function currentWorkOrder() {
+  return checkPrompts().map((p) => ({ prompt: p, expected: isNum(state.expected[p]) ? +state.expected[p] : null,
+    areaMin: isNum(state.areaMin[p]) ? +state.areaMin[p] : null, areaMax: isNum(state.areaMax[p]) ? +state.areaMax[p] : null }));
+}
+function applyWorkOrder() {
+  const v = $("wo-sel").value; if (!v) return showError("請先選擇一個工單");
+  const name = v.slice(2), parts = v.startsWith("p:") ? WO_PRESETS[name] : lsGet("workorders", {})[name];
+  if (!parts) return showError("找不到這個工單");
+  showError(""); state.expected = {}; state.areaMin = {}; state.areaMax = {};
+  parts.forEach((x) => { state.expected[x.prompt] = x.expected ?? ""; state.areaMin[x.prompt] = x.areaMin ?? ""; state.areaMax[x.prompt] = x.areaMax ?? ""; });
+  state.woName = name.replace(/^範本｜/, ""); $("wo-name").value = state.woName;
+  const ta = $("prompts"); ta.value = parts.map((x) => x.prompt).join("\n"); ta.dispatchEvent(new Event("input", { bubbles: true }));   // 走既有流程（HyDE 待套用、自動執行、串流更新）
+  rebuildCheckRows(true); updateCheck(state.result);
+}
+$("wo-apply").addEventListener("click", applyWorkOrder);
+$("wo-sel").addEventListener("change", () => { $("wo-del").disabled = !$("wo-sel").value.startsWith("s:"); });
+$("wo-save").addEventListener("click", () => {
+  const name = $("wo-name").value.trim(); if (!name) return showError("請先輸入工單名稱");
+  const parts = currentWorkOrder(); if (!parts.length) return showError("沒有可儲存的零件（請先輸入提示詞）");
+  const saved = lsGet("workorders", {}); saved[name] = parts;
+  if (!lsSet("workorders", saved)) return showError("無法儲存：瀏覽器封鎖了本機儲存（私密視窗？）", true);
+  state.woName = name; showError(""); refreshWoSelect("s:" + name);
+});
+$("wo-del").addEventListener("click", () => {
+  const v = $("wo-sel").value; if (!v.startsWith("s:")) return;
+  const saved = lsGet("workorders", {}); delete saved[v.slice(2)]; lsSet("workorders", saved); refreshWoSelect();
+});
+$("wo-name").addEventListener("input", () => { state.woName = $("wo-name").value.trim(); });
+
+// ---- 比例尺（mm / 像素）：以「校準當下畫面的最大邊」為基準，畫面縮放時自動換算 ----
+const curRefMax = () => (state.mode === "server" && state.result ? Math.max(state.result.image.width, state.result.image.height) : Math.max(state.srcW, state.srcH) || (state.result ? Math.max(state.result.image.width, state.result.image.height) : maxSide()));
+function calScale(img) { return state.cal && img ? state.cal.mmPerPx * state.cal.refMax / Math.max(img.width, img.height) : null; }   // 此畫面的 mm / 像素
+function updateCalState() {
+  $("cal-state").textContent = state.cal ? `已校準：${state.cal.mmPerPx.toPrecision(4)} mm/px（畫面最大邊 ${state.cal.refMax}px）→ 1 px² = ${(state.cal.mmPerPx ** 2).toPrecision(3)} mm²` : "未校準：面積只能以像素顯示，無法設定面積範圍";
+  $("cal-two").disabled = state.mode === "server";
+  $("cal-two").title = state.mode === "server" ? "伺服器串流模式請手動輸入比例尺" : "在影像上點兩個已知實際距離的點";
+}
+function setCal(mmPerPx) {
+  state.cal = mmPerPx > 0 ? { mmPerPx, refMax: curRefMax() } : null; lsSet("calibration", state.cal);
+  $("cal-mm").value = state.cal ? +mmPerPx.toPrecision(5) : ""; updateCalState();
+  if (state.result) { draw(); updateCheck(state.result); }
+}
+$("cal-mm").addEventListener("change", () => setCal(+$("cal-mm").value));
+$("cal-two").addEventListener("click", () => {
+  if (!state.src) return showError("請先載入圖片或開始影片 / 攝影機，才能在影像上校準");
+  showError(""); state.calMode = true; state.calPts = []; $("cal-box").hidden = false; $("cal-ok").disabled = true;
+  $("cal-msg").textContent = "請在影像上點第 1 個點"; draw();
+});
+const calCancel = () => { state.calMode = false; state.calPts = []; $("cal-box").hidden = true; draw(); };
+$("cal-cancel").addEventListener("click", calCancel);
+$("cal-ok").addEventListener("click", () => {
+  const dist = +$("cal-dist").value, [p, q] = state.calPts;
+  if (!(dist > 0) || !q) return $("cal-msg").textContent = "請輸入大於 0 的實際距離";
+  const px = Math.hypot(q.x - p.x, q.y - p.y); if (px < 2) return $("cal-msg").textContent = "兩點太近，請重新選點";
+  state.calMode = false; $("cal-box").hidden = true; setCal(dist / px); state.calPts = []; draw();
+});
+canvas.addEventListener("click", (e) => {
+  if (!state.calMode || state.calPts.length >= 2) return;
+  const rect = canvas.getBoundingClientRect(), k = canvas.width / rect.width;
+  state.calPts.push({ x: (e.clientX - rect.left) * k, y: (e.clientY - rect.top) * k });
+  $("cal-msg").textContent = state.calPts.length === 1 ? "請點第 2 個點" : "已選兩點，輸入實際距離後按確定"; $("cal-ok").disabled = state.calPts.length < 2; draw();
+});
+function drawCalibration() {                       // 校準中的點與連線（疊在影像上）
+  if (!state.calPts.length) return;
+  ctx.save(); ctx.lineWidth = Math.max(2, canvas.width / 300); ctx.strokeStyle = "#ef4444"; ctx.fillStyle = "#ef4444";
+  state.calPts.forEach((p) => { ctx.beginPath(); ctx.arc(p.x, p.y, ctx.lineWidth * 2.5, 0, 7); ctx.fill(); });
+  if (state.calPts.length === 2) { ctx.beginPath(); ctx.moveTo(state.calPts[0].x, state.calPts[0].y); ctx.lineTo(state.calPts[1].x, state.calPts[1].y); ctx.stroke(); }
+  ctx.restore();
+}
+
+// ---- 檢查表：每一列 = 一種零件 ----
 let checkKey = "";
-function renderCheck(r) {
-  const key = r.prompts.join("\u0001"), tb = $("tbl-check").tBodies[0];
-  if (key !== checkKey) {                                        // 提示詞改變才重建輸入框，避免打字時被覆蓋
-    checkKey = key; tb.replaceChildren();
-    r.prompts.forEach((p) => {
-      const inp = el("input", { type: "number", min: 0, step: 1, placeholder: "—", value: state.expected[p] ?? "" });
-      inp.addEventListener("input", () => { state.expected[p] = inp.value; updateCheck(state.result); pushServerParams(); });
-      const row = el("tr", {}, el("td", { textContent: p }), el("td", { className: "num" }, inp), el("td", { className: "num cnt" }), el("td", { className: "st" }));
-      row.dataset.label = p;   // dataset 是唯讀屬性，不能用 Object.assign 指定
-      tb.append(row);
-    });
-  }
-  updateCheck(r);
-}
-function updateCheck(r) {
-  if (!r) return;
-  const rows = [...$("tbl-check").tBodies[0].rows].filter((x) => x.dataset.label); let any = false, allOk = true;
-  rows.forEach((row) => {
-    const s = r.summary.find((x) => x.label === row.dataset.label), n = s ? s.count : 0, exp = state.expected[row.dataset.label];
-    row.querySelector(".cnt").textContent = n; const st = row.querySelector(".st");
-    if (exp === "" || exp == null) { st.textContent = "—"; st.className = "st muted"; return; }
-    any = true; const diff = n - +exp;
-    if (diff === 0) { st.textContent = "OK"; st.className = "st st-ok"; } else { allOk = false; st.textContent = diff < 0 ? `NG（缺 ${-diff}）` : `NG（多 ${diff}）`; st.className = "st st-ng"; }
+const checkPrompts = () => (isRunning() && state.result ? state.result.prompts : parsePrompts($("prompts").value));
+function rebuildCheckRows(force = false) {
+  const ps = checkPrompts(), key = ps.join("\u0001"), tb = $("tbl-check").tBodies[0];
+  if (key === checkKey && !force) return;            // 提示詞沒變就不重建，避免打字時輸入框被覆蓋
+  checkKey = key; tb.replaceChildren();
+  if (!ps.length) { tb.append(el("tr", {}, el("td", { colSpan: 7, className: "muted", textContent: "輸入提示詞後顯示" }))); return; }
+  ps.forEach((p) => {
+    const mk = (store, ph, step) => {
+      const inp = el("input", { type: "number", min: 0, step, placeholder: ph, value: store[p] ?? "" });
+      inp.addEventListener("input", () => { store[p] = inp.value; updateCheck(state.result); if (store === state.expected) pushServerParams(); });
+      return inp;
+    };
+    const row = el("tr", {}, el("td", { textContent: p }), el("td", { className: "num" }, mk(state.expected, "—", 1)),
+      el("td", { className: "num area-cell" }, mk(state.areaMin, "—", 1)), el("td", { className: "num area-cell" }, mk(state.areaMax, "—", 1)),
+      el("td", { className: "num cnt" }), el("td", { className: "num area" }), el("td", { className: "st" }));
+    row.dataset.label = p; tb.append(row);       // dataset 是唯讀屬性，不能用 Object.assign 指定
   });
-  const v = $("verdict"); v.className = "verdict " + (!any ? "idle" : allOk ? "ok" : "ng"); v.textContent = !any ? "未設定" : allOk ? "PASS" : "FAIL";
 }
+function renderCheck(r) { rebuildCheckRows(); updateCheck(r); }
+
+// 評估一個結果 → 每種零件的數量 / 面積 / 判定，以及整體 PASS / FAIL / 無法判定
+function evaluate(r) {
+  const parts = []; let any = false, fail = false, incomplete = false;
+  checkPrompts().forEach((p) => {
+    const has = !!r && r.prompts.includes(p), dets = has ? r.detections.filter((d) => d.label === p) : [], scale = calScale(r && r.image);
+    const areas = dets.map((d) => (d.mask_area == null || !scale ? null : d.mask_area * scale * scale)), areaKnown = scale && areas.every((a) => a != null);
+    const exp = state.expected[p], lo = state.areaMin[p], hi = state.areaMax[p], hasArea = isNum(lo) || isNum(hi);
+    const total = has && areaKnown ? areas.reduce((a, b) => a + b, 0) : null, msgs = [], warns = [];
+    if (has && isNum(exp)) { any = true; const d = dets.length - +exp; if (d) { fail = true; msgs.push(d < 0 ? `缺 ${-d}` : `多 ${d}`); } }
+    if (has && hasArea) {
+      any = true;
+      if (!areaKnown) { if (dets.length) { incomplete = true; warns.push(!scale ? "需校準比例尺" : "需計算遮罩"); } }
+      else { const bad = areas.filter((a) => (isNum(lo) && a < +lo) || (isNum(hi) && a > +hi)).length; if (bad) { fail = true; msgs.push(`${bad} 件面積超出範圍`); } }
+    }
+    let status = "—", cls = "st muted";
+    if (has && (isNum(exp) || hasArea)) { if (msgs.length) { status = "NG（" + msgs.join("、") + "）"; cls = "st st-ng"; } else if (warns.length) { status = "⚠ " + warns[0]; cls = "st st-warn"; } else { status = "OK"; cls = "st st-ok"; } }
+    parts.push({ label: p, has, areasPx: dets.map((d) => d.mask_area), count: has ? dets.length : null, expected: isNum(exp) ? +exp : null, areaMin: isNum(lo) ? +lo : null, areaMax: isNum(hi) ? +hi : null, areas, total, status, cls });
+  });
+  return { parts, verdict: !any ? "idle" : fail ? "ng" : incomplete ? "inc" : "ok" };
+}
+const VERDICT_TEXT = { idle: "未設定", ok: "PASS", ng: "FAIL", inc: "無法判定" };
+function updateCheck(r) {
+  const ev = evaluate(r), rows = [...$("tbl-check").tBodies[0].rows].filter((x) => x.dataset.label);
+  rows.forEach((row) => {
+    const p = ev.parts.find((x) => x.label === row.dataset.label); if (!p) return;
+    row.querySelector(".cnt").textContent = p.count ?? "—";
+    row.querySelector(".area").textContent = p.total != null ? `${p.total.toFixed(1)} mm²` : (p.has && r.detections.some((d) => d.label === p.label && d.mask_area != null) ? `${fmtInt(r.detections.filter((d) => d.label === p.label).reduce((a, d) => a + d.mask_area, 0))} px` : "—");
+    const st = row.querySelector(".st"); st.textContent = p.status; st.className = p.cls;
+  });
+  const v = $("verdict"); v.className = "verdict " + ev.verdict; v.textContent = VERDICT_TEXT[ev.verdict];
+  if (r && $("log-auto").checked) autoLog(r, ev);
+}
+
+// ---- 檢查紀錄 ----
+function snapshot() {                              // 目前畫面（含偵測疊圖）縮成 JPEG，供報表附圖；失敗不影響記錄
+  try {
+    const src = state.mode === "server" ? $("stream") : canvas, w = src.naturalWidth || src.width, h = src.naturalHeight || src.height;
+    if (!w || !h) return null;
+    const k = Math.min(1, 380 / Math.max(w, h)), c = document.createElement("canvas"); c.width = Math.round(w * k); c.height = Math.round(h * k);
+    c.getContext("2d").drawImage(src, 0, 0, c.width, c.height); return c.toDataURL("image/jpeg", 0.72);
+  } catch { return null; }
+}
+function logRecord(r, ev) {
+  state.log.push({ thumb: snapshot(), t: new Date(), mode: ({ image: "圖片", video: "影片", cam: "瀏覽器攝影機", server: "伺服器來源" })[state.mode], wo: state.woName || "（未命名）", verdict: VERDICT_TEXT[ev.verdict], parts: ev.parts });
+  if (state.log.length > 2000) state.log.shift(); renderLog();
+}
+function autoLog(r, ev) {                           // 只在「判定或各零件數量改變」時記錄，並限制頻率，避免連續影格洗版
+  const sig = ev.verdict + "|" + ev.parts.map((p) => `${p.label}:${p.count}:${p.status}`).join(","), now = performance.now();
+  if (sig === state.lastLogSig || now - state.lastLogAt < 500) return;
+  state.lastLogSig = sig; state.lastLogAt = now; logRecord(r, ev);
+}
+function renderLog() {
+  $("log-n").textContent = state.log.length; const tb = $("tbl-log").tBodies[0]; tb.replaceChildren();
+  state.log.slice(-30).reverse().forEach((x) => {
+    const sum = x.parts.reduce((a, p) => a + (p.total ?? 0), 0), any = x.parts.some((p) => p.total != null);
+    tb.append(el("tr", {}, el("td", { textContent: x.t.toLocaleTimeString() }), el("td", { textContent: x.mode }), el("td", { textContent: x.wo }),
+      el("td", { textContent: x.verdict, className: x.verdict === "PASS" ? "st-ok" : x.verdict === "FAIL" ? "st-ng" : "muted" }),
+      el("td", { textContent: x.parts.map((p) => `${p.label} ${p.count ?? "—"}/${p.expected ?? "—"}`).join("、") }), el("td", { className: "num", textContent: any ? sum.toFixed(1) : "—" })));
+  });
+}
+function buildLogCsv() {
+  const q = (s) => `"${String(s).replace(/"/g, '""')}"`, labels = [];
+  state.log.forEach((x) => x.parts.forEach((p) => { if (!labels.includes(p.label)) labels.push(p.label); }));
+  const head = ["time", "source", "work_order", "verdict", ...labels.flatMap((l) => [q(l + " count"), q(l + " expected"), q(l + " total_area_mm2"), q(l + " status")])].join(",");
+  const rows = state.log.map((x) => [x.t.toISOString(), q(x.mode), q(x.wo), x.verdict, ...labels.flatMap((l) => { const p = x.parts.find((y) => y.label === l); return p ? [p.count ?? "", p.expected ?? "", p.total != null ? p.total.toFixed(2) : "", q(p.status)] : ["", "", "", ""]; })].join(","));
+  return "﻿" + [head, ...rows].join("\n");
+}
+const esc = (v) => String(v).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
+const stat = (a) => (a.length ? { n: a.length, mean: a.reduce((x, y) => x + y, 0) / a.length, min: Math.min(...a), max: Math.max(...a) } : null);
+function buildReportHtml() {
+  const L = state.log, labels = []; L.forEach((x) => x.parts.forEach((p) => { if (!labels.includes(p.label)) labels.push(p.label); }));
+  const calibrated = L.length > 0 && L.every((x) => x.parts.every((p) => p.areas.every((a) => a != null))), unit = calibrated ? "mm²" : "px";
+  const cnt = { PASS: 0, FAIL: 0, "無法判定": 0, "未設定": 0 }; L.forEach((x) => { cnt[x.verdict] = (cnt[x.verdict] || 0) + 1; });
+  const judged = cnt.PASS + cnt.FAIL, rate = judged ? ((cnt.PASS / judged) * 100).toFixed(1) + "%" : "—";
+  const f = (v, d = 1) => (v == null ? "—" : Number(v).toFixed(d));
+  const fmtT = (d) => d.toLocaleString("zh-TW", { hour12: false });
+  const perPart = labels.map((lb) => {
+    const rows = L.map((x) => x.parts.find((p) => p.label === lb)).filter((p) => p && p.count != null);
+    const counts = rows.map((p) => p.count), exps = [...new Set(rows.map((p) => p.expected).filter((v) => v != null))];   // 預期值可能中途改過：每筆紀錄各用當時的預期值
+    const areas = rows.flatMap((p) => (calibrated ? p.areas : p.areasPx)).filter((a) => a != null), cs = stat(counts), as = stat(areas);
+    const judged = rows.filter((p) => p.expected != null), ok = judged.length ? judged.filter((p) => p.count === p.expected).length : null, rg = rows.find((p) => p.areaMin != null || p.areaMax != null);
+    return `<tr><td>${esc(lb)}</td><td class="n">${exps.length ? exps.join("、") : "—"}</td><td class="n">${f(cs?.mean)} / ${cs?.min ?? "—"} / ${cs?.max ?? "—"}</td>
+      <td class="n">${ok == null ? "—" : `${ok}/${judged.length}（${((ok / judged.length) * 100).toFixed(0)}%）`}</td>
+      <td class="n">${as ? `${f(as.mean)} / ${f(as.min)} / ${f(as.max)}` : "—"}</td><td class="n">${as ? as.n : "—"}</td>
+      <td class="n">${rg ? `${rg.areaMin ?? "—"} ~ ${rg.areaMax ?? "—"} mm²` : "—"}</td></tr>`;
+  }).join("");
+  let withImg = { FAIL: 0, other: 0 };
+  const detail = L.map((x, i) => {
+    const want = x.verdict === "FAIL" ? withImg.FAIL++ < 50 : withImg.other++ < 10, img = want && x.thumb ? `<img src="${x.thumb}" alt="">` : "";
+    return `<tr class="${x.verdict === "FAIL" ? "bad" : ""}"><td class="n">${i + 1}</td><td>${fmtT(x.t)}</td><td>${esc(x.mode)}</td><td class="v ${x.verdict}">${x.verdict}</td>
+      <td>${x.parts.map((p) => `${esc(p.label)}：${p.count ?? "—"}${p.expected != null ? `/${p.expected}` : ""}${p.total != null ? `，${p.total.toFixed(1)} mm²` : p.areasPx.length ? `，${fmtInt(p.areasPx.reduce((a, b) => a + b, 0))} px` : ""}${p.status !== "—" && p.status !== "OK" ? `（${esc(p.status)}）` : ""}`).join("<br>")}</td><td>${img}</td></tr>`;
+  }).join("");
+  const settings = `threshold ${$("threshold").value}、NMS IoU ${$("nms").value}、HyDE ${state.hydeOn ? "開（" + (state.hyde.info?.model || "") + "）" : "關"}、計算遮罩 ${$("masks").checked ? "是" : "否（只有框）"}`;
+  return `<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><title>零件檢查報表</title><style>
+  body{font:14px/1.6 system-ui,"Noto Sans TC","Microsoft JhengHei",sans-serif;color:#1b1f27;max-width:980px;margin:24px auto;padding:0 16px}
+  h1{font-size:22px;margin:0 0 4px}h2{font-size:16px;margin:26px 0 8px;border-bottom:2px solid #e3e6ec;padding-bottom:4px}
+  table{border-collapse:collapse;width:100%;font-size:13px}th,td{border:1px solid #d5d9e0;padding:5px 8px;text-align:left;vertical-align:top}th{background:#f3f5f8}
+  td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}.kv{display:grid;grid-template-columns:max-content 1fr;gap:2px 16px}.kv dt{color:#667085}.kv dd{margin:0}
+  .v.PASS{color:#166534;font-weight:700}.v.FAIL{color:#b91c1c;font-weight:700}tr.bad{background:#fff5f5}img{max-width:190px;height:auto;border-radius:4px;display:block}
+  .cards{display:flex;gap:12px;flex-wrap:wrap}.card{border:1px solid #d5d9e0;border-radius:8px;padding:8px 16px}.card b{font-size:22px;display:block}
+  .note{color:#667085;font-size:12px}@media print{body{margin:0}tr{page-break-inside:avoid}h2{page-break-after:avoid}}</style></head><body>
+  <h1>製造現場零件檢查報表</h1><div class="note">產生時間：${fmtT(new Date())}</div>
+  <h2>基本資訊</h2><dl class="kv"><dt>工單</dt><dd>${esc(state.woName || "（未命名）")}</dd>
+    <dt>檢查期間</dt><dd>${L.length ? fmtT(L[0].t) + " ～ " + fmtT(L[L.length - 1].t) : "—"}</dd>
+    <dt>零件（提示詞）</dt><dd>${labels.map(esc).join("、") || "—"}</dd><dt>偵測設定</dt><dd>${esc(settings)}</dd>
+    <dt>比例尺</dt><dd>${state.cal ? `${state.cal.mmPerPx.toPrecision(4)} mm/px（畫面最大邊 ${state.cal.refMax}px）` : "未校準（面積單位為像素）"}</dd>
+    <dt>面積單位</dt><dd>${unit}</dd></dl>
+  <h2>總覽</h2><div class="cards"><div class="card">檢查筆數<b>${L.length}</b></div><div class="card">PASS<b style="color:#166534">${cnt.PASS}</b></div>
+    <div class="card">FAIL<b style="color:#b91c1c">${cnt.FAIL}</b></div><div class="card">無法判定 / 未設定<b>${cnt["無法判定"] + cnt["未設定"]}</b></div><div class="card">合格率（PASS / 可判定）<b>${rate}</b></div></div>
+  <h2>各零件統計</h2><table><thead><tr><th>零件</th><th class="n">預期數量</th><th class="n">偵測數量<br>平均 / 最小 / 最大</th><th class="n">數量符合</th>
+    <th class="n">單件面積（${unit}）<br>平均 / 最小 / 最大</th><th class="n">樣本（個）</th><th class="n">設定的面積範圍</th></tr></thead><tbody>${perPart || '<tr><td colspan="7">尚無紀錄</td></tr>'}</tbody></table>
+  <h2>逐筆明細</h2><table><thead><tr><th class="n">#</th><th>時間</th><th>來源</th><th>判定</th><th>各零件（偵測/預期，合計面積）</th><th>畫面</th></tr></thead><tbody>${detail || '<tr><td colspan="6">尚無紀錄</td></tr>'}</tbody></table>
+  <p class="note">說明：面積由 SAM 遮罩的像素數乘以比例尺的平方換算，假設鏡頭垂直拍攝平面；未校準時以像素表示。準確度取決於比例尺校準、鏡頭畸變與遮罩品質。
+  失敗案例附圖最多 50 張、其餘判定最多 10 張。數量符合率以有設定預期數量的紀錄計算。</p></body></html>`;
+}
+$("log-report").addEventListener("click", () => {
+  if (!state.log.length) return showError("還沒有紀錄：請先按「記錄目前結果」，或勾選「結果改變時自動記錄」");
+  showError(""); const url = URL.createObjectURL(new Blob([buildReportHtml()], { type: "text/html" }));
+  if (!window.open(url, "_blank")) el("a", { href: url, download: "inspection_report.html" }).click();     // 彈出視窗被擋時改為下載
+});
+$("log-add").addEventListener("click", () => { if (!state.result) return showError("還沒有偵測結果可以記錄"); showError(""); logRecord(state.result, evaluate(state.result)); $("log-details").open = true; });
+$("log-clear").addEventListener("click", () => { state.log = []; state.lastLogSig = ""; renderLog(); });
+$("log-csv").addEventListener("click", () => {
+  if (!state.log.length) return showError("還沒有紀錄可以下載");
+  el("a", { href: URL.createObjectURL(new Blob([buildLogCsv()], { type: "text/csv" })), download: "inspection_log.csv" }).click();
+});
 
 // ================= 即時 GPU 數據 =================
 async function pollStats() {
@@ -583,6 +831,8 @@ $("btn-log").addEventListener("click", refreshLogs); $("log-filter").addEventLis
 
 // ================= 啟動 =================
 (async function init() {
+  state.cal = lsGet("calibration", null); if (state.cal && !(state.cal.mmPerPx > 0)) state.cal = null; if (state.cal) $("cal-mm").value = +state.cal.mmPerPx.toPrecision(5);
+  refreshWoSelect(); updateCalState(); rebuildCheckRows(true); samEncInit();
   setMode("image"); renderPromptChips(); updateHydeChip(); listCams(); hydeStatus(); setInterval(hydeStatus, 15000);
   try { const h = await (await fetch("/api/health")).json(); $("chip-backend").textContent = h.backend; $("chip-device").textContent = h.device; } catch { /* pollStats 會顯示 */ }
   pollStats(); setInterval(pollStats, 1000);

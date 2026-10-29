@@ -29,7 +29,8 @@ async def lifespan(app: FastAPI):
     global service, camera
     logger.info("[lifespan.startup]: input=(), output=loading models")
     service = SegmentService(sam_checkpoint=os.environ.get("SAM_CHECKPOINT", os.path.join(ROOT, "data/models/mobile_sam.pt")),
-                             owl_engine=os.environ.get("OWL_ENGINE") or None)
+                             owl_engine=os.environ.get("OWL_ENGINE") or None,
+                             student_checkpoint=os.environ.get("SAM_STUDENT") or None)   # 自訓練的 ResNet18 encoder；不給就只有 baseline
     camera = CameraWorker(service)
     import threading
     threading.Thread(target=hyde.ensure_running, name="ollama-autostart", daemon=True).start()   # 不阻塞啟動；Ollama 沒在跑就自動拉起
@@ -102,6 +103,23 @@ def hyde_expand(prompts: str = Form(...)):
         return service.hyde_expand(plist)
     except hyde.HydeError as e:
         raise HTTPException(503, str(e))
+
+
+@app.get("/api/sam/encoder")
+def sam_encoder_get():
+    return service.sam_encoder_info()
+
+
+@app.post("/api/sam/encoder")
+@log_call(name="api.sam.encoder")
+def sam_encoder_set(name: str = Form(...)):
+    """切換 SAM image encoder（mobilesam = baseline；student = 自訓練）。camera 串流中請先停止，避免兩邊用不同 encoder 比較。"""
+    if camera.running:
+        raise HTTPException(409, "伺服器串流進行中，請先停止再切換 SAM encoder")
+    try:
+        return service.switch_sam_encoder(name)
+    except ValueError as e:
+        raise HTTPException(400, str(e))
 
 
 @app.get("/api/hyde/status")

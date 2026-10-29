@@ -99,6 +99,9 @@ a remote control</textarea>
         <label class="inline">畫面最大邊
           <select id="maxside"><option>480</option><option selected>640</option><option>960</option><option>1280</option></select>
         </label>
+        <label class="inline" id="sam-enc-wrap" hidden title="baseline = MobileSAM；自訓練 = 蒸餾出的 ResNet18。decoder 相同，只換 image encoder，可用同一張圖比較">SAM 編碼器
+          <select id="sam-enc"></select>
+        </label>
         <label class="inline">顯示
           <select id="style">
             <option value="both">遮罩 + 輪廓</option>
@@ -132,11 +135,49 @@ a remote control</textarea>
     </div>
 
     <div class="card" id="card-check">
-      <div class="card-head"><h2>製造情境：數量檢查 <small>（設定每種零件的預期數量，即時判定 OK / NG）</small></h2><span id="verdict" class="verdict idle">未設定</span></div>
+      <div class="card-head"><h2>製造情境：零件檢查 <small>（工單 → 數量 / 面積 → OK·NG → 紀錄）</small></h2><span id="verdict" class="verdict idle">未設定</span></div>
+
+      <div class="row wo-row">
+        <label class="inline">工單 <select id="wo-sel"></select></label>
+        <button id="wo-apply" class="ghost" title="把工單的零件與預期值填入提示詞與下表">套用工單</button>
+        <button id="wo-del" class="ghost" disabled title="只能刪除自己儲存的工單">刪除</button>
+        <div class="spacer"></div>
+        <input type="text" id="wo-name" class="wo-name" placeholder="工單名稱" spellcheck="false">
+        <button id="wo-save" class="ghost" title="把目前的提示詞與下表的預期值存成工單（只存在這個瀏覽器）">儲存目前設定為工單</button>
+      </div>
+
+      <div class="row cal-row">
+        <label class="inline">比例尺 <input type="number" id="cal-mm" min="0" step="0.001" placeholder="mm / 像素" style="width:7.5em"> mm/px</label>
+        <button id="cal-two" class="ghost" title="在影像上點兩個已知實際距離的點">兩點校準</button>
+        <span id="cal-state" class="muted"></span>
+      </div>
+      <div id="cal-box" class="cal-box" hidden>
+        兩點間的實際距離 <input type="number" id="cal-dist" min="0" step="0.1" style="width:6em"> mm
+        <button id="cal-ok" class="primary">確定</button> <button id="cal-cancel" class="ghost">取消</button>
+        <span id="cal-msg" class="muted"></span>
+      </div>
+
       <div class="table-wrap"><table id="tbl-check">
-        <thead><tr><th>零件（提示詞）</th><th class="num">預期</th><th class="num">偵測</th><th>判定</th></tr></thead>
-        <tbody><tr><td colspan="4" class="muted">執行後顯示</td></tr></tbody>
+        <thead><tr><th>零件（提示詞）</th><th class="num">預期數量</th>
+          <th class="num" title="單件面積允許範圍（mm²），超出視為錯件或破損；需先校準比例尺並計算遮罩">單件面積下限</th><th class="num">上限 (mm²)</th>
+          <th class="num">偵測</th><th class="num">合計面積</th><th>判定</th></tr></thead>
+        <tbody><tr><td colspan="7" class="muted">輸入提示詞後顯示</td></tr></tbody>
       </table></div>
+
+      <div class="row log-row">
+        <button id="log-add" class="ghost">記錄目前結果</button>
+        <label class="check"><input type="checkbox" id="log-auto"> 結果改變時自動記錄</label>
+        <div class="spacer"></div>
+        <button id="log-report" class="primary" title="產生可列印的報表（總覽、各零件數量與面積統計、逐筆明細與失敗案例截圖）">產生報表</button>
+        <button id="log-csv" class="ghost">下載檢查紀錄 CSV</button>
+        <button id="log-clear" class="ghost">清除</button>
+      </div>
+      <details id="log-details"><summary>檢查紀錄（<span id="log-n">0</span> 筆）</summary>
+        <div class="table-wrap"><table id="tbl-log">
+          <thead><tr><th>時間</th><th>來源</th><th>工單</th><th>判定</th><th>內容（偵測/預期）</th><th class="num">合計面積 mm²</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </details>
     </div>
 
     <div class="card" id="card-timeline" hidden>

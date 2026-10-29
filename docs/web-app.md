@@ -5,7 +5,7 @@
 ```bash
 conda activate nanoowl-sam
 python -m server.main                 # http://127.0.0.1:8000
-# 環境變數：HOST、PORT、SAM_CHECKPOINT、OWL_ENGINE（指定 TensorRT 引擎則改用 TensorRT）、APP_LOG（日誌路徑）
+# 環境變數：HOST、PORT、SAM_CHECKPOINT、SAM_STUDENT（自訓練的 ResNet18 encoder，和 baseline 並存、可在網頁切換比較）、OWL_ENGINE（指定 TensorRT 引擎則改用 TensorRT）、APP_LOG（日誌路徑）
 ```
 
 啟動時會載入模型並暖機 3 次（避免第一個請求被冷啟動拖慢）。
@@ -29,6 +29,7 @@ python -m server.main                 # http://127.0.0.1:8000
 - 零偵測診斷：統計表顯示每個提示詞的「最高分」（含低於門檻者）與 SAM 品質；沒有任何偵測時直接說明原因（SAM 不會執行），並警告非英文提示詞。
 - 結果：遮罩／輪廓／框三種顯示、點圖例可隱藏某提示詞、滑鼠移到物件上看分數與面積。
 - 各提示詞的數量、遮罩面積、框面積、遮罩/框比例、平均分數。
+- **製造情境：零件檢查**：工單（範本 / 自訂）、預期數量、比例尺校準與 mm² 面積、單件面積範圍、PASS/FAIL 判定、檢查紀錄、CSV 匯出與可列印報表，詳見 [scenario.md](scenario.md)。
 - 執行速度：後端總耗時與 FPS、各階段（文字編碼／OWL／SAM／序列化／其他）堆疊條、含網路往返時間。
 - 「量測速度」：重複 N 次（捨棄第 1 次），顯示 mean / median / p95 / min / max / std。
 - 即時 GPU 數據（每秒）：顯存、使用率、溫度、時脈、功耗，與近期延遲長條圖。
@@ -45,6 +46,7 @@ python -m server.main                 # http://127.0.0.1:8000
 | GET | `/api/camera/state` | 串流狀態、各提示詞統計、耗時（前端每 0.4 秒輪詢，不寫 log） |
 | GET | `/api/camera/stream` | MJPEG 串流（`<img src>` 直接顯示） |
 | POST | `/api/hyde/expand` | form：`prompts`。HyDE 擴展（會呼叫 LLM，數秒）；**前端必須在開始偵測之前呼叫**，偵測端點只查快取 |
+| GET / POST | `/api/sam/encoder` | 查詢 / 切換 SAM image encoder（`mobilesam` = baseline、`student` = 自訓練；需以 `SAM_STUDENT=<checkpoint>` 啟動才有 `student`）。伺服器串流中不可切換 |
 | GET | `/api/hyde/status` | Ollama 是否可連線、設定的模型是否已下載（前端 HyDE 徽章用） |
 | GET | `/api/stats` | 即時 GPU 數據（前端每秒輪詢，不寫 log） |
 | GET | `/api/health` | 後端、裝置、模型載入時間、請求數 |
@@ -75,6 +77,13 @@ curl -X POST localhost:8000/api/segment -F image=@data/samples/cats.jpg -F 'prom
 `/api/stats` 與 `/api/logs` 為前端輪詢用，刻意不逐筆記錄以免洗版。
 
 連續影格（攝影機／影片）的日誌採**取樣**：前 3 幀與每 10 幀（伺服器串流為每 30 幀）完整記錄，其餘只記 WARNING 以上與 API 進出，避免 `app.log` 在數分鐘內被洗掉。因此「只看最近一次請求」在連續模式下可能只看到 API 兩行，屬預期；`POST /api/segment` 的 `quiet` 欄位即為此用途。
+
+## 大圖（長邊 > 4096）的座標系
+
+後端對長邊超過 4096 的圖會先縮小再偵測（OWL 輸入 768、SAM 輸入 1024，更大的解析度對結果沒有幫助，只會拖慢 CPU 端的轉換與遮罩運算）。
+**回傳的框、輪廓、面積都在縮小後的座標系**（`image.width × image.height`），`image.original_width/height` 是縮圖前的尺寸，日誌會有 `image downscaled` 警告。
+網頁前端收到結果後會自動換算成「畫面上那張圖」的座標系，所以疊圖、面積（原圖像素）、比例尺（mm/原圖像素）都一致；其他 API 用戶端需自行依 `image` 與原圖尺寸換算。
+（2026-10-29 曾因為前端沒有換算，大圖的疊圖整組縮在左上角，詳見 [record.md](record.md)。）
 
 ## 已知現象與限制
 

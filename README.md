@@ -54,14 +54,14 @@
 - [x] 跑通 NanoOWL（文字 → 物件框）與 SAM（框 → 遮罩）
 - [x] 串接流程與疊圖顯示（框／遮罩／輪廓／各提示詞數量與面積）
 - [x] 即時更換文字提示（不需重啟）
-- [ ] 自行蒸餾 NanoSAM ResNet18 image encoder（官方檔案需登入 Google Drive；見 [docs/training.md](docs/training.md)）
-- [ ] 修正重複偵測造成的計數偏高
+- [ ] 自行蒸餾 NanoSAM ResNet18 image encoder（官方檔案需登入 Google Drive）：腳本與驗證集已就緒，`./training/run_distill.sh --bg`，說明見 [docs/training.md](docs/training.md)；訓練結果待產出
+- [ ] 計數偏高（局部／巢狀偵測）：IoU-NMS 在預設門檻 0.1 只把多報影格從 26% 降到 23%，剩下的是低分局部框；門檻 ≥ 0.2 或「包含抑制」可消除（單一場景實測，見 [docs/scenario.md](docs/scenario.md)），尚未寫進 pipeline
 - [x] HyDE 提示擴展（Ollama + qwen3:4b，每組 5 詞句取組內最高信心，詳見 [docs/hyde.md](docs/hyde.md)）；尚待用真實素材驗證效果
 - [x] 攝影機／影片輸入（瀏覽器攝影機、影片檔、伺服器端攝影機或影片路徑）
-- [x] 製造情境：零件齊套數量檢查（OK / NG、遮罩面積），詳見 [docs/scenario.md](docs/scenario.md)；尚待用真實製造素材驗證
+- [x] 製造情境：零件檢查（工單、預期數量、比例尺校準與 mm² 面積、單件面積範圍、PASS/FAIL、檢查紀錄、可列印報表），詳見 [docs/scenario.md](docs/scenario.md)；尚待用真實製造素材驗證
 - [ ] 提示詞測試集：≥10 張影像、≥3 種提示詞寫法，建立正確率計算腳本
 - [ ] 效能量測腳本（延遲、FPS、記憶體），之後直接在 Jetson 跑
-- [ ] 準備報告素材：情境圖、OWL-ViT／SAM 原理說明（資訊流程圖見 [docs/workflow.md](docs/workflow.md)）
+- [ ] 準備報告素材：情境圖、OWL-ViT／SAM 原理說明（資訊流程圖見 [docs/workflow.md](docs/workflow.md)；**問題與解決方式的紀錄見 [docs/record.md](docs/record.md)**）
 
 **B. 必須在 Jetson 完成（無法由 WSL 取代）**
 - [ ] JetPack 6.2 環境建置，記錄版本相容性問題與解法
@@ -110,9 +110,10 @@ python -m server.main                                             # Web 介面 h
 ├── frontend/                    # Web 前端（HTML/JS，由後端提供）
 ├── benchmark/                   # 分階段延遲／FPS／記憶體量測
 ├── installation/                # 環境安裝、模型下載（含 jetson/ 部署腳本）
-├── training/                    # NanoSAM image encoder 蒸餾訓練與 COCO 下載
+├── training/                    # NanoSAM image encoder 蒸餾訓練、與 baseline 的比較（compare_encoders.py）、COCO 下載
+├── tests/                       # API 契約檢查（改 server 後請實際打一次 API）
 ├── third_party/                 # submodule: nanoowl、nanosam
-├── docs/                        # installation / jetson-setup / training / workflow / web-app / hyde / scenario / benchmark / experiments
+├── docs/                        # installation / jetson-setup / training / workflow / web-app / hyde / scenario / benchmark / experiments / record（開發紀錄，寫報告用）
 ├── environment.yml, requirements*.txt
 └── data/                        # 模型權重、引擎、測試資料（不進版控）
 ```
