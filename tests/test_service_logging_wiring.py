@@ -26,6 +26,17 @@ class _FailingDetector:
         raise RuntimeError("boom: simulated unexpected failure")
 
 
+class _LeakyDetector:
+    """Simulates a third-party detector that embeds request-derived
+    data directly in its exception message -- the realistic privacy
+    risk, as opposed to _FailingDetector's hardcoded literal (which
+    legitimately appears in a traceback's source-code frame line, not
+    because the fix failed to redact it)."""
+
+    def detect(self, image, prompts, threshold=0.1):
+        raise RuntimeError("backend rejected prompt=" + prompts[0])
+
+
 class _FakeSegmenter:
     def set_image(self, image):
         pass
@@ -57,6 +68,7 @@ def running_server(tmp_path):
     yield srv, tmp_path
     srv.shutdown()
     thread.join(timeout=5)
+    srv.server_close()
 
 
 def _base_url(server) -> str:
@@ -152,6 +164,83 @@ def test_forced_server_failure_logs_traceback_but_returns_generic_500(tmp_path):
     finally:
         srv.shutdown()
         thread.join(timeout=5)
+
+
+def test_forced_failure_never_logs_request_derived_exception_text(tmp_path):
+    """PM-Reviwer finding: a stub detector raising a RuntimeError whose
+    message is built from the actual request's prompt persisted that
+    prompt verbatim into app.log via the default `_logger.exception()`
+    formatting. The exception TYPE must still appear (useful for
+    debugging); the request-derived MESSAGE text must not."""
+    pytest.importorskip("PIL")
+    srv = run_server(_LeakyDetector(), device="cpu", port=0, log_dir=tmp_path)
+    thread = threading.Thread(target=srv.serve_forever, daemon=True)
+    thread.start()
+    try:
+        request_body = json.dumps(
+            {"image_base64": _tiny_png_base64(), "prompts": ["PROMPT_PRIVATE_SENTINEL"]}
+        ).encode("utf-8")
+        req = urllib.request.Request(
+            f"{_base_url(srv)}/infer",
+            data=request_body,
+            headers={"Content-Type": "application/json"},
+            method="POST",
+        )
+        with pytest.raises(urllib.error.HTTPError) as exc_info:
+            urllib.request.urlopen(req, timeout=10)
+        assert exc_info.value.code == 500
+    finally:
+        srv.shutdown()
+        thread.join(timeout=5)
+        srv.server_close()
+
+    log_text = (tmp_path / "app.log").read_text()
+    assert "RuntimeError" in log_text  # exception type preserved
+    assert "PROMPT_PRIVATE_SENTINEL" not in log_text  # request-derived message redacted
+
+
+def test_query_string_is_never_logged(running_server):
+    server, log_dir = running_server
+    with urllib.request.urlopen(f"{_base_url(server)}/health?token=QUERY_PRIVATE_SENTINEL", timeout=10) as resp:
+        resp.read()
+    log_text = _log_text(log_dir)
+    assert "QUERY_PRIVATE_SENTINEL" not in log_text
+
+
+def test_unsupported_method_still_gets_logged_and_correlated(running_server):
+    """A method with no do_X handler (PUT) never reaches do_GET/do_POST
+    -- must still get an X-Request-ID header and a correlated log
+    entry via the send_error() override, not silently bypass #53's
+    correlation requirement."""
+    server, log_dir = running_server
+    req = urllib.request.Request(f"{_base_url(server)}/infer", method="PUT")
+    with pytest.raises(urllib.error.HTTPError) as exc_info:
+        urllib.request.urlopen(req, timeout=10)
+    assert exc_info.value.code == 501
+    request_id = exc_info.value.headers.get("X-Request-ID")
+    assert request_id
+
+    log_text = _log_text(log_dir)
+    assert f"id={request_id}" in log_text
+
+
+def test_server_logs_actual_bound_address_and_shutdown_sequence(tmp_path):
+    srv = run_server(_FakeDetector(), device="cpu", port=0, log_dir=tmp_path)
+    thread = threading.Thread(target=srv.serve_forever, daemon=True)
+    thread.start()
+    _, actual_port = srv.server_address
+    try:
+        log_text = (tmp_path / "app.log").read_text()
+        assert f"port={actual_port}" in log_text  # the real bound port, not the requested 0
+        assert "server starting" in log_text
+    finally:
+        srv.shutdown()
+        thread.join(timeout=5)
+        srv.server_close()
+
+    log_text = (tmp_path / "app.log").read_text()
+    assert "server shutdown requested" in log_text
+    assert "server closed" in log_text
 
 
 def test_repeated_run_server_calls_do_not_duplicate_log_lines(tmp_path):

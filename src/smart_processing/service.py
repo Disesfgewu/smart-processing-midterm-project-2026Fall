@@ -13,11 +13,19 @@ import base64
 import json
 import logging
 import time
+import traceback
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from io import BytesIO
+from urllib.parse import urlsplit
 
-from smart_processing.service_logging import configure_logging, new_request_id
+from smart_processing.service_logging import configure_logging, new_request_id, shutdown_logging
 from smart_processing.types import BoundingBox, DetectionResult
+
+# Routes this server actually implements -- used to sanitize what lands
+# in logs (#53 forbids arbitrary query strings / unknown paths in route
+# logs; a client-supplied query string could carry a secret a client
+# embedded in the URL for its own reasons).
+_KNOWN_ROUTES = ("/health", "/infer", "/segment")
 
 # Handlers (console + rotating file) are attached by configure_logging()
 # in run_server() at startup (#53), not at import time -- importing this
@@ -73,6 +81,28 @@ def _detection_result_to_dict(result: DetectionResult) -> dict:
             for d in result.detections
         ],
     }
+
+
+def _safe_exception_report(exc: BaseException) -> str:
+    """A traceback-only incident report for server-side logs: exception
+    type and call-stack frames (file/line/function), but never the
+    exception's own message text, walking __cause__/__context__ chains
+    the same way. PM-Reviwer finding: a third-party detector/segmenter
+    can embed request-derived data (e.g. a prompt) directly in its
+    exception's message, which `_logger.exception()`'s default
+    formatting would otherwise persist verbatim -- #53 forbids logging
+    raw prompts/image data by default even when it arrives this
+    indirectly. Frame text (source code lines) is not request data, so
+    it is kept; only the exception's args/message are redacted."""
+    parts = []
+    current: BaseException | None = exc
+    seen: set[int] = set()
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        frames = "".join(traceback.format_tb(current.__traceback__))
+        parts.append(f"{type(current).__module__}.{type(current).__qualname__} (message redacted)\n{frames}")
+        current = current.__cause__ or current.__context__
+    return "\n-- caused by --\n".join(parts)
 
 
 def _encode_mask(mask) -> str:
@@ -166,41 +196,78 @@ def make_handler(detector, device: str, segmenter=None):
         # hardening, applies to both /infer and /segment via _handle).
         _MAX_BODY_BYTES = 64 * 1024 * 1024
 
+        def _safe_route(self) -> str:
+            # Route for LOGGING only: query/fragment stripped, and an
+            # unrecognized path collapses to a generic marker -- #53
+            # forbids arbitrary query strings in route logs. Response
+            # bodies below still echo self.path verbatim (reflecting a
+            # client's own request back to itself is not a cross-
+            # request leak the way persisting it to disk would be).
+            path = urlsplit(self.path).path
+            return path if path in _KNOWN_ROUTES else "<unknown-route>"
+
+        def end_headers(self) -> None:
+            # Applies to every response this handler sends, including
+            # ones the stdlib dispatches itself (e.g. send_error() for
+            # an unsupported HTTP method) -- not just the ones routed
+            # through _send_json below.
+            request_id = getattr(self, "_request_id", None)
+            if request_id is not None:
+                self.send_header("X-Request-ID", request_id)
+            super().end_headers()
+
         def _send_json(self, status: int, payload: dict) -> None:
             body = json.dumps(payload).encode("utf-8")
             self.send_response(status)
             self.send_header("Content-Type", "application/json")
             self.send_header("Content-Length", str(len(body)))
-            # #53: echoes the same ID logged server-side for this request,
-            # so a frontend error can be correlated to its log lines.
-            request_id = getattr(self, "_request_id", None)
-            if request_id is not None:
-                self.send_header("X-Request-ID", request_id)
             self.end_headers()
             self.wfile.write(body)
 
-        def _begin_request(self) -> float:
+        def _begin_request(self) -> None:
             # #53: a short per-request correlation ID + start timestamp,
-            # logged here (route only -- never the request body, which
-            # may contain base64 image bytes or prompts) and echoed in
-            # every response via _send_json's X-Request-ID header.
+            # logged here (sanitized route only -- never the request
+            # body, which may contain base64 image bytes or prompts)
+            # and echoed in every response via end_headers above.
             self._request_id = new_request_id()
-            _logger.info("request start id=%s method=%s path=%s", self._request_id, self.command, self.path)
-            return time.monotonic()
-
-        def _finish_request(self, status: int, payload: dict, start: float) -> None:
-            elapsed_ms = (time.monotonic() - start) * 1000
+            self._request_start = time.monotonic()
             _logger.info(
-                "request end id=%s method=%s path=%s status=%d elapsed_ms=%.1f",
+                "request start id=%s method=%s path=%s", self._request_id, self.command, self._safe_route()
+            )
+
+        def _finish_request(self, status: int, payload: dict) -> None:
+            elapsed_ms = (time.monotonic() - self._request_start) * 1000
+            _logger.info(
+                "request end id=%s method=%s path=%s status=%s elapsed_ms=%.1f",
                 self._request_id,
                 self.command,
-                self.path,
+                self._safe_route(),
                 status,
                 elapsed_ms,
             )
             self._send_json(status, payload)
 
-        def _handle(self, handler_fn, *args, start: float) -> None:
+        def send_error(self, code, message=None, explain=None) -> None:
+            # PM-Reviwer finding: an unsupported HTTP method (e.g. PUT
+            # /infer) never reaches do_GET/do_POST, so it bypassed
+            # _begin_request() entirely -- no correlation ID, no log
+            # line, for a response the client still received. Covers
+            # that and any other stdlib-internal error path that calls
+            # send_error() directly.
+            if not hasattr(self, "_request_id"):
+                self._begin_request()
+            elapsed_ms = (time.monotonic() - self._request_start) * 1000
+            _logger.info(
+                "request end id=%s method=%s path=%s status=%s elapsed_ms=%.1f (stdlib error path)",
+                self._request_id,
+                self.command,
+                self._safe_route(),
+                code,
+                elapsed_ms,
+            )
+            super().send_error(code, message, explain)
+
+        def _handle(self, handler_fn, *args) -> None:
             # PM-Reviwer/Co-Reviewer finding: Content-Length was parsed
             # with a bare int(), uncaught for a non-numeric or negative
             # header value; and json.loads() on non-UTF-8 bytes raises
@@ -212,16 +279,16 @@ def make_handler(detector, device: str, segmenter=None):
             try:
                 length = int(self.headers.get("Content-Length", 0))
             except ValueError:
-                self._finish_request(400, {"error": "Content-Length header is not a valid integer"}, start)
+                self._finish_request(400, {"error": "Content-Length header is not a valid integer"})
                 return
             if length < 0 or length > self._MAX_BODY_BYTES:
-                self._finish_request(400, {"error": f"Content-Length out of bounds: {length}"}, start)
+                self._finish_request(400, {"error": f"Content-Length out of bounds: {length}"})
                 return
 
             try:
                 body = json.loads(self.rfile.read(length) or b"{}")
             except (json.JSONDecodeError, UnicodeDecodeError) as e:
-                self._finish_request(400, {"error": f"invalid JSON body: {e}"}, start)
+                self._finish_request(400, {"error": f"invalid JSON body: {e}"})
                 return
 
             try:
@@ -230,40 +297,76 @@ def make_handler(detector, device: str, segmenter=None):
                 # A validation failure is a controlled client error (#53):
                 # logged as part of the request-end line above, not with
                 # a traceback -- the request body itself is never logged.
-                self._finish_request(400, {"error": str(e)}, start)
-            except Exception:
-                # Real exception logged server-side only, with traceback,
-                # never leaked to the client body (docs/frontend_service_
-                # api.md's error-response contract) -- previously silently
-                # swallowed, a known gap flagged on #47, fixed in #54.
-                _logger.exception("request failed id=%s path=%s", self._request_id, self.path)
-                self._finish_request(500, {"error": "internal error during inference"}, start)
+                self._finish_request(400, {"error": str(e)})
+            except Exception as e:
+                # Real exception logged server-side only, with a type +
+                # frame traceback but never the exception's own message
+                # text (PM-Reviwer finding: a detector/segmenter could
+                # embed request data in its exception message) -- see
+                # _safe_exception_report. Never leaked to the client
+                # body either way (docs/frontend_service_api.md's
+                # error-response contract).
+                _logger.error(
+                    "request failed id=%s method=%s path=%s\n%s",
+                    self._request_id,
+                    self.command,
+                    self._safe_route(),
+                    _safe_exception_report(e),
+                )
+                self._finish_request(500, {"error": "internal error during inference"})
             else:
-                self._finish_request(200, result, start)
+                self._finish_request(200, result)
 
         def do_GET(self) -> None:
-            start = self._begin_request()
-            if self.path == "/health":
-                self._finish_request(200, {"status": "ok", "device": device}, start)
+            self._begin_request()
+            # Routes on the parsed path, ignoring any query string --
+            # was previously an exact self.path match, so "/health?x=1"
+            # 404'd instead of routing to /health with a query string
+            # (noticed while sanitizing route logging; standard HTTP
+            # servers route on the path component alone).
+            if urlsplit(self.path).path == "/health":
+                self._finish_request(200, {"status": "ok", "device": device})
             else:
-                self._finish_request(404, {"error": f"no such endpoint: {self.path}"}, start)
+                self._finish_request(404, {"error": f"no such endpoint: {self.path}"})
 
         def do_POST(self) -> None:
-            start = self._begin_request()
-            if self.path == "/infer":
-                self._handle(handle_infer, detector, start=start)
-            elif self.path == "/segment":
+            self._begin_request()
+            route = urlsplit(self.path).path
+            if route == "/infer":
+                self._handle(handle_infer, detector)
+            elif route == "/segment":
                 if segmenter is None:
-                    self._finish_request(503, {"error": "segmentation is not available on this server"}, start)
+                    self._finish_request(503, {"error": "segmentation is not available on this server"})
                 else:
-                    self._handle(handle_segment, segmenter, start=start)
+                    self._handle(handle_segment, segmenter)
             else:
-                self._finish_request(404, {"error": f"no such endpoint: {self.path}"}, start)
+                self._finish_request(404, {"error": f"no such endpoint: {self.path}"})
 
         def log_message(self, format, *args) -> None:
             pass  # HTTP access log is quiet by default; requests are logged via _logger above
 
     return Handler
+
+
+class _LoggingHTTPServer(HTTPServer):
+    """Logs the shutdown sequence and releases this module's own log
+    handlers on close -- PM-Reviwer finding: shutdown()+server_close()
+    previously left both logging handlers attached with no shutdown
+    event recorded, despite #53 explicitly requiring startup/shutdown
+    logging. http.server.HTTPServer has no built-in hook for this, so
+    this subclass provides one rather than treating that absence as a
+    reason to skip the acceptance criterion."""
+
+    def shutdown(self) -> None:
+        host, port = self.server_address
+        _logger.info("server shutdown requested host=%s port=%d", host, port)
+        super().shutdown()
+
+    def server_close(self) -> None:
+        host, port = self.server_address
+        super().server_close()
+        _logger.info("server closed host=%s port=%d", host, port)
+        shutdown_logging()
 
 
 def run_server(
@@ -281,6 +384,23 @@ def run_server(
     # level, so startup fails loudly here rather than silently running
     # without the persistent log the Owner asked for.
     configure_logging(log_dir=log_dir, level=log_level)
-    _logger.info("server starting host=%s port=%d device=%s segmenter=%s", host, port, device, segmenter is not None)
-    server = HTTPServer((host, port), make_handler(detector, device, segmenter=segmenter))
+    try:
+        server = _LoggingHTTPServer((host, port), make_handler(detector, device, segmenter=segmenter))
+    except OSError as e:
+        # PM-Reviwer finding: a startup bind failure (e.g. port already
+        # in use) must be logged before it propagates, not just raised
+        # silently past the logging layer.
+        _logger.error("server failed to start host=%s port=%d error=%s", host, port, e)
+        raise
+    # Logs the ACTUAL bound address, not the requested `port` -- with
+    # port=0 (as the opt-in real test suite uses), the OS picks the
+    # real port only once the socket is bound.
+    bound_host, bound_port = server.server_address
+    _logger.info(
+        "server starting host=%s port=%d device=%s segmenter=%s",
+        bound_host,
+        bound_port,
+        device,
+        segmenter is not None,
+    )
     return server
