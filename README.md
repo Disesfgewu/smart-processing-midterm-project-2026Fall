@@ -1,0 +1,1 @@
+# smart-processing-midterm-project-2026Fall
