@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 from sample_image import SAMPLE_IMAGE_PATH, ensure_sample_image
 from smart_processing.adapters.owlvit_text_detector import OwlViTTextDetector
 from smart_processing.adapters.sam_box_segmenter import SamBoxSegmenter
-from smart_processing.run_benchmarks import export_benchmark_results, run_pipeline_benchmarks
+from smart_processing.run_benchmarks import build_run_metadata, export_benchmark_results, run_pipeline_benchmarks
 from smart_processing.types import BackendConfig
 
 DEFAULT_OUT = Path(__file__).resolve().parent.parent / ".agent-artifacts" / "benchmark_results.json"
@@ -34,11 +34,16 @@ def main():
     image_path = ensure_sample_image(args.image or SAMPLE_IMAGE_PATH)
     image = np.array(Image.open(image_path).convert("RGB"))
 
-    detector = OwlViTTextDetector(BackendConfig(device="cpu"))
+    device = "cpu"
+    threshold = 0.1
+    warmup = 2
+    detector = OwlViTTextDetector(BackendConfig(device=device))
     segmenter = SamBoxSegmenter(args.checkpoint)
+    prompts = [args.prompt]
 
     results = run_pipeline_benchmarks(
-        detector, segmenter, image, [args.prompt], samples=args.samples
+        detector, segmenter, image, prompts, threshold=threshold, device=device, warmup=warmup,
+        samples=args.samples,
     )
 
     for name, result in results.items():
@@ -48,8 +53,12 @@ def main():
             f"fps={lat.fps:.2f} peak_rss_delta={result.peak_rss.delta_bytes / 1024 / 1024:.2f}MB"
         )
 
+    run_metadata = build_run_metadata(
+        detector, segmenter, image, prompts, threshold, device, warmup, args.samples,
+        checkpoint_path=args.checkpoint,
+    )
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    export_benchmark_results(results, args.out)
+    export_benchmark_results(results, args.out, run_metadata=run_metadata)
     print(f"wrote {args.out}")
 
 

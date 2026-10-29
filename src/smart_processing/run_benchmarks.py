@@ -12,6 +12,38 @@ from pathlib import Path
 from smart_processing.performance_harness import BenchmarkResult, run_benchmark
 
 
+def build_run_metadata(
+    detector,
+    segmenter,
+    image,
+    prompts: list[str],
+    threshold: float,
+    device: str,
+    warmup: int,
+    samples: int,
+    checkpoint_path: str | None = None,
+) -> dict:
+    """Captures the actual run configuration for reproducibility (PM-
+    Reviwer finding: platform_info alone -- system/machine/python/
+    device -- doesn't record model identity, image identity, prompts,
+    threshold, or sample/warmup counts, so two exported results can't
+    be told apart or reproduced without external notes). Reads only
+    attributes the adapters already expose (`detector.model_name`);
+    `checkpoint_path` is accepted explicitly since SamBoxSegmenter
+    doesn't retain its own checkpoint path as a public attribute, and
+    this module shouldn't reach into its private state to get one."""
+    return {
+        "model_name": getattr(detector, "model_name", None),
+        "segmenter_checkpoint_path": checkpoint_path,
+        "device": device,
+        "threshold": threshold,
+        "prompts": list(prompts),
+        "warmup": warmup,
+        "samples": samples,
+        "image_shape": list(image.shape),
+    }
+
+
 def run_pipeline_benchmarks(
     detector,
     segmenter,
@@ -62,7 +94,9 @@ def run_pipeline_benchmarks(
     }
 
 
-def export_benchmark_results(results: dict[str, BenchmarkResult], out_path: str) -> None:
+def export_benchmark_results(
+    results: dict[str, BenchmarkResult], out_path: str, run_metadata: dict | None = None
+) -> None:
     serializable = {
         name: {
             "name": r.name,
@@ -83,4 +117,12 @@ def export_benchmark_results(results: dict[str, BenchmarkResult], out_path: str)
         }
         for name, r in results.items()
     }
+    # PM-Reviwer finding: a run with 0 failures/full-success results had
+    # no record anywhere of what was actually run (model, device,
+    # threshold, prompts, sample counts) -- `run_metadata` is optional
+    # so existing callers aren't forced to supply it, but every stage
+    # export now carries it when a caller does (same top-level-metadata
+    # pattern as #10's run_evaluation.py export).
+    if run_metadata is not None:
+        serializable["run_metadata"] = run_metadata
     Path(out_path).write_text(json.dumps(serializable, indent=2))
