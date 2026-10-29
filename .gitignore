@@ -20,3 +20,9 @@ tests/data/*.engine
 # Sample image fetched on demand (scripts/sample_image.py): its individual
 # source photo license is unverified, so it is never redistributed here.
 tests/data/sample_cats.jpg
+
+# Backend service diagnostic logs (#53): generated at runtime by
+# smart_processing.service_logging.configure_logging(), rotated locally,
+# never project source. Ignored here (the PR that first writes to this
+# default path), not deferred to a later PR.
+artifacts/logs/

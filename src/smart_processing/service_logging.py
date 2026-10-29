@@ -49,15 +49,28 @@ def _resolve_level(level: str | int | None) -> int:
     return resolved
 
 
+# PM-Reviwer finding: shutdown_logging() previously removed every
+# handler on the shared logger, including ones attached by unrelated
+# code (a caller's own logging.basicConfig(), another library, a test
+# harness). Tagging only the handlers this module itself creates lets
+# shutdown_logging()/configure_logging() detach exactly those, leaving
+# any externally-attached handler on the same logger untouched.
+_OWNED_HANDLER_ATTR = "_smart_processing_service_logging_owned"
+
+
 def shutdown_logging() -> None:
-    """Closes and detaches every handler this module owns on the shared
-    logger. Idempotent -- safe to call even if configure_logging() was
-    never called, or called multiple times, so tests can always clean
-    up between runs without leaking open file descriptors."""
+    """Closes and detaches only the handlers this module attached to the
+    shared logger (tagged via configure_logging()) -- never a handler
+    some other code attached to the same logger name. Idempotent --
+    safe to call even if configure_logging() was never called, or
+    called multiple times, so tests can always clean up between runs
+    without leaking open file descriptors or touching handlers they
+    don't own."""
     logger = logging.getLogger(LOGGER_NAME)
     for handler in list(logger.handlers):
-        logger.removeHandler(handler)
-        handler.close()
+        if getattr(handler, _OWNED_HANDLER_ATTR, False):
+            logger.removeHandler(handler)
+            handler.close()
 
 
 def configure_logging(
@@ -73,11 +86,19 @@ def configure_logging(
     are never duplicated or emitted twice.
 
     Raises LoggingConfigError if the log directory can't be created or
-    the file can't be opened for writing, or if `level` doesn't name a
-    real logging level -- the caller must let server startup fail
-    loudly rather than claim persistent logging is active when it
+    the file can't be opened for writing, if `level` doesn't name a
+    real logging level, or if `max_bytes`/`backup_count` would disable
+    bounding (RotatingFileHandler treats maxBytes=0 as "never rotate",
+    which would let app.log grow unbounded despite #53's rotation
+    requirement) -- the caller must let server startup fail loudly
+    rather than claim persistent, bounded logging is active when it
     isn't.
     """
+    if not isinstance(max_bytes, int) or isinstance(max_bytes, bool) or max_bytes <= 0:
+        raise LoggingConfigError(f"max_bytes must be a positive int, got {max_bytes!r}")
+    if not isinstance(backup_count, int) or isinstance(backup_count, bool) or backup_count < 1:
+        raise LoggingConfigError(f"backup_count must be a positive int, got {backup_count!r}")
+
     resolved_level = _resolve_level(level)
     shutdown_logging()
 
@@ -86,6 +107,7 @@ def configure_logging(
 
     console_handler = logging.StreamHandler(sys.stderr)
     console_handler.setFormatter(formatter)
+    setattr(console_handler, _OWNED_HANDLER_ATTR, True)
     logger.addHandler(console_handler)
 
     log_path = resolve_log_path(log_dir)
@@ -99,6 +121,7 @@ def configure_logging(
         console_handler.close()
         raise LoggingConfigError(f"cannot write logs to {log_path}: {e}") from e
     file_handler.setFormatter(formatter)
+    setattr(file_handler, _OWNED_HANDLER_ATTR, True)
     logger.addHandler(file_handler)
 
     logger.setLevel(resolved_level)

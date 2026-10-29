@@ -17,6 +17,11 @@ from smart_processing.service_logging import (
     resolve_log_path,
     shutdown_logging,
 )
+from smart_processing.service_logging import _OWNED_HANDLER_ATTR
+
+
+def _owned_handlers(logger):
+    return [h for h in logger.handlers if getattr(h, _OWNED_HANDLER_ATTR, False)]
 
 
 @pytest.fixture(autouse=True)
@@ -55,10 +60,10 @@ def test_configure_logging_is_idempotent_no_duplicate_lines(tmp_path):
 def test_shutdown_logging_detaches_and_closes_handlers(tmp_path):
     configure_logging(log_dir=tmp_path)
     logger = logging.getLogger(LOGGER_NAME)
-    assert logger.handlers
+    assert len(_owned_handlers(logger)) == 2  # console + rotating file
 
     shutdown_logging()
-    assert logger.handlers == []
+    assert _owned_handlers(logger) == []
 
 
 def test_shutdown_logging_is_safe_to_call_when_nothing_configured():
@@ -121,3 +126,52 @@ def test_new_request_id_is_a_short_hex_string():
 def test_new_request_id_is_unique_across_calls():
     ids = {new_request_id() for _ in range(1000)}
     assert len(ids) == 1000
+
+
+def test_rotation_actually_bounds_the_log_file_and_creates_a_backup(tmp_path):
+    """PM-Reviwer finding: swapping RotatingFileHandler for a plain
+    FileHandler didn't fail any prior test -- none of them actually
+    exceeded maxBytes, so rotation itself was never exercised. This
+    writes well past a tiny maxBytes and asserts a backup file exists
+    and the live app.log never grows past the configured bound."""
+    logger = configure_logging(log_dir=tmp_path, max_bytes=200, backup_count=2)
+    for i in range(200):
+        logger.info("padding line number %d to exceed the tiny byte limit", i)
+
+    log_file = tmp_path / "app.log"
+    backup_file = tmp_path / "app.log.1"
+    assert backup_file.exists(), "no backup was created -- rotation did not actually occur"
+    assert log_file.stat().st_size <= 400, "live app.log grew well past the configured maxBytes bound"
+
+
+def test_configure_logging_rejects_non_positive_max_bytes(tmp_path):
+    """maxBytes=0 means 'never rotate' to RotatingFileHandler -- silently
+    accepting it would let app.log grow unbounded despite #53's
+    rotation requirement."""
+    with pytest.raises(LoggingConfigError, match="max_bytes"):
+        configure_logging(log_dir=tmp_path, max_bytes=0)
+
+
+def test_configure_logging_rejects_non_positive_backup_count(tmp_path):
+    with pytest.raises(LoggingConfigError, match="backup_count"):
+        configure_logging(log_dir=tmp_path, backup_count=0)
+
+
+def test_shutdown_logging_preserves_an_externally_attached_handler(tmp_path):
+    """PM-Reviwer finding: shutdown_logging() previously cleared every
+    handler on the shared logger, including ones this module never
+    attached. A handler some other code (or a test harness) put on the
+    same logger name must survive both configure_logging() and
+    shutdown_logging()."""
+    external_handler = logging.NullHandler()
+    logger = logging.getLogger(LOGGER_NAME)
+    logger.addHandler(external_handler)
+    try:
+        configure_logging(log_dir=tmp_path)
+        assert external_handler in logger.handlers
+
+        shutdown_logging()
+        assert external_handler in logger.handlers, "shutdown_logging() removed a handler it doesn't own"
+        assert _owned_handlers(logger) == []
+    finally:
+        logger.removeHandler(external_handler)
