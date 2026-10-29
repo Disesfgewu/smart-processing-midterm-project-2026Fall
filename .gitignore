@@ -1,0 +1,12 @@
+# 模型、資料集、訓練輸出（體積大，不進版控）
+data/
+
+# 測試輸出
+out*.png
+out*.jpg
+out*.mp4
+
+# Python / 環境
+__pycache__/
+*.egg-info/
+.venv-jetson/

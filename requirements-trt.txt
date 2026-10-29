@@ -1,0 +1,6 @@
+# 選用：TensorRT 後端（在 Jetson 上由 JetPack 6.2 提供 tensorrt，不要用 pip 裝）
+# WSL/Pascal 只能用 TensorRT 8.x（10.x 已移除 Pascal 支援）
+tensorrt==8.6.1
+onnx
+# torch2trt 需從原始碼安裝：
+#   pip install git+https://github.com/NVIDIA-AI-IOT/torch2trt.git

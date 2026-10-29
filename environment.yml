@@ -1,0 +1,11 @@
+name: nanoowl-sam
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+      - -r requirements.txt
+      - -e ./third_party/nanoowl
+# nanosam 的 setup.py 因缺少 nanosam/__init__.py 而裝不進去，
+# 建好環境後請執行 installation/setup_env.sh 補上路徑（.pth）。

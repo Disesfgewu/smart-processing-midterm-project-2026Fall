@@ -1,0 +1,18 @@
+# WSL + GTX 1060 (Pascal, sm_61) 開發環境
+# PyTorch 2.5.1 + cu121 仍包含 sm_61 kernel（cu128 之後的版本已移除 Pascal）
+--extra-index-url https://download.pytorch.org/whl/cu121
+torch==2.5.1
+torchvision==0.20.1
+numpy<2
+transformers==4.46.3   # OwlViTForObjectDetection / OwlViTProcessor
+timm==1.0.11           # MobileSAM TinyViT
+pillow
+opencv-python
+matplotlib
+requests
+tqdm
+gdown
+# 匯出 ONNX（NanoSAM mask decoder / image encoder）
+onnx
+onnxscript
+onnxruntime
