@@ -117,3 +117,8 @@ python -m server.main                                             # Web 介面 h
 ├── environment.yml, requirements*.txt
 └── data/                        # 模型權重、引擎、測試資料（不進版控）
 ```
+
+
+## macOS 階段歷史封存
+
+舊開發的完整 PR／issue／審查紀錄與移植注意事項，見 [DEVELOPMENT_HANDOFF_ZH_TW.md](DEVELOPMENT_HANDOFF_ZH_TW.md)。所有舊分支程式集中保存於 [archive/macos-development-2026-10-29](https://github.com/Disesfgewu/smart-processing-midterm-project-2026Fall/tree/archive/macos-development-2026-10-29) 的 snapshots/；這是多版本參考庫，不是現行 main 的已驗收版本。
