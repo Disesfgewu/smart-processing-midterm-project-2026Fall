@@ -1,0 +1,208 @@
+[
+  {
+    "image": "evaluation/similar_objects_fruits.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Fruits in bowl oranges lime apples (1).jpg, author Gerardolagunes)",
+    "category": "similar_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a lime",
+    "ground_truth_boxes": [
+      {"label": "lime", "box_xyxy": [614, 294, 1011, 717]},
+      {"label": "lime", "box_xyxy": [794, 934, 1216, 1395]},
+      {"label": "lime", "box_xyxy": [870, 1779, 1331, 2240]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_fruits.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Fruits in bowl oranges lime apples (1).jpg, author Gerardolagunes)",
+    "category": "similar_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a red and yellow apple",
+    "ground_truth_boxes": [
+      {"label": "apple", "box_xyxy": [1126, 1242, 1830, 1830]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_fruits.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Fruits in bowl oranges lime apples (1).jpg, author Gerardolagunes)",
+    "category": "similar_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a round citrus fruit",
+    "ground_truth_boxes": [
+      {"label": "lime", "box_xyxy": [614, 294, 1011, 717]},
+      {"label": "lime", "box_xyxy": [794, 934, 1216, 1395]},
+      {"label": "lime", "box_xyxy": [870, 1779, 1331, 2240]},
+      {"label": "orange", "box_xyxy": [13, 563, 768, 1152]},
+      {"label": "orange", "box_xyxy": [768, 666, 1216, 1024]},
+      {"label": "orange", "box_xyxy": [538, 1254, 1139, 1894]},
+      {"label": "lemon", "box_xyxy": [1254, 730, 1830, 1216]},
+      {"label": "lemon", "box_xyxy": [13, 1229, 550, 1766]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_hardware.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83)",
+    "category": "similar_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a bolt",
+    "ground_truth_boxes": [
+      {"label": "bolt", "box_xyxy": [359, 293, 1972, 1875]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_hardware.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83)",
+    "category": "similar_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a hexagonal nut with a hole in the center",
+    "ground_truth_boxes": [
+      {"label": "nut", "box_xyxy": [1353, 1337, 1875, 1875]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_hardware.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83)",
+    "category": "similar_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a round metal washer",
+    "ground_truth_boxes": [
+      {"label": "washer", "box_xyxy": [554, 1989, 1434, 2804]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_books.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Stack of multicolored books on a table.jpg, author Alexander Grey)",
+    "category": "occlusion",
+    "prompt_style": "basic_noun",
+    "prompt": "a book",
+    "ground_truth_boxes": [
+      {"label": "book", "box_xyxy": [1461, 337, 3457, 703]},
+      {"label": "book", "box_xyxy": [1461, 703, 3232, 927]},
+      {"label": "book", "box_xyxy": [1068, 4018, 3316, 4384]},
+      {"label": "book", "box_xyxy": [618, 4384, 3316, 4637]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_books.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Stack of multicolored books on a table.jpg, author Alexander Grey)",
+    "category": "occlusion",
+    "prompt_style": "fine_grained",
+    "prompt": "a pink hardcover book with gold text",
+    "ground_truth_boxes": [
+      {"label": "book", "box_xyxy": [1068, 4018, 3316, 4384]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_books.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Stack of multicolored books on a table.jpg, author Alexander Grey)",
+    "category": "occlusion",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a book spine in a stacked pile of books",
+    "ground_truth_boxes": [
+      {"label": "book", "box_xyxy": [1461, 337, 3457, 703]},
+      {"label": "book", "box_xyxy": [1461, 703, 3232, 927]},
+      {"label": "book", "box_xyxy": [1068, 4018, 3316, 4384]},
+      {"label": "book", "box_xyxy": [618, 4384, 3316, 4637]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_parking.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Parking lot, Gross-Gerau (P1090665).jpg, author Matti Blume)",
+    "category": "small_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a car",
+    "ground_truth_boxes": [
+      {"label": "car", "box_xyxy": [1162, 1173, 1190, 1202]},
+      {"label": "car", "box_xyxy": [2093, 1242, 2122, 1271]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_parking.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Parking lot, Gross-Gerau (P1090665).jpg, author Matti Blume)",
+    "category": "small_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a small red car",
+    "ground_truth_boxes": [
+      {"label": "car", "box_xyxy": [1162, 1173, 1190, 1202]},
+      {"label": "car", "box_xyxy": [2093, 1242, 2122, 1271]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_parking.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Parking lot, Gross-Gerau (P1090665).jpg, author Matti Blume)",
+    "category": "small_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a vehicle parked in a large aerial parking lot",
+    "ground_truth_boxes": [
+      {"label": "car", "box_xyxy": [1162, 1173, 1190, 1202]},
+      {"label": "car", "box_xyxy": [2093, 1242, 2122, 1271]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_pens.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:NIND Pen-pile ISO100.jpg, author MB-one). Downscaled from 3996x2998 to 1600x1200 with macOS sips (7.1MB -> 300KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "basic_noun",
+    "prompt": "a pencil",
+    "ground_truth_boxes": [
+      {"label": "pencil", "box_xyxy": [90, 600, 855, 770]},
+      {"label": "pencil", "box_xyxy": [120, 480, 1225, 570]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_pens.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:NIND Pen-pile ISO100.jpg, author MB-one). Downscaled from 3996x2998 to 1600x1200 with macOS sips (7.1MB -> 300KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "fine_grained",
+    "prompt": "a yellow marker pen with a cap",
+    "ground_truth_boxes": [
+      {"label": "marker", "box_xyxy": [225, 265, 735, 765]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_pens.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:NIND Pen-pile ISO100.jpg, author MB-one). Downscaled from 3996x2998 to 1600x1200 with macOS sips (7.1MB -> 300KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a writing instrument lying on a wooden table",
+    "ground_truth_boxes": [
+      {"label": "marker", "box_xyxy": [225, 265, 735, 765]},
+      {"label": "pencil", "box_xyxy": [90, 600, 855, 770]},
+      {"label": "pen", "box_xyxy": [715, 265, 1185, 460]},
+      {"label": "pencil", "box_xyxy": [120, 480, 1225, 570]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_paperclips.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Paperclips.jpg, author Tdlnx). Downscaled from 3264x2448 to 1600x1200 with macOS sips (2.9MB -> 421KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only the isolated paperclips on the pile's periphery are annotated -- the dense central cluster has too much overlap for confident individual boxes, which is itself relevant evidence for #10's small-object/occlusion failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a paperclip",
+    "ground_truth_boxes": [
+      {"label": "paperclip", "box_xyxy": [720, 48, 1056, 156]},
+      {"label": "paperclip", "box_xyxy": [1248, 0, 1376, 120]},
+      {"label": "paperclip", "box_xyxy": [0, 228, 160, 408]},
+      {"label": "paperclip", "box_xyxy": [0, 456, 288, 600]},
+      {"label": "paperclip", "box_xyxy": [1488, 852, 1600, 1032]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_paperclips.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Paperclips.jpg, author Tdlnx). Downscaled from 3264x2448 to 1600x1200 with macOS sips (2.9MB -> 421KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only the isolated paperclips on the pile's periphery are annotated -- the dense central cluster has too much overlap for confident individual boxes, which is itself relevant evidence for #10's small-object/occlusion failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a gold-toned paperclip",
+    "ground_truth_boxes": [
+      {"label": "paperclip", "box_xyxy": [950, 380, 1080, 600]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_paperclips.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Paperclips.jpg, author Tdlnx). Downscaled from 3264x2448 to 1600x1200 with macOS sips (2.9MB -> 421KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only the isolated paperclips on the pile's periphery are annotated -- the dense central cluster has too much overlap for confident individual boxes, which is itself relevant evidence for #10's small-object/occlusion failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a tangled pile of metal paperclips on a table",
+    "ground_truth_boxes": [
+      {"label": "paperclip pile", "box_xyxy": [230, 60, 1430, 1060]}
+    ]
+  }
+]

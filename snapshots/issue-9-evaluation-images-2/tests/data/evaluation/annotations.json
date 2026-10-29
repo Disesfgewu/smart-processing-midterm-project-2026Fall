@@ -1,0 +1,346 @@
+[
+  {
+    "image": "evaluation/similar_objects_fruits.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Fruits in bowl oranges lime apples (1).jpg, author Gerardolagunes)",
+    "category": "similar_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a lime",
+    "ground_truth_boxes": [
+      {"label": "lime", "box_xyxy": [614, 294, 1011, 717]},
+      {"label": "lime", "box_xyxy": [794, 934, 1216, 1395]},
+      {"label": "lime", "box_xyxy": [870, 1779, 1331, 2240]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_fruits.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Fruits in bowl oranges lime apples (1).jpg, author Gerardolagunes)",
+    "category": "similar_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a red and yellow apple",
+    "ground_truth_boxes": [
+      {"label": "apple", "box_xyxy": [1126, 1242, 1830, 1830]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_fruits.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Fruits in bowl oranges lime apples (1).jpg, author Gerardolagunes)",
+    "category": "similar_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a round citrus fruit",
+    "ground_truth_boxes": [
+      {"label": "lime", "box_xyxy": [614, 294, 1011, 717]},
+      {"label": "lime", "box_xyxy": [794, 934, 1216, 1395]},
+      {"label": "lime", "box_xyxy": [870, 1779, 1331, 2240]},
+      {"label": "orange", "box_xyxy": [13, 563, 768, 1152]},
+      {"label": "orange", "box_xyxy": [768, 666, 1216, 1024]},
+      {"label": "orange", "box_xyxy": [538, 1254, 1139, 1894]},
+      {"label": "lemon", "box_xyxy": [1254, 730, 1830, 1216]},
+      {"label": "lemon", "box_xyxy": [13, 1229, 550, 1766]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_hardware.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83). File has EXIF orientation tag 6 (rotate 90deg CW to display upright); PIL's Image.open() without exif_transpose loads the RAW unrotated frame (3264x2448), so these boxes are in that raw landscape coordinate space, not the upright-displayed portrait view. PM-Reviwer found the washer box exceeded bounds because it had been computed in the displayed (portrait) frame instead; corrected here for all 3 entries and verified by cropping each box from the actual PIL-loaded array and visually confirming it contains the right object.",
+    "category": "similar_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a bolt",
+    "ground_truth_boxes": [
+      {"label": "bolt", "box_xyxy": [293, 475, 1875, 2088]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_hardware.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83). File has EXIF orientation tag 6 (rotate 90deg CW to display upright); PIL's Image.open() without exif_transpose loads the RAW unrotated frame (3264x2448), so these boxes are in that raw landscape coordinate space, not the upright-displayed portrait view. PM-Reviwer found the washer box exceeded bounds because it had been computed in the displayed (portrait) frame instead; corrected here for all 3 entries and verified by cropping each box from the actual PIL-loaded array and visually confirming it contains the right object.",
+    "category": "similar_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a hexagonal nut with a hole in the center",
+    "ground_truth_boxes": [
+      {"label": "nut", "box_xyxy": [1337, 572, 1875, 1094]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_hardware.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Bolts,Nuts & Washers.jpg, author Sbrennan83). File has EXIF orientation tag 6 (rotate 90deg CW to display upright); PIL's Image.open() without exif_transpose loads the RAW unrotated frame (3264x2448), so these boxes are in that raw landscape coordinate space, not the upright-displayed portrait view. PM-Reviwer found this washer box exceeded bounds (y1=2804 > 2448) because it had been computed in the displayed (portrait) frame instead; corrected here for all 3 entries in this image and verified by cropping each box from the actual PIL-loaded array and visually confirming it contains the right object.",
+    "category": "similar_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a round metal washer",
+    "ground_truth_boxes": [
+      {"label": "washer", "box_xyxy": [1989, 1013, 2804, 1893]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_books.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Stack of multicolored books on a table.jpg, author Alexander Grey)",
+    "category": "occlusion",
+    "prompt_style": "basic_noun",
+    "prompt": "a book",
+    "ground_truth_boxes": [
+      {"label": "book", "box_xyxy": [1461, 337, 3457, 703]},
+      {"label": "book", "box_xyxy": [1461, 703, 3232, 927]},
+      {"label": "book", "box_xyxy": [1068, 4018, 3316, 4384]},
+      {"label": "book", "box_xyxy": [618, 4384, 3316, 4637]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_books.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Stack of multicolored books on a table.jpg, author Alexander Grey)",
+    "category": "occlusion",
+    "prompt_style": "fine_grained",
+    "prompt": "a pink hardcover book with gold text",
+    "ground_truth_boxes": [
+      {"label": "book", "box_xyxy": [1068, 4018, 3316, 4384]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_books.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:Stack of multicolored books on a table.jpg, author Alexander Grey)",
+    "category": "occlusion",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a book spine in a stacked pile of books",
+    "ground_truth_boxes": [
+      {"label": "book", "box_xyxy": [1461, 337, 3457, 703]},
+      {"label": "book", "box_xyxy": [1461, 703, 3232, 927]},
+      {"label": "book", "box_xyxy": [1068, 4018, 3316, 4384]},
+      {"label": "book", "box_xyxy": [618, 4384, 3316, 4637]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_parking.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Parking lot, Gross-Gerau (P1090665).jpg, author Matti Blume)",
+    "category": "small_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a car",
+    "ground_truth_boxes": [
+      {"label": "car", "box_xyxy": [1162, 1173, 1190, 1202]},
+      {"label": "car", "box_xyxy": [2093, 1242, 2122, 1271]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_parking.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Parking lot, Gross-Gerau (P1090665).jpg, author Matti Blume)",
+    "category": "small_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a small red car",
+    "ground_truth_boxes": [
+      {"label": "car", "box_xyxy": [1162, 1173, 1190, 1202]},
+      {"label": "car", "box_xyxy": [2093, 1242, 2122, 1271]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_parking.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Parking lot, Gross-Gerau (P1090665).jpg, author Matti Blume)",
+    "category": "small_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a vehicle parked in a large aerial parking lot",
+    "ground_truth_boxes": [
+      {"label": "car", "box_xyxy": [1162, 1173, 1190, 1202]},
+      {"label": "car", "box_xyxy": [2093, 1242, 2122, 1271]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_pens.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:NIND Pen-pile ISO100.jpg, author MB-one). Downscaled from 3996x2998 to 1600x1200 with macOS sips (7.1MB -> 300KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "basic_noun",
+    "prompt": "a pencil",
+    "ground_truth_boxes": [
+      {"label": "pencil", "box_xyxy": [90, 600, 855, 770]},
+      {"label": "pencil", "box_xyxy": [120, 480, 1225, 570]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_pens.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:NIND Pen-pile ISO100.jpg, author MB-one). Downscaled from 3996x2998 to 1600x1200 with macOS sips (7.1MB -> 300KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "fine_grained",
+    "prompt": "a yellow marker pen with a cap",
+    "ground_truth_boxes": [
+      {"label": "marker", "box_xyxy": [225, 265, 735, 765]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_pens.jpg",
+    "image_license": "CC0 (Wikimedia Commons, verified via Commons API extmetadata for File:NIND Pen-pile ISO100.jpg, author MB-one). Downscaled from 3996x2998 to 1600x1200 with macOS sips (7.1MB -> 300KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a writing instrument lying on a wooden table",
+    "ground_truth_boxes": [
+      {"label": "marker", "box_xyxy": [225, 265, 735, 765]},
+      {"label": "pencil", "box_xyxy": [90, 600, 855, 770]},
+      {"label": "pen", "box_xyxy": [715, 265, 1185, 460]},
+      {"label": "pencil", "box_xyxy": [120, 480, 1225, 570]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_paperclips.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Paperclips.jpg, author Tdlnx). Downscaled from 3264x2448 to 1600x1200 with macOS sips (2.9MB -> 421KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only the isolated paperclips on the pile's periphery are annotated -- the dense central cluster has too much overlap for confident individual boxes, which is itself relevant evidence for #10's small-object/occlusion failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a paperclip",
+    "ground_truth_boxes": [
+      {"label": "paperclip", "box_xyxy": [720, 48, 1056, 156]},
+      {"label": "paperclip", "box_xyxy": [1248, 0, 1376, 120]},
+      {"label": "paperclip", "box_xyxy": [0, 228, 160, 408]},
+      {"label": "paperclip", "box_xyxy": [0, 456, 288, 600]},
+      {"label": "paperclip", "box_xyxy": [1488, 852, 1600, 1032]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_paperclips.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Paperclips.jpg, author Tdlnx). Downscaled from 3264x2448 to 1600x1200 with macOS sips (2.9MB -> 421KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only the isolated paperclips on the pile's periphery are annotated -- the dense central cluster has too much overlap for confident individual boxes, which is itself relevant evidence for #10's small-object/occlusion failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a gold-toned paperclip",
+    "ground_truth_boxes": [
+      {"label": "paperclip", "box_xyxy": [950, 380, 1080, 600]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_paperclips.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Paperclips.jpg, author Tdlnx). Downscaled from 3264x2448 to 1600x1200 with macOS sips (2.9MB -> 421KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only the isolated paperclips on the pile's periphery are annotated -- the dense central cluster has too much overlap for confident individual boxes, which is itself relevant evidence for #10's small-object/occlusion failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a tangled pile of metal paperclips on a table",
+    "ground_truth_boxes": [
+      {"label": "paperclip pile", "box_xyxy": [230, 60, 1430, 1060]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_mugs.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Align (52873932).jpeg, author Anoop Mukundan). Already small (1152x864, 282KB); no downscaling needed. Only a representative subset of the ~30 visually near-identical mugs is individually boxed -- the rest are packed edge-to-edge with no gap, making per-mug boxes unreliable; this is a known precision limitation, not hidden.",
+    "category": "similar_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a mug",
+    "ground_truth_boxes": [
+      {"label": "mug", "box_xyxy": [0, 95, 108, 230]},
+      {"label": "mug", "box_xyxy": [0, 245, 100, 390]},
+      {"label": "mug", "box_xyxy": [290, 245, 385, 390]},
+      {"label": "mug", "box_xyxy": [860, 245, 960, 390]},
+      {"label": "mug", "box_xyxy": [330, 415, 450, 565]},
+      {"label": "mug", "box_xyxy": [0, 585, 110, 745]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_mugs.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Align (52873932).jpeg, author Anoop Mukundan). Already small (1152x864, 282KB); no downscaling needed. Only a representative subset of the ~30 visually near-identical mugs is individually boxed -- the rest are packed edge-to-edge with no gap, making per-mug boxes unreliable; this is a known precision limitation, not hidden.",
+    "category": "similar_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a pastel green mug",
+    "ground_truth_boxes": [
+      {"label": "mug", "box_xyxy": [0, 245, 100, 390]}
+    ]
+  },
+  {
+    "image": "evaluation/similar_objects_mugs.jpg",
+    "image_license": "CC BY-SA 3.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Align (52873932).jpeg, author Anoop Mukundan). Already small (1152x864, 282KB); no downscaling needed. Only a representative subset of the ~30 visually near-identical mugs is individually boxed -- the rest are packed edge-to-edge with no gap, making per-mug boxes unreliable; this is a known precision limitation, not hidden.",
+    "category": "similar_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a row of mugs on a shelf",
+    "ground_truth_boxes": [
+      {"label": "mug row", "box_xyxy": [0, 245, 1152, 390]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_sandals.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:DSC 8297 A colorful market stall piled high with assorted sandals and slip-on shoes on display with a price sign reading 69 hanging above.jpg, author PattayaPatrol). Downscaled from 6048x4024 to 1600x1064 with macOS sips (11.7MB -> 308KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "basic_noun",
+    "prompt": "a sandal",
+    "ground_truth_boxes": [
+      {"label": "sandal", "box_xyxy": [265, 355, 655, 580]},
+      {"label": "sandal", "box_xyxy": [0, 560, 390, 855]},
+      {"label": "sandal", "box_xyxy": [640, 495, 880, 695]},
+      {"label": "sandal", "box_xyxy": [1105, 720, 1435, 920]},
+      {"label": "sandal", "box_xyxy": [0, 850, 230, 1064]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_sandals.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:DSC 8297 A colorful market stall piled high with assorted sandals and slip-on shoes on display with a price sign reading 69 hanging above.jpg, author PattayaPatrol). Downscaled from 6048x4024 to 1600x1064 with macOS sips (11.7MB -> 308KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "fine_grained",
+    "prompt": "a black rubber slide sandal with a visible brand logo",
+    "ground_truth_boxes": [
+      {"label": "sandal", "box_xyxy": [1105, 720, 1435, 920]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_sandals.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:DSC 8297 A colorful market stall piled high with assorted sandals and slip-on shoes on display with a price sign reading 69 hanging above.jpg, author PattayaPatrol). Downscaled from 6048x4024 to 1600x1064 with macOS sips (11.7MB -> 308KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space.",
+    "category": "occlusion",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a pile of sandals on a market stall",
+    "ground_truth_boxes": [
+      {"label": "sandal pile", "box_xyxy": [0, 350, 1600, 1064]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_birds.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Large flocks of birds flying, Pallithode, Kerala (2).jpg, author Gannu03). Downscaled from 6000x4000 to 1600x1066 with macOS sips (5.8MB -> 110KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only clearly isolated birds away from the dense central flock are annotated -- the hundreds of birds in the main cluster are too small and overlapping for confident individual boxes, which is itself relevant evidence for #10's small-object failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "basic_noun",
+    "prompt": "a bird",
+    "ground_truth_boxes": [
+      {"label": "bird", "box_xyxy": [140, 513, 178, 540]},
+      {"label": "bird", "box_xyxy": [35, 697, 120, 706]},
+      {"label": "bird", "box_xyxy": [565, 923, 585, 940]},
+      {"label": "bird", "box_xyxy": [1240, 672, 1270, 692]},
+      {"label": "bird", "box_xyxy": [1405, 696, 1430, 706]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_birds.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Large flocks of birds flying, Pallithode, Kerala (2).jpg, author Gannu03). Downscaled from 6000x4000 to 1600x1066 with macOS sips (5.8MB -> 110KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only clearly isolated birds away from the dense central flock are annotated -- the hundreds of birds in the main cluster are too small and overlapping for confident individual boxes, which is itself relevant evidence for #10's small-object failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "fine_grained",
+    "prompt": "a single bird flying apart from the main flock",
+    "ground_truth_boxes": [
+      {"label": "bird", "box_xyxy": [140, 513, 178, 540]}
+    ]
+  },
+  {
+    "image": "evaluation/small_objects_birds.jpg",
+    "image_license": "CC BY-SA 4.0 (Wikimedia Commons, verified via Commons API extmetadata for File:Large flocks of birds flying, Pallithode, Kerala (2).jpg, author Gannu03). Downscaled from 6000x4000 to 1600x1066 with macOS sips (5.8MB -> 110KB) for repository hygiene; ground-truth boxes below are in the downscaled image's coordinate space. Only clearly isolated birds away from the dense central flock are annotated -- the hundreds of birds in the main cluster are too small and overlapping for confident individual boxes, which is itself relevant evidence for #10's small-object failure analysis, not hidden.",
+    "category": "small_objects",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a flock of birds flying in formation against the sky",
+    "ground_truth_boxes": [
+      {"label": "bird flock", "box_xyxy": [0, 540, 1600, 950]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_crayons.jpg",
+    "image_license": "CC BY 2.0 (Wikimedia Commons, verified via Commons API extmetadata for File:CrayonLogs.jpg, author Chris Metcalf). Already small (1280x960, 1.1MB); no downscaling needed.",
+    "category": "occlusion",
+    "prompt_style": "basic_noun",
+    "prompt": "a crayon",
+    "ground_truth_boxes": [
+      {"label": "crayon", "box_xyxy": [900, 0, 1050, 70]},
+      {"label": "crayon", "box_xyxy": [1080, 190, 1210, 280]},
+      {"label": "crayon", "box_xyxy": [830, 345, 965, 430]},
+      {"label": "crayon", "box_xyxy": [775, 535, 915, 625]},
+      {"label": "crayon", "box_xyxy": [235, 615, 375, 705]},
+      {"label": "crayon", "box_xyxy": [1125, 700, 1265, 800]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_crayons.jpg",
+    "image_license": "CC BY 2.0 (Wikimedia Commons, verified via Commons API extmetadata for File:CrayonLogs.jpg, author Chris Metcalf). Already small (1280x960, 1.1MB); no downscaling needed.",
+    "category": "occlusion",
+    "prompt_style": "fine_grained",
+    "prompt": "a blue crayon with a visible brand label",
+    "ground_truth_boxes": [
+      {"label": "crayon", "box_xyxy": [490, 440, 625, 520]}
+    ]
+  },
+  {
+    "image": "evaluation/occlusion_crayons.jpg",
+    "image_license": "CC BY 2.0 (Wikimedia Commons, verified via Commons API extmetadata for File:CrayonLogs.jpg, author Chris Metcalf). Already small (1280x960, 1.1MB); no downscaling needed.",
+    "category": "occlusion",
+    "prompt_style": "descriptive_phrase",
+    "prompt": "a stack of crisscrossed crayons",
+    "ground_truth_boxes": [
+      {"label": "crayon stack", "box_xyxy": [230, 0, 1270, 960]}
+    ]
+  }
+]

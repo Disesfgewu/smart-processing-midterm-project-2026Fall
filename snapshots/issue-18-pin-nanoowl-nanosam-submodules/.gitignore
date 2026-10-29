@@ -1,0 +1,6 @@
+# Downloaded weights, exported ONNX, and built TensorRT engines are never tracked
+third_party/*/data/
+third_party/*/assets/*.pt
+third_party/*/assets/*.pth
+third_party/*/assets/*.onnx
+third_party/*/assets/*.engine
