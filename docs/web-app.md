@@ -24,7 +24,9 @@ python -m server.main                 # http://127.0.0.1:8000
 ## 前端功能
 
 - 上傳（點擊／拖曳／貼上）圖片、輸入提示詞列表（一行一個或逗號分隔）、調整 threshold 與 NMS IoU。
-- HyDE 開關（**後端尚未實作**：請求會送出 `use_hyde=true`，後端記 WARNING 並改用原始提示，回應與畫面都會說明）。
+- HyDE 開關：用本機 Ollama 的小型 LLM 把提示改寫成數個短的英文外觀描述（同時會把中文翻成英文），詳見 [hyde.md](hyde.md)。Ollama 不可用時請求不會失敗，而是退回原始提示並在畫面說明原因。
+- 「計算遮罩」開關：取消後只輸出物件框、跳過 SAM，影片分析約快一倍（只需要計數時使用）。
+- 零偵測診斷：統計表顯示每個提示詞的「最高分」（含低於門檻者）與 SAM 品質；沒有任何偵測時直接說明原因（SAM 不會執行），並警告非英文提示詞。
 - 結果：遮罩／輪廓／框三種顯示、點圖例可隱藏某提示詞、滑鼠移到物件上看分數與面積。
 - 各提示詞的數量、遮罩面積、框面積、遮罩/框比例、平均分數。
 - 執行速度：後端總耗時與 FPS、各階段（文字編碼／OWL／SAM／序列化／其他）堆疊條、含網路往返時間。
@@ -42,6 +44,8 @@ python -m server.main                 # http://127.0.0.1:8000
 | POST | `/api/camera/stop` | 停止串流 |
 | GET | `/api/camera/state` | 串流狀態、各提示詞統計、耗時（前端每 0.4 秒輪詢，不寫 log） |
 | GET | `/api/camera/stream` | MJPEG 串流（`<img src>` 直接顯示） |
+| POST | `/api/hyde/expand` | form：`prompts`。HyDE 擴展（會呼叫 LLM，數秒）；**前端必須在開始偵測之前呼叫**，偵測端點只查快取 |
+| GET | `/api/hyde/status` | Ollama 是否可連線、設定的模型是否已下載（前端 HyDE 徽章用） |
 | GET | `/api/stats` | 即時 GPU 數據（前端每秒輪詢，不寫 log） |
 | GET | `/api/health` | 後端、裝置、模型載入時間、請求數 |
 | GET | `/api/history` | 近 50 次請求摘要 |

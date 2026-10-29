@@ -89,9 +89,11 @@ a remote control</textarea>
       </div>
 
       <div class="row">
-        <label class="check"><input type="checkbox" id="hyde"> 使用 HyDE 擴展提示 <span class="badge warn">後端尚未實作</span></label>
+        <label class="check"><input type="checkbox" id="hyde"> 使用 HyDE 擴展提示 <span class="badge warn" id="hyde-badge">檢查 Ollama…</span></label>
+        <button id="btn-hyde" class="ghost" title="先用 LLM 把提示詞擴展成一組類似詞句。必須在開始偵測之前完成；偵測期間不會呼叫 LLM。">擴展提示詞</button>
         <label class="check"><input type="checkbox" id="auto"> 提示詞改變時自動執行</label>
         <label class="check" title="取消勾選後只輸出物件框、不跑 SAM，GTX 1060 上約快 2.5 倍；適合只需要計數的情境"><input type="checkbox" id="masks" checked> 計算遮罩 <small>（取消＝只留框，較快）</small></label>
+        <label class="check" title="每個提示詞（一組）只保留信心最高的那個偵測；預設會保留全部實例（計數需要），只把最高者標為主要輸出"><input type="checkbox" id="top1"> 每組只輸出信心最高的一個</label>
       </div>
       <div class="row">
         <label class="inline">畫面最大邊
@@ -110,6 +112,7 @@ a remote control</textarea>
           <button id="btn-bench" class="ghost" disabled>量測速度</button></label>
         <button id="btn-run" class="primary" disabled>執行</button>
       </div>
+      <div id="hyde-state" class="muted hyde-state"></div>
       <div id="error" class="error" hidden></div>
     </div>
 
@@ -118,6 +121,7 @@ a remote control</textarea>
         <h2>結果</h2>
         <div id="legend" class="chips small"></div>
       </div>
+      <div id="hint" class="hint" hidden></div>
       <div class="stage" id="stage">
         <canvas id="canvas" width="640" height="360"></canvas>
         <div id="tip" class="tip" hidden></div>
@@ -145,13 +149,13 @@ a remote control</textarea>
     <div class="card">
       <h2>各提示詞統計 <small>（面積單位：像素）</small></h2>
       <div class="table-wrap"><table id="tbl-summary">
-        <thead><tr><th>提示詞</th><th class="num">數量</th><th class="num">遮罩面積</th><th class="num">框面積</th><th class="num">遮罩/框</th><th class="num">平均分數</th></tr></thead>
-        <tbody><tr><td colspan="6" class="muted">尚無結果</td></tr></tbody>
+        <thead><tr><th>提示詞</th><th class="num">數量</th><th class="num" title="OWL 對這個提示詞的最高分（含低於門檻者）">最高分</th><th class="num">平均分數</th><th class="num">遮罩面積</th><th class="num">框面積</th><th class="num">遮罩/框</th><th class="num" title="SAM 對自己產生的遮罩所預測的 IoU（品質），0~1">SAM 品質</th></tr></thead>
+        <tbody><tr><td colspan="8" class="muted">尚無結果</td></tr></tbody>
       </table></div>
       <details>
         <summary>每個偵測結果</summary>
         <div class="table-wrap"><table id="tbl-det">
-          <thead><tr><th>#</th><th>提示詞</th><th class="num">分數</th><th>框 x0,y0,x1,y1</th><th class="num">遮罩面積</th><th class="num">輪廓點數</th></tr></thead>
+          <thead><tr><th>#</th><th>提示詞</th><th title="HyDE：實際命中的描述">命中描述</th><th class="num">分數</th><th>框 x0,y0,x1,y1</th><th class="num">遮罩面積</th><th class="num">SAM 品質</th><th class="num">輪廓點數</th></tr></thead>
           <tbody></tbody>
         </table></div>
       </details>
@@ -167,6 +171,11 @@ a remote control</textarea>
       <div class="stack" id="stack"></div>
       <div id="stack-legend" class="chips small"></div>
       <dl class="kv" id="timing-kv"></dl>
+    </div>
+
+    <div class="card" id="card-hyde" hidden>
+      <h2>HyDE 擴展結果 <small id="hyde-meta"></small></h2>
+      <div id="hyde-body"></div>
     </div>
 
     <div class="card">

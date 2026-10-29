@@ -94,6 +94,17 @@ Pascal 只能用 TensorRT 8.x（10.x 已移除支援）。裝不起來可忽略�
 
 > 注意：WSL 用的 MobileSAM 與 Jetson 最終用的 NanoSAM（ResNet18 encoder）不是同一個模型，準確度與效能數據一律以 Jetson 為準。
 
+## 2.5 （選用）HyDE：Ollama 與本機 LLM
+
+HyDE 用本機 Ollama 的小型 LLM 把提示詞擴展成一組類似詞句（也會把中文翻成英文）。安裝（使用者層級，免 sudo，約 4GB）：
+
+```bash
+./installation/install_ollama.sh            # 下載 Ollama 到 ~/.local/ollama，並 pull qwen3:4b
+```
+
+之後不需手動啟動：`python -m server.main` 偵測到 Ollama 沒在跑會自動拉起（也可用 `./installation/start_ollama.sh` 手動啟動）。
+模型選擇、規則（擴展必須在開始偵測之前完成）與實測數據見 [hyde.md](hyde.md)。
+
 ## 3. Jetson Orin Nano（JetPack 6.2）
 
 腳本依編號順序執行：
@@ -117,6 +128,8 @@ Jetson 不使用 conda，用 Python venv（`--system-site-packages`，才能使�
 installation/
 ├── setup_env.sh              WSL: 建 conda 環境
 ├── download_model.sh         下載模型（WSL 與 Jetson 共用）
+├── install_ollama.sh         （選用）安裝 Ollama + 本機 LLM（HyDE）
+├── start_ollama.sh           手動啟動 Ollama（server 也會自動啟動）
 └── jetson/                   Jetson 部署腳本 00–05
 environment.yml               conda 環境定義
 requirements.txt              pip 套件（WSL）

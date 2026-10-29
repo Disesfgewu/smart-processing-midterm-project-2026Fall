@@ -57,26 +57,20 @@ class SegmentService:
 
     @log_call
     def run(self, image: PIL.Image.Image, prompts: List[str], threshold: float, nms_iou: float,
-            use_hyde: bool, contour_eps: float = 0.002, with_masks: bool = True) -> Dict:
-        hyde_info = {"requested": use_hyde, "applied": False, "note": None, "expanded": None}
-        if use_hyde:
-            try:
-                hyde_info["expanded"] = hyde.expand_prompts(prompts)
-                hyde_info["applied"] = True
-            except NotImplementedError as e:  # 預期內：已在 hyde.py 記錄 WARNING
-                hyde_info["note"] = f"{e}，已改用原始提示"
+            use_hyde: bool, contour_eps: float = 0.002, with_masks: bool = True, top_per_group: bool = False) -> Dict:
+        groups, hyde_info = self.hyde_groups(prompts, use_hyde)
 
         t_all = time.perf_counter()
         with self.lock:
             t_wait = time.perf_counter()
-            if self.seg.prompts != prompts:
+            if self.seg.prompts != prompts or self.seg.groups != groups:
                 t = time.perf_counter()
-                self.seg.set_prompts(prompts)
+                self.seg.set_prompts(prompts, groups)
                 torch.cuda.synchronize()
                 text_ms = (time.perf_counter() - t) * 1e3
             else:
                 text_ms = 0.0
-            dets = self.seg(image, threshold, nms_iou, with_masks)
+            dets = self.seg(image, threshold, nms_iou, with_masks, top_per_group)
             timing = dict(self.seg.timing)
         lock_wait_ms = (t_wait - t_all) * 1e3
 
@@ -87,7 +81,7 @@ class SegmentService:
             mask_area = d.area if d.mask is not None else None
             out_dets.append({
                 "id": i, "label": d.label, "score": d.score, "box": [x0, y0, x1, y1],
-                "box_area": int(max(x1 - x0, 0) * max(y1 - y0, 0)), "mask_area": mask_area,
+                "box_area": int(max(x1 - x0, 0) * max(y1 - y0, 0)), "mask_area": mask_area, "sam_iou": d.sam_iou, "query": d.query, "primary": d.primary,
                 "contours": [c.astype(int).tolist() for c in d.contours(contour_eps)],
             })
         summary = []
@@ -95,18 +89,42 @@ class SegmentService:
             mine = [d for d in out_dets if d["label"] == p]
             summary.append({"label": p, "count": len(mine), "mask_area": sum(d["mask_area"] for d in mine) if with_masks else None,
                             "box_area": sum(d["box_area"] for d in mine),
-                            "mean_score": float(np.mean([d["score"] for d in mine])) if mine else None})
+                            "mean_score": float(np.mean([d["score"] for d in mine])) if mine else None,
+                            "best_score": self.seg.best_scores.get(p),
+                            "queries": groups.get(p) or [p], "primary": self.seg.primary.get(p),
+                            "mean_sam_iou": float(np.mean([d["sam_iou"] for d in mine])) if mine and with_masks else None})
         serialize_ms = (time.perf_counter() - t) * 1e3
 
         timing.update({"text_encode_ms": text_ms, "lock_wait_ms": lock_wait_ms, "serialize_ms": serialize_ms,
                        "total_ms": (time.perf_counter() - t_all) * 1e3})
         self.n_requests += 1
         result = {"image": {"width": image.width, "height": image.height}, "prompts": prompts, "threshold": threshold,
-                  "nms_iou": nms_iou, "with_masks": with_masks, "hyde": hyde_info, "detections": out_dets, "summary": summary,
+                  "nms_iou": nms_iou, "with_masks": with_masks, "top_per_group": top_per_group, "hyde": hyde_info, "detections": out_dets, "summary": summary,
                   "timing": timing, "backend": self.backend, "memory": self.gpu_stats()}
         self.history.appendleft({"time": time.strftime("%H:%M:%S"), "prompts": prompts, "n": len(out_dets),
                                  "total_ms": timing["total_ms"], "owl_ms": timing["owl_ms"], "sam_ms": timing["sam_ms"]})
         return result
+
+    def token_count(self, text: str) -> int:
+        return len(self.seg.owl.processor.tokenizer(text)["input_ids"])
+
+    def hyde_expand(self, prompts: List[str]) -> Dict:
+        """明確的擴展步驟（會呼叫 LLM）：只由 /api/hyde/expand 在開始偵測之前呼叫。"""
+        return hyde.expand_prompts(prompts, token_counter=self.token_count)
+
+    def hyde_groups(self, prompts: List[str], use_hyde: bool):
+        """偵測路徑用：**只查快取，絕不呼叫 LLM**（LLM 要數秒，會卡住影片 / 攝影機迴圈）。
+        回傳 (groups, hyde_info)。查不到快取時退回原始提示並在 hyde_info.note 說明，請求不會失敗也不會變慢。"""
+        info = {"requested": use_hyde, "applied": False, "note": None, "expanded": None, "model": hyde.DEFAULT_MODEL, "elapsed_ms": 0, "cached": None}
+        if not use_hyde:
+            return {}, info
+        groups = hyde.lookup_cached(prompts)
+        if groups is None:
+            logger.warning(f"[SegmentService.hyde_groups]: input=(prompts={prompts}), output=not expanded yet → original prompts (no LLM call on detection path)")
+            info["note"] = "尚未擴展這組提示詞（請先按「擴展提示詞」；偵測期間不會呼叫 LLM）"
+            return {}, info
+        info.update(applied=True, expanded=groups, cached={c: True for c in prompts})
+        return groups, info
 
     def gpu_stats(self) -> Dict:
         s = {"device": torch.cuda.get_device_name(0), "torch_allocated_mb": torch.cuda.memory_allocated() / 2**20,

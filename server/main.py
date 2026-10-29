@@ -16,6 +16,7 @@ from fastapi.responses import JSONResponse, Response, StreamingResponse  # noqa:
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 
 from applog import LOG_PATH, log_call, logger, quiet_var, request_id_var  # noqa: E402
+from server import hyde  # noqa: E402
 from server.camera import CameraWorker  # noqa: E402
 from server.service import SegmentService  # noqa: E402
 
@@ -30,9 +31,12 @@ async def lifespan(app: FastAPI):
     service = SegmentService(sam_checkpoint=os.environ.get("SAM_CHECKPOINT", os.path.join(ROOT, "data/models/mobile_sam.pt")),
                              owl_engine=os.environ.get("OWL_ENGINE") or None)
     camera = CameraWorker(service)
+    import threading
+    threading.Thread(target=hyde.ensure_running, name="ollama-autostart", daemon=True).start()   # 不阻塞啟動；Ollama 沒在跑就自動拉起
     logger.info("[lifespan.startup]: input=(), output=ready")
     yield
     camera.stop()
+    hyde.stop_started()
     logger.info("[lifespan.shutdown]: input=(), output=bye")
 
 
@@ -87,6 +91,24 @@ def stats():
     return {**service.gpu_stats(), "requests": service.n_requests, "uptime_s": time.time() - service.started}
 
 
+@app.post("/api/hyde/expand")
+@log_call(name="api.hyde.expand")
+def hyde_expand(prompts: str = Form(...)):
+    """HyDE 擴展（會呼叫 LLM，數秒～十幾秒）。前端必須在「開始偵測之前」呼叫；偵測端點只讀快取，不會呼叫 LLM。"""
+    plist = parse_prompts(prompts)
+    if not plist or len(plist) > 20:
+        raise HTTPException(400, "prompts must have 1~20 items")
+    try:
+        return service.hyde_expand(plist)
+    except hyde.HydeError as e:
+        raise HTTPException(503, str(e))
+
+
+@app.get("/api/hyde/status")
+def hyde_status():
+    return hyde.status()
+
+
 @app.get("/api/history")
 @log_call(name="api.history")
 def history():
@@ -113,7 +135,7 @@ def logs(lines: int = 120, request_id: Optional[str] = None):
 @app.post("/api/segment")
 @log_call(name="api.segment")
 def segment(image: UploadFile = File(...), prompts: str = Form(...), threshold: float = Form(0.1),
-            nms_iou: float = Form(0.5), use_hyde: bool = Form(False), quiet: bool = Form(False), with_masks: bool = Form(True)):
+            nms_iou: float = Form(0.5), use_hyde: bool = Form(False), quiet: bool = Form(False), with_masks: bool = Form(True), top_per_group: bool = Form(False)):
     quiet_var.set(quiet)  # 連續影格（攝影機／影片）由前端取樣記錄，其餘只記 WARNING 以上
     plist = parse_prompts(prompts)
     if not plist:
@@ -126,7 +148,7 @@ def segment(image: UploadFile = File(...), prompts: str = Form(...), threshold: 
         img = service.decode_image(image.file.read())
     except Exception as e:
         raise HTTPException(400, f"cannot read image: {e}")
-    result = service.run(img, plist, threshold, nms_iou, use_hyde, with_masks=with_masks)
+    result = service.run(img, plist, threshold, nms_iou, use_hyde, with_masks=with_masks, top_per_group=top_per_group)
     result["request_id"] = request_id_var.get()
     return result
 
@@ -143,17 +165,19 @@ def check_params(prompts: str, threshold: float, nms_iou: float) -> List[str]:
 @app.post("/api/camera/start")
 @log_call(name="api.camera.start")
 def camera_start(source: str = Form("0"), prompts: str = Form(...), threshold: float = Form(0.1), nms_iou: float = Form(0.5),
-                 style: str = Form("both"), max_side: int = Form(640), with_masks: bool = Form(True)):
+                 style: str = Form("both"), max_side: int = Form(640), with_masks: bool = Form(True), use_hyde: bool = Form(False), top_per_group: bool = Form(False)):
     plist = check_params(prompts, threshold, nms_iou)
     if style not in ("mask", "contour", "both", "box"):
         raise HTTPException(400, "bad style")
+    groups, hyde_info = service.hyde_groups(plist, use_hyde)
     if camera.running:
         camera.stop()
     try:
-        camera.start(source.strip(), plist, threshold, nms_iou, style, max(160, min(max_side, 1920)), with_masks)
+        camera.start(source.strip(), plist, threshold, nms_iou, style, max(160, min(max_side, 1920)), with_masks, groups, top_per_group)
     except ValueError as e:
         raise HTTPException(400, str(e))
-    return {"started": True, "source": source}
+    camera.hyde_info = hyde_info
+    return {"started": True, "source": source, "hyde": hyde_info}
 
 
 @app.post("/api/camera/stop")
@@ -166,13 +190,15 @@ def camera_stop():
 @app.post("/api/camera/prompts")
 @log_call(name="api.camera.prompts")
 def camera_prompts(prompts: str = Form(...), threshold: float = Form(0.1), nms_iou: float = Form(0.5), style: str = Form("both"),
-                   expected: str = Form(""), with_masks: bool = Form(True)):
+                   expected: str = Form(""), with_masks: bool = Form(True), use_hyde: bool = Form(False), top_per_group: bool = Form(False)):
     """執行中更換提示詞與參數，不需重啟串流。expected 為 JSON：{提示詞: 預期數量}。"""
     plist = check_params(prompts, threshold, nms_iou)
     exp = json.loads(expected) if expected.strip() else None
-    camera.set_params(threshold=threshold, nms_iou=nms_iou, style=style, expected=exp, with_masks=with_masks)
-    camera.set_prompts(plist)
-    return {"prompts": plist}
+    camera.set_params(threshold=threshold, nms_iou=nms_iou, style=style, expected=exp, with_masks=with_masks, top_per_group=top_per_group)
+    groups, hyde_info = service.hyde_groups(plist, use_hyde)
+    camera.set_prompts(plist, groups)
+    camera.hyde_info = hyde_info
+    return {"prompts": plist, "hyde": hyde_info}
 
 
 @app.get("/api/camera/state")

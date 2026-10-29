@@ -15,6 +15,70 @@ const el = (tag, props = {}, ...kids) => { const e = Object.assign(document.crea
 const colorOf = (label, prompts) => COLORS[Math.max(0, prompts.indexOf(label)) % COLORS.length];
 const maxSide = () => +$("maxside").value || 640;
 
+// ================= HyDE：一律在「開始偵測之前」完成擴展 =================
+// 擴展要呼叫 LLM（每個提示詞數秒），放進偵測迴圈會卡住影片 / 攝影機。所以：
+//  * 按下開始（執行 / 開始分析 / 開啟攝影機 / 開始串流）時先擴展完，才送第一幀；
+//  * 偵測用的提示詞是「擴展當下凍結的那一組」（state.hyde.prompts），偵測期間改文字不會立刻生效；
+//  * 偵測中要換提示詞（HyDE 開著）：按「套用」→ 暫停偵測 → 擴展 → 繼續。HyDE 關閉時仍即時生效。
+state.hyde = { key: "", prompts: [], ok: false, info: null, promise: null };
+state.hydeOn = false;   // 目前這輪偵測是否使用 HyDE（開始 / 套用時決定）
+state.paused = false;   // 套用提示詞期間，迴圈暫停送幀
+state.inflight = 0;     // 進行中的偵測請求數；套用時要等它歸零才開始擴展，確保擴展與偵測不重疊
+const promptKey = (ps) => ps.join("\u0001");
+const isRunning = () => state.loop.on || state.srv.on;
+function activeSet() {
+  return state.hydeOn ? { prompts: state.hyde.prompts, hyde: true } : { prompts: parsePrompts($("prompts").value), hyde: false };
+}
+function hydePending() {
+  const ck = $("hyde").checked;
+  return ck !== state.hydeOn || (ck && promptKey(parsePrompts($("prompts").value)) !== state.hyde.key);
+}
+function updateHydeChip() {
+  const st = $("hyde-state"), b = $("btn-hyde"), running = isRunning(), pending = hydePending(), expanding = !!state.hyde.promise;
+  b.disabled = expanding || (!$("hyde").checked && !state.hydeOn);
+  b.textContent = running && pending ? "套用提示詞（暫停偵測）" : "擴展提示詞";
+  b.classList.toggle("primary", running && pending);
+  if (expanding) st.textContent = "HyDE 擴展中…（完成前不會開始偵測）";
+  else if (!$("hyde").checked && !state.hydeOn) st.textContent = "";
+  else if (pending && running) st.textContent = "⚠ 提示詞已變更：目前偵測仍使用舊提示詞，按「套用」才會生效";
+  else if (pending) st.textContent = "尚未擴展：按開始時會先擴展完才偵測";
+  else if (state.hydeOn && state.hyde.info) st.textContent = `✓ 已擴展（${state.hyde.info.model} · 耗時 ${fmt(state.hyde.info.elapsed_ms, 0)} ms）`;
+  st.className = "muted" + (pending && running ? " st-ng" : "");
+}
+async function ensureExpanded() {
+  if (state.hyde.promise) return state.hyde.promise;
+  const ck = $("hyde").checked, ps = parsePrompts($("prompts").value);
+  if (!ck) { state.hydeOn = false; updateHydeChip(); return true; }
+  if (!ps.length) { showError("請至少輸入一個提示詞"); return false; }
+  if (state.hyde.ok && state.hyde.key === promptKey(ps)) { state.hydeOn = true; updateHydeChip(); return true; }
+  state.hyde.promise = (async () => {
+    $("busy").textContent = "HyDE 擴展中…（約每個提示詞 3–4 秒；完成後才開始偵測）"; $("busy").hidden = false; updateHydeChip();
+    try {
+      const fd = new FormData(); fd.append("prompts", JSON.stringify(ps));
+      const res = await fetch("/api/hyde/expand", { method: "POST", body: fd });
+      const b = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(b.detail || `HTTP ${res.status}`);
+      Object.assign(state.hyde, { key: promptKey(ps), prompts: ps, ok: true, info: b }); state.hydeOn = true; showError("");
+      drawHydeCard(b.groups, null);
+      return true;
+    } catch (e) { showError("HyDE 擴展失敗：" + e.message + "。可取消勾選「使用 HyDE」後直接偵測。"); return false; }
+    finally { state.hyde.promise = null; $("busy").hidden = true; updateHydeChip(); }
+  })();
+  return state.hyde.promise;
+}
+async function applyPrompts() {                     // 偵測中換提示詞：暫停 → 擴展 → 繼續（伺服器串流則重啟串流）
+  if (state.hyde.promise) return;
+  if (state.srv.on) { await serverStop(true); if (await ensureExpanded()) await serverStart(); return; }
+  if (state.loop.on) {
+    state.paused = true;                                  // 1) 不再送新幀
+    try { while (state.inflight > 0) await sleep(25); await ensureExpanded(); }   // 2) 等進行中的那一幀做完，3) 才開始擴展
+    finally { state.paused = false; updateHydeChip(); }
+    return;
+  }
+  await ensureExpanded();
+}
+const waitIfPaused = async () => { while (state.paused && state.loop.on) await sleep(100); };
+
 function parsePrompts(text) {
   const seen = new Set();
   return text.split(/[\n,，]/).map((s) => s.trim()).filter((s) => s && !seen.has(s) && seen.add(s));
@@ -42,7 +106,7 @@ function stopAll() {
   if (state.camStream) { state.camStream.getTracks().forEach((t) => t.stop()); state.camStream = null; }
   if (state.srv.on) serverStop(true);
   $("btn-camstart").disabled = false; $("btn-camstop").disabled = true;
-  $("btn-vstart").disabled = !state.video.url; $("btn-vstop").disabled = true;
+  $("btn-vstart").disabled = !state.video.url; $("btn-vstop").disabled = true; state.paused = false; updateHydeChip();
 }
 
 // ================= 取得影格 / 呼叫後端 =================
@@ -55,20 +119,22 @@ function grab(srcEl, w, h) {
 const toBlob = (canvas) => new Promise((r) => canvas.toBlob(r, "image/jpeg", 0.85));
 
 async function callSegment(blob, quiet = false) {
-  const prompts = parsePrompts($("prompts").value);
+  const { prompts, hyde } = activeSet();
   if (!prompts.length) throw new Error("請至少輸入一個提示詞");
   const fd = new FormData();
   fd.append("image", blob, blob.name || "frame.jpg");
   fd.append("prompts", JSON.stringify(prompts));
   fd.append("threshold", $("threshold").value);
   fd.append("nms_iou", $("nms").value);
-  fd.append("use_hyde", $("hyde").checked ? "true" : "false");
+  fd.append("use_hyde", hyde ? "true" : "false");   // 偵測端點只查快取，不會呼叫 LLM
   fd.append("quiet", quiet ? "true" : "false");
   fd.append("with_masks", $("masks").checked ? "true" : "false");
+  fd.append("top_per_group", $("top1").checked ? "true" : "false");
   const t0 = performance.now();
-  const res = await fetch("/api/segment", { method: "POST", body: fd });
-  const rid = res.headers.get("X-Request-ID");
-  const body = await res.json().catch(() => ({}));
+  state.inflight++;
+  let res, body, rid;
+  try { res = await fetch("/api/segment", { method: "POST", body: fd }); rid = res.headers.get("X-Request-ID"); body = await res.json().catch(() => ({})); }
+  finally { state.inflight--; }
   if (!res.ok) throw new Error(body.detail || body.error || `HTTP ${res.status}`);
   body.client_ms = performance.now() - t0; body.request_id = body.request_id || rid;
   return body;
@@ -104,8 +170,11 @@ document.addEventListener("paste", (e) => { const f = [...(e.clipboardData?.file
 
 async function run() {
   if (!state.file || state.busy) return;
-  state.busy = true; showError(""); $("busy").hidden = false; $("btn-run").disabled = true;
-  try { accept(await callSegment(state.file), state.src, state.srcW, state.srcH); refreshLogs(); }
+  state.busy = true; showError(""); $("btn-run").disabled = true;
+  try {
+    if (!(await ensureExpanded())) return;              // HyDE：先擴展完，才開始偵測
+    $("busy").textContent = "推論中…"; $("busy").hidden = false;
+    accept(await callSegment(state.file), state.src, state.srcW, state.srcH); refreshLogs(); }
   catch (e) { showError(e.message); }
   finally { state.busy = false; $("busy").hidden = true; $("btn-run").disabled = false; }
 }
@@ -123,6 +192,8 @@ async function bench() {
   state.busy = true; showError(""); $("btn-bench").disabled = $("btn-run").disabled = true;
   const totals = [], owl = [], sam = [], client = []; let last;
   try {
+    if (!(await ensureExpanded())) return;
+
     for (let i = 0; i < n; i++) {
       $("busy").hidden = false; $("busy").textContent = `量測中 ${i + 1}/${n}`;
       last = await callSegment(state.file, i % 10 !== 0);
@@ -170,7 +241,9 @@ const seekTo = (t) => new Promise((res) => {
   vid.addEventListener("seeked", () => res(), { once: true }); vid.currentTime = t;
 });
 async function analyzeVideo() {
-  if (!state.video.url || state.loop.on) return;
+  if (!state.video.url || state.loop.on || state.hyde.promise) return;
+  $("btn-vstart").disabled = true;
+  if (!(await ensureExpanded())) { $("btn-vstart").disabled = false; return; }   // HyDE：先擴展完，才開始分析
   const step = Math.max(0.05, +$("v-step").value || 0.5), t0 = Math.max(0, +$("v-from").value || 0), dur = vid.duration;
   state.loop = { on: true, n: 0, fps: 0 }; state.video.timeline = []; showError("");
   $("btn-vstart").disabled = true; $("btn-vstop").disabled = false; $("v-prog").hidden = false; $("v-prog").max = dur; $("card-timeline").hidden = false;
@@ -179,6 +252,7 @@ async function analyzeVideo() {
   try {
     let cur = t0 < dur ? await prepare(t0) : null;
     for (let i = 0; cur && state.loop.on; i++) {
+      await waitIfPaused();
       const tf = performance.now(), nextT = cur.t + step, nextP = nextT < dur ? prepare(nextT) : Promise.resolve(null);
       const r = await callSegment(cur.blob, i >= 3 && i % 10 !== 0);
       if (!state.loop.on) break;
@@ -236,6 +310,7 @@ async function listCams() {
 async function camStart() {
   if (!navigator.mediaDevices?.getUserMedia) return showError("此瀏覽器或網址不允許使用攝影機（需 localhost 或 HTTPS）");
   showError(""); $("btn-camstart").disabled = true;
+  if (!(await ensureExpanded())) { $("btn-camstart").disabled = false; return; }   // HyDE：先擴展完，才開啟攝影機迴圈
   try {
     state.camStream = await navigator.mediaDevices.getUserMedia({ video: { deviceId: $("cam-dev").value ? { exact: $("cam-dev").value } : undefined, width: { ideal: 1280 } }, audio: false });
   } catch (e) { $("btn-camstart").disabled = false; return showError("無法開啟攝影機：" + e.message); }
@@ -244,6 +319,7 @@ async function camStart() {
   $("btn-camstop").disabled = false; state.loop = { on: true, n: 0, fps: 0 };
   try {
     for (let i = 0; state.loop.on; i++) {
+      await waitIfPaused();
       const tf = performance.now(), c = grab(cam, cam.videoWidth, cam.videoHeight);
       const r = await callSegment(await toBlob(c), i >= 3 && i % 10 !== 0);
       if (!state.loop.on) break;
@@ -258,12 +334,14 @@ $("btn-camstop").addEventListener("click", stopAll);
 // ================= 伺服器來源（攝影機 / 影片路徑，MJPEG） =================
 function serverForm(extra = {}) {
   const fd = new FormData();
-  fd.append("prompts", JSON.stringify(parsePrompts($("prompts").value)));
-  fd.append("threshold", $("threshold").value); fd.append("nms_iou", $("nms").value); fd.append("style", $("style").value); fd.append("with_masks", $("masks").checked ? "true" : "false");
+  const act = activeSet();
+  fd.append("prompts", JSON.stringify(act.prompts));
+  fd.append("threshold", $("threshold").value); fd.append("nms_iou", $("nms").value); fd.append("style", $("style").value); fd.append("with_masks", $("masks").checked ? "true" : "false"); fd.append("use_hyde", act.hyde ? "true" : "false"); fd.append("top_per_group", $("top1").checked ? "true" : "false");
   Object.entries(extra).forEach(([k, v]) => fd.append(k, v)); return fd;
 }
 async function serverStart() {
   showError(""); $("btn-srvstart").disabled = true;
+  if (!(await ensureExpanded())) { $("btn-srvstart").disabled = false; return; }   // HyDE：先擴展完，才啟動串流
   try {
     const res = await fetch("/api/camera/start", { method: "POST", body: serverForm({ source: $("srv-src").value, max_side: maxSide() }) });
     const b = await res.json().catch(() => ({})); if (!res.ok) throw new Error(b.detail || `HTTP ${res.status}`);
@@ -278,7 +356,7 @@ async function pollServer() {
     if (s.error) { showError("伺服器來源錯誤：" + s.error); return serverStop(false); }
     if (!s.running || !s.summary) return;
     $("loop-fps").textContent = `${fmt(s.fps)} FPS（後端迴圈）`;
-    const r = { ...s, hyde: { requested: false }, backend: "server", client_ms: null, request_id: "camera", threshold: +$("threshold").value };
+    const r = { ...s, hyde: s.hyde || { requested: false }, backend: "server", client_ms: null, request_id: "camera", threshold: +$("threshold").value };
     state.result = r; render(r, { skipDraw: true });
   } catch { /* 暫時失敗略過 */ }
 }
@@ -291,7 +369,7 @@ $("btn-srvstart").addEventListener("click", serverStart);
 $("btn-srvstop").addEventListener("click", () => serverStop(false));
 async function pushServerParams() {
   if (!state.srv.on) return;
-  const ps = parsePrompts($("prompts").value);
+  const ps = activeSet().prompts;
   const exp = Object.fromEntries(Object.entries(state.expected).filter(([k, v]) => v !== "" && ps.includes(k)).map(([k, v]) => [k, +v]));
   try { await fetch("/api/camera/prompts", { method: "POST", body: serverForm({ expected: JSON.stringify(exp) }) }); } catch { /* 忽略 */ }
 }
@@ -305,17 +383,28 @@ let autoTimer = null;
 $("prompts").addEventListener("input", () => {
   renderPromptChips();
   clearTimeout(autoTimer);
-  if (state.srv.on) autoTimer = setTimeout(pushServerParams, 400);                       // 伺服器串流：即時換提示
+  updateHydeChip();
+  if (state.srv.on) { if (!state.hydeOn) autoTimer = setTimeout(pushServerParams, 400); }   // HyDE 關閉：串流即時換提示；開啟：按「套用」
   else if ($("auto").checked && state.mode === "image" && state.file) autoTimer = setTimeout(run, 700);
-  // 瀏覽器攝影機／影片：迴圈每一幀都會重新讀取提示詞，下一幀即生效
+  // 瀏覽器攝影機／影片（HyDE 關閉）：迴圈每一幀都會讀取提示詞，下一幀即生效；HyDE 開啟則需按「套用」
 });
 const onParam = () => { if (state.srv.on) pushServerParams(); else if ($("auto").checked && state.mode === "image" && state.file) run(); };
 $("threshold").addEventListener("input", (e) => { $("th-out").textContent = (+e.target.value).toFixed(2); });
 $("nms").addEventListener("input", (e) => { $("nms-out").textContent = (+e.target.value).toFixed(2); });
 $("threshold").addEventListener("change", onParam); $("nms").addEventListener("change", onParam);
 $("style").addEventListener("change", () => { draw(); onParam(); });
-$("masks").addEventListener("change", onParam);
-$("hyde").addEventListener("change", () => { showError($("hyde").checked ? "HyDE 後端尚未實作：請求會送出 use_hyde=true，但伺服器會改用原始提示並回報原因。" : "", true); });
+$("masks").addEventListener("change", onParam); $("top1").addEventListener("change", onParam);
+async function hydeStatus() {
+  const b = $("hyde-badge");
+  try {
+    const h = await (await fetch("/api/hyde/status")).json();
+    if (!h.reachable) { b.className = "badge warn"; b.textContent = h.binary ? "Ollama 啟動中…" : "未安裝 Ollama"; b.title = (h.binary ? "後端會自動啟動；若一直失敗請執行 ./installation/start_ollama.sh，並看 /tmp/ollama.log\n" : "請執行 ./installation/install_ollama.sh\n") + (h.error || ""); }
+    else if (!h.model_ready) { b.className = "badge warn"; b.textContent = `未下載 ${h.model}`; b.title = "ollama pull " + h.model; }
+    else { b.className = "badge ok"; b.textContent = `Ollama · ${h.model}`; b.title = `每個提示詞產生 ${h.variants} 個描述`; }
+  } catch { b.className = "badge warn"; b.textContent = "狀態未知"; }
+}
+$("hyde").addEventListener("change", () => { showError(""); updateHydeChip(); if (!isRunning() && $("auto").checked && state.mode === "image" && state.file) run(); });
+$("btn-hyde").addEventListener("click", applyPrompts);
 
 // ================= 繪圖 =================
 const canvas = $("canvas"), ctx = canvas.getContext("2d");
@@ -326,15 +415,15 @@ function draw() {
   const r = state.result; if (!r) return;
   const style = $("style").value, lw = Math.max(2, Math.round(Math.max(W, H) / 400));
   for (const d of r.detections) {
-    const color = colorOf(d.label, r.prompts), path = new Path2D();
+    const color = colorOf(d.label, r.prompts), path = new Path2D(), thick = r.hyde && r.hyde.applied && d.primary ? 2 : 1;
     d.contours.forEach((c) => { c.forEach(([x, y], i) => (i ? path.lineTo(x, y) : path.moveTo(x, y))); path.closePath(); });
     state.paths.push({ d, path });
     if (state.hidden.has(d.label)) continue;
     if (d.mask_area != null && (style === "mask" || style === "both")) { ctx.globalAlpha = style === "both" ? 0.3 : 0.45; ctx.fillStyle = color; ctx.fill(path, "evenodd"); ctx.globalAlpha = 1; }
-    if (d.mask_area != null && (style === "contour" || style === "both")) { ctx.lineWidth = lw; ctx.strokeStyle = color; ctx.lineJoin = "round"; ctx.stroke(path); }
+    if (d.mask_area != null && (style === "contour" || style === "both")) { ctx.lineWidth = lw * thick; ctx.strokeStyle = color; ctx.lineJoin = "round"; ctx.stroke(path); }
     if (style === "box" || d.mask_area == null) { ctx.lineWidth = lw; ctx.strokeStyle = color; const [x0, y0, x1, y1] = d.box; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0); }
     const fs = Math.max(12, Math.round(Math.max(W, H) / 50)); ctx.font = `600 ${fs}px system-ui, sans-serif`;
-    const text = `${d.label} ${d.score.toFixed(2)}`, tw = ctx.measureText(text).width, [x0, y0] = d.box, ty = Math.max(y0, fs + 4);
+    const star = r.hyde && r.hyde.applied && d.primary, text = `${star ? "★ " : ""}${d.label} ${d.score.toFixed(2)}`, tw = ctx.measureText(text).width, [x0, y0] = d.box, ty = Math.max(y0, fs + 4);
     ctx.fillStyle = color; ctx.fillRect(x0, ty - fs - 4, tw + 8, fs + 6); ctx.fillStyle = "#fff"; ctx.fillText(text, x0 + 4, ty - 3);
   }
 }
@@ -352,7 +441,7 @@ canvas.addEventListener("mouseleave", () => { $("tip").hidden = true; });
 function render(r, { skipDraw = false } = {}) {
   state.hidden = new Set([...state.hidden].filter((l) => r.prompts.includes(l)));
   if (!skipDraw) draw();
-  renderLegend(r); renderSummary(r); renderTiming(r); renderCheck(r);
+  renderLegend(r); renderSummary(r); renderTiming(r); renderCheck(r); renderHyde(r);
 }
 function renderLegend(r) {
   const box = $("legend"); box.replaceChildren();
@@ -368,12 +457,26 @@ function renderSummary(r) {
   const tb = $("tbl-summary").tBodies[0]; tb.replaceChildren();
   r.summary.forEach((s) => {
     const ratio = s.box_area && s.mask_area != null ? (s.mask_area / s.box_area) * 100 : null;
-    tb.append(el("tr", {}, el("td", { textContent: s.label }), el("td", { className: "num", textContent: s.count }), el("td", { className: "num", textContent: fmtInt(s.mask_area) }),
-      el("td", { className: "num", textContent: fmtInt(s.box_area) }), el("td", { className: "num", textContent: ratio == null ? "—" : ratio.toFixed(0) + "%" }), el("td", { className: "num", textContent: fmt(s.mean_score, 2) })));
+    const miss = s.count === 0;
+    tb.append(el("tr", {}, el("td", { textContent: s.label }), el("td", { className: "num" + (miss ? " st-ng" : ""), textContent: s.count }),
+      el("td", { className: "num", textContent: s.best_score == null ? "<0.01" : s.best_score.toFixed(2) }), el("td", { className: "num", textContent: fmt(s.mean_score, 2) }),
+      el("td", { className: "num", textContent: fmtInt(s.mask_area) }), el("td", { className: "num", textContent: fmtInt(s.box_area) }),
+      el("td", { className: "num", textContent: ratio == null ? "—" : ratio.toFixed(0) + "%" }), el("td", { className: "num", textContent: fmt(s.mean_sam_iou, 2) })));
   });
   const td = $("tbl-det").tBodies[0]; td.replaceChildren();
-  r.detections.forEach((d) => td.append(el("tr", {}, el("td", { textContent: d.id }), el("td", { textContent: d.label }), el("td", { className: "num", textContent: d.score.toFixed(3) }),
-    el("td", { textContent: d.box.map((v) => Math.round(v)).join(", ") }), el("td", { className: "num", textContent: fmtInt(d.mask_area) }), el("td", { className: "num", textContent: d.contours.reduce((a, c) => a + c.length, 0) }))));
+  r.detections.forEach((d) => td.append(el("tr", {}, el("td", { textContent: d.id }), el("td", { textContent: d.label }), el("td", { textContent: (d.primary && r.hyde && r.hyde.applied ? "★ " : "") + (d.query && d.query !== d.label ? d.query : "—"), className: "muted" }), el("td", { className: "num", textContent: d.score.toFixed(3) }),
+    el("td", { textContent: d.box.map((v) => Math.round(v)).join(", ") }), el("td", { className: "num", textContent: fmtInt(d.mask_area) }),
+    el("td", { className: "num", textContent: fmt(d.sam_iou, 3) }), el("td", { className: "num", textContent: d.contours.reduce((a, c) => a + c.length, 0) }))));
+  renderHint(r);
+}
+// 沒有偵測結果時說明原因（SAM 只在 OWL 有給框時才會執行）
+function renderHint(r) {
+  const msgs = [], th = r.threshold ?? +$("threshold").value, bad = r.prompts.filter((p) => /[^\x00-\x7F]/.test(p));
+  if (bad.length && !(r.hyde && r.hyde.applied)) msgs.push(`OWL 的文字編碼器只認英文：「${bad.join("、")}」這類非英文提示詞幾乎偵測不到，請改用英文（例如 a screw）。`);
+  const miss = r.summary.filter((s) => s.count === 0);
+  if (!r.detections.length) msgs.push(`OWL 在門檻 ${(+th).toFixed(2)} 下沒有找到任何物件，所以 SAM 沒有執行（沒有框就沒有遮罩，面積與 SAM 品質都會是空的）。`);
+  if (miss.length) msgs.push(`沒偵測到：${miss.map((s) => `${s.label}（最高分 ${s.best_score == null ? "—" : s.best_score.toFixed(2)}${s.best_score != null && s.best_score < th ? "，低於門檻" : ""}）`).join("、")}。可降低門檻，或改用 "a …" / 更具體的英文描述。`);
+  $("hint").hidden = !msgs.length; $("hint").textContent = msgs.join("\n");
 }
 function renderTiming(r) {
   const t = r.timing, other = Math.max(0, t.total_ms - t.text_encode_ms - t.owl_ms - t.sam_ms - t.serialize_ms);
@@ -399,6 +502,23 @@ function spark() {
   const c = $("spark"), g = c.getContext("2d"), a = state.latencies, w = c.width, h = c.height; g.clearRect(0, 0, w, h); if (!a.length) return;
   const max = Math.max(...a) * 1.1, bw = w / 40; g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#2563eb";
   a.forEach((v, i) => { const bh = (v / max) * (h - 4); g.fillRect(i * bw + 1, h - bh, bw - 2, bh); });
+}
+
+function drawHydeCard(groups, r) {
+  const info = state.hyde.info, card = $("card-hyde"), body = $("hyde-body"); card.hidden = false; body.replaceChildren();
+  $("hyde-meta").textContent = info ? `${info.model} · 擴展耗時 ${fmt(info.elapsed_ms, 0)} ms${Object.values(info.cached || {}).every(Boolean) ? "（快取）" : ""}` : "";
+  Object.entries(groups).forEach(([label, qs]) => {
+    const dets = r ? r.detections.filter((d) => d.label === label) : [], win = new Set(dets.map((d) => d.query));
+    const s = r && r.summary.find((x) => x.label === label), pr = s && s.primary ? `　★ 主要輸出：「${s.primary.query}」${s.primary.score.toFixed(2)}` : "";
+    body.append(el("div", { className: "hy-row" }, el("b", { textContent: r ? `${label} → ${s ? s.count : 0} 個${pr}` : label }),
+      ...qs.map((q) => el("span", { className: "chip" + (win.has(q) ? " win" : ""), title: win.has(q) ? "有物件由這個描述命中" : "" }, q))));
+  });
+}
+function renderHyde(r) {
+  const h = r.hyde || {}, card = $("card-hyde");
+  if (!h.requested) { card.hidden = true; return; }
+  if (!h.applied) { card.hidden = false; $("hyde-meta").textContent = ""; $("hyde-body").replaceChildren(el("div", { className: "muted", textContent: h.note || "未套用" })); return; }
+  drawHydeCard(h.expanded, r);
 }
 
 // ================= 製造情境：數量檢查 =================
@@ -463,7 +583,7 @@ $("btn-log").addEventListener("click", refreshLogs); $("log-filter").addEventLis
 
 // ================= 啟動 =================
 (async function init() {
-  setMode("image"); renderPromptChips(); listCams();
+  setMode("image"); renderPromptChips(); updateHydeChip(); listCams(); hydeStatus(); setInterval(hydeStatus, 15000);
   try { const h = await (await fetch("/api/health")).json(); $("chip-backend").textContent = h.backend; $("chip-device").textContent = h.device; } catch { /* pollStats 會顯示 */ }
   pollStats(); setInterval(pollStats, 1000);
   refreshLogs(); setInterval(() => { if ($("log-auto").checked && !state.busy) refreshLogs(); }, 2000);

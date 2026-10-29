@@ -56,6 +56,7 @@
 - [x] 即時更換文字提示（不需重啟）
 - [ ] 自行蒸餾 NanoSAM ResNet18 image encoder（官方檔案需登入 Google Drive；見 [docs/training.md](docs/training.md)）
 - [ ] 修正重複偵測造成的計數偏高
+- [x] HyDE 提示擴展（Ollama + qwen3:4b，每組 5 詞句取組內最高信心，詳見 [docs/hyde.md](docs/hyde.md)）；尚待用真實素材驗證效果
 - [x] 攝影機／影片輸入（瀏覽器攝影機、影片檔、伺服器端攝影機或影片路徑）
 - [x] 製造情境：零件齊套數量檢查（OK / NG、遮罩面積），詳見 [docs/scenario.md](docs/scenario.md)；尚待用真實製造素材驗證
 - [ ] 提示詞測試集：≥10 張影像、≥3 種提示詞寫法，建立正確率計算腳本
@@ -80,6 +81,7 @@
 
 - 完整安裝說明（conda、模型下載、Jetson 步驟）：[docs/installation.md](docs/installation.md)
 - WSL 開發環境：`./installation/setup_env.sh`（conda: `nanoowl-sam`），模型：`./installation/download_model.sh`
+- HyDE（選用）：`./installation/install_ollama.sh` 安裝 Ollama 並下載 qwen3:4b；server 啟動時會自動拉起，詳見 [docs/hyde.md](docs/hyde.md)
 - Jetson 部署：`installation/jetson/`（編號順序執行），版本相容性筆記見 [docs/jetson-setup.md](docs/jetson-setup.md)
 
 ### 快速開始（WSL）
@@ -93,6 +95,7 @@ python src/test_image.py <影像> "a cat" "a remote control"      # 單張：框
 python src/demo_owl.py <影像> "a cat"                           # 只跑 OWL
 python src/demo_sam.py <影像> --box 6 53 320 469                # 只跑 SAM
 python src/app.py --source <影片> --prompt "a cat" --style contour   # 即時；執行中輸入新提示 + Enter 可換
+./installation/download_model.sh nanosam                        # 之後給 Jetson 轉引擎用的 mask decoder ONNX（encoder 需手動下載或自行蒸餾，見 docs/training.md）
 python -m server.main                                             # Web 介面 http://127.0.0.1:8000（見 docs/web-app.md）
 ```
 
@@ -109,7 +112,7 @@ python -m server.main                                             # Web 介面 h
 ├── installation/                # 環境安裝、模型下載（含 jetson/ 部署腳本）
 ├── training/                    # NanoSAM image encoder 蒸餾訓練與 COCO 下載
 ├── third_party/                 # submodule: nanoowl、nanosam
-├── docs/                        # installation / jetson-setup / training / workflow / web-app / benchmark / experiments
+├── docs/                        # installation / jetson-setup / training / workflow / web-app / hyde / scenario / benchmark / experiments
 ├── environment.yml, requirements*.txt
 └── data/                        # 模型權重、引擎、測試資料（不進版控）
 ```
