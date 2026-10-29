@@ -10,3 +10,6 @@ out*.mp4
 __pycache__/
 *.egg-info/
 .venv-jetson/
+
+# 日誌
+*.log

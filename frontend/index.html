@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open-Vocab Segmentation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>文字提示 · 物件偵測與分割</h1>
+  <div class="chips">
+    <span class="chip" id="chip-status"><i class="dot"></i><span>連線中…</span></span>
+    <span class="chip" id="chip-device">—</span>
+    <span class="chip" id="chip-backend">—</span>
+  </div>
+</header>
+
+<main>
+  <!-- 左：輸入與結果影像 -->
+  <section class="col-main">
+    <div class="card" id="card-input">
+      <h2>輸入</h2>
+      <div class="tabs" id="tabs" role="tablist">
+        <button class="tab on" data-mode="image" role="tab">圖片</button>
+        <button class="tab" data-mode="video" role="tab">影片檔</button>
+        <button class="tab" data-mode="cam" role="tab">瀏覽器攝影機</button>
+        <button class="tab" data-mode="server" role="tab">伺服器來源</button>
+      </div>
+
+      <div class="panel" id="panel-image">
+        <label class="drop" id="drop">
+          <input type="file" id="file" accept="image/*" hidden>
+          <span id="drop-text">點擊、拖曳或貼上圖片</span>
+        </label>
+      </div>
+
+      <div class="panel" id="panel-video" hidden>
+        <label class="drop" id="drop-video">
+          <input type="file" id="vfile" accept="video/*" hidden>
+          <span id="vdrop-text">點擊或拖曳影片檔（mp4 / webm …）</span>
+        </label>
+        <div class="row">
+          <label class="inline">取樣間隔 <input type="number" id="v-step" value="0.5" min="0.05" max="30" step="0.05" style="width:5em"> 秒</label>
+          <label class="inline">從 <input type="number" id="v-from" value="0" min="0" step="0.5" style="width:5em"> 秒</label>
+          <div class="spacer"></div>
+          <button id="btn-vstart" class="primary" disabled>開始分析</button>
+          <button id="btn-vstop" class="ghost" disabled>停止</button>
+        </div>
+        <progress id="v-prog" value="0" max="1" hidden></progress>
+        <small class="muted" id="v-info">影片在瀏覽器端逐段取樣，每個取樣點送到後端推論；分析中仍可隨時修改提示詞。</small>
+      </div>
+
+      <div class="panel" id="panel-cam" hidden>
+        <div class="row">
+          <select id="cam-dev"><option value="">預設攝影機</option></select>
+          <div class="spacer"></div>
+          <button id="btn-camstart" class="primary">開啟攝影機</button>
+          <button id="btn-camstop" class="ghost" disabled>關閉</button>
+        </div>
+        <small class="muted">使用「瀏覽器所在電腦」的攝影機，每一幀送到後端推論。瀏覽器只允許在 localhost 或 HTTPS 使用攝影機。</small>
+      </div>
+
+      <div class="panel" id="panel-server" hidden>
+        <label class="field">來源 <small>（後端所在機器：攝影機編號 <code>0</code>、影片路徑、或 <code>gst:…</code> GStreamer 管線）</small>
+          <input type="text" id="srv-src" value="0" spellcheck="false">
+        </label>
+        <div class="row">
+          <div class="spacer"></div>
+          <button id="btn-srvstart" class="primary">開始串流</button>
+          <button id="btn-srvstop" class="ghost" disabled>停止</button>
+        </div>
+        <small class="muted">由後端直接讀取並持續推論，結果以 MJPEG 串流顯示（Jetson 接 USB / CSI 攝影機時使用）。</small>
+      </div>
+
+      <label class="field">提示詞列表 <small>（一行一個，或用逗號分隔；每個 ≤ 12 字）</small>
+        <textarea id="prompts" rows="4" spellcheck="false">a cat
+a remote control</textarea>
+      </label>
+      <div id="prompt-chips" class="chips small"></div>
+
+      <div class="grid2">
+        <label class="field">偵測門檻 threshold <output id="th-out">0.10</output>
+          <input type="range" id="threshold" min="0.01" max="0.9" step="0.01" value="0.10">
+        </label>
+        <label class="field">NMS IoU <output id="nms-out">0.50</output>
+          <input type="range" id="nms" min="0.1" max="1" step="0.05" value="0.5">
+        </label>
+      </div>
+
+      <div class="row">
+        <label class="check"><input type="checkbox" id="hyde"> 使用 HyDE 擴展提示 <span class="badge warn">後端尚未實作</span></label>
+        <label class="check"><input type="checkbox" id="auto"> 提示詞改變時自動執行</label>
+        <label class="check" title="取消勾選後只輸出物件框、不跑 SAM，GTX 1060 上約快 2.5 倍；適合只需要計數的情境"><input type="checkbox" id="masks" checked> 計算遮罩 <small>（取消＝只留框，較快）</small></label>
+      </div>
+      <div class="row">
+        <label class="inline">畫面最大邊
+          <select id="maxside"><option>480</option><option selected>640</option><option>960</option><option>1280</option></select>
+        </label>
+        <label class="inline">顯示
+          <select id="style">
+            <option value="both">遮罩 + 輪廓</option>
+            <option value="contour">只畫輪廓</option>
+            <option value="mask">只填遮罩</option>
+            <option value="box">只畫框</option>
+          </select>
+        </label>
+        <div class="spacer"></div>
+        <label class="inline">重複 <input type="number" id="bench-n" value="10" min="2" max="200" style="width:4.5em"> 次
+          <button id="btn-bench" class="ghost" disabled>量測速度</button></label>
+        <button id="btn-run" class="primary" disabled>執行</button>
+      </div>
+      <div id="error" class="error" hidden></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h2>結果</h2>
+        <div id="legend" class="chips small"></div>
+      </div>
+      <div class="stage" id="stage">
+        <canvas id="canvas" width="640" height="360"></canvas>
+        <div id="tip" class="tip" hidden></div>
+        <img id="stream" alt="server stream" hidden>
+        <div id="busy" class="busy" hidden>推論中…</div>
+        <div id="empty" class="empty">尚未選擇圖片</div>
+      </div>
+    </div>
+
+    <div class="card" id="card-check">
+      <div class="card-head"><h2>製造情境：數量檢查 <small>（設定每種零件的預期數量，即時判定 OK / NG）</small></h2><span id="verdict" class="verdict idle">未設定</span></div>
+      <div class="table-wrap"><table id="tbl-check">
+        <thead><tr><th>零件（提示詞）</th><th class="num">預期</th><th class="num">偵測</th><th>判定</th></tr></thead>
+        <tbody><tr><td colspan="4" class="muted">執行後顯示</td></tr></tbody>
+      </table></div>
+    </div>
+
+    <div class="card" id="card-timeline" hidden>
+      <div class="card-head"><h2>影片時間軸 <small>各提示詞的偵測數量隨時間變化</small></h2><button id="btn-csv" class="ghost">下載 CSV</button></div>
+      <canvas id="timeline" width="760" height="180"></canvas>
+      <div id="tl-legend" class="chips small"></div>
+      <div class="table-wrap"><table id="tbl-tl"><thead></thead><tbody></tbody></table></div>
+    </div>
+
+    <div class="card">
+      <h2>各提示詞統計 <small>（面積單位：像素）</small></h2>
+      <div class="table-wrap"><table id="tbl-summary">
+        <thead><tr><th>提示詞</th><th class="num">數量</th><th class="num">遮罩面積</th><th class="num">框面積</th><th class="num">遮罩/框</th><th class="num">平均分數</th></tr></thead>
+        <tbody><tr><td colspan="6" class="muted">尚無結果</td></tr></tbody>
+      </table></div>
+      <details>
+        <summary>每個偵測結果</summary>
+        <div class="table-wrap"><table id="tbl-det">
+          <thead><tr><th>#</th><th>提示詞</th><th class="num">分數</th><th>框 x0,y0,x1,y1</th><th class="num">遮罩面積</th><th class="num">輪廓點數</th></tr></thead>
+          <tbody></tbody>
+        </table></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- 右：速度、即時數據、日誌 -->
+  <aside class="col-side">
+    <div class="card">
+      <h2>執行速度 <small id="req-id"></small></h2>
+      <div class="big"><span id="t-total">—</span><small>ms 後端總計</small> <span id="t-fps">—</span><small>FPS</small></div>
+      <small id="loop-fps" class="muted"></small>
+      <div class="stack" id="stack"></div>
+      <div id="stack-legend" class="chips small"></div>
+      <dl class="kv" id="timing-kv"></dl>
+    </div>
+
+    <div class="card">
+      <h2>即時 GPU 數據 <small>每秒更新</small></h2>
+      <div class="meter"><span>顯存</span><div class="bar"><div id="m-mem"></div></div><b id="m-mem-t">—</b></div>
+      <dl class="kv" id="gpu-kv"></dl>
+      <canvas id="spark" width="320" height="56"></canvas>
+      <small class="muted">近期每次請求的後端總耗時（ms）</small>
+    </div>
+
+    <div class="card" id="card-bench" hidden>
+      <h2>重複量測結果</h2>
+      <dl class="kv" id="bench-kv"></dl>
+    </div>
+
+    <div class="card">
+      <h2>對照官方（TensorRT, Jetson）</h2>
+      <p class="muted note">目前為 WSL + GTX 1060 + PyTorch fp32，僅供開發參考，不可與下列官方數據直接比較。Orin Nano 的 OWL 與 encoder 單項官方為 TBD。</p>
+      <div class="table-wrap"><table class="small-table">
+        <thead><tr><th>項目</th><th class="num">官方</th></tr></thead>
+        <tbody>
+          <tr><td>OWL-ViT B/32 · AGX Orin</td><td class="num">95 FPS</td></tr>
+          <tr><td>MobileSAM 完整流程 · Orin Nano</td><td class="num">146 ms</td></tr>
+          <tr><td>NanoSAM 完整流程 · Orin Nano</td><td class="num">27 ms</td></tr>
+          <tr><td>NanoSAM 完整流程 · AGX Orin</td><td class="num">8.1 ms</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <div class="card">
+      <h2>本次工作階段</h2>
+      <div class="table-wrap"><table id="tbl-hist">
+        <thead><tr><th>時間</th><th>提示詞</th><th class="num">數量</th><th class="num">OWL</th><th class="num">SAM</th><th class="num">總計</th></tr></thead>
+        <tbody><tr><td colspan="6" class="muted">尚無紀錄</td></tr></tbody>
+      </table></div>
+    </div>
+  </aside>
+</main>
+
+<section class="card logs">
+  <div class="card-head">
+    <h2>後端日誌 <small id="log-path">app.log</small></h2>
+    <div class="row">
+      <label class="check"><input type="checkbox" id="log-filter" checked> 只看最近一次請求</label>
+      <label class="check"><input type="checkbox" id="log-auto" checked> 自動更新</label>
+      <button id="btn-log" class="ghost">重新整理</button>
+    </div>
+  </div>
+  <pre id="log" aria-live="polite"></pre>
+</section>
+
+<video id="vid" muted playsinline preload="auto" hidden></video>
+<video id="cam" muted playsinline hidden></video>
+<script src="app.js"></script>
+</body>
+</html>

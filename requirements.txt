@@ -16,3 +16,7 @@ gdown
 onnx
 onnxscript
 onnxruntime
+# Web 後端
+fastapi
+uvicorn[standard]
+python-multipart

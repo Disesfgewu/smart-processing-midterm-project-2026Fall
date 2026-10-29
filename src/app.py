@@ -18,9 +18,9 @@ import numpy as np
 import PIL.Image
 
 sys.path.insert(0, "src")
+from overlay import draw_overlay
 from pipeline import OpenVocabSegmenter
 
-COLORS = [(0, 200, 0), (0, 128, 255), (255, 80, 80), (200, 0, 200), (0, 200, 200), (200, 200, 0)]
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--source", default="0", help="攝影機編號或影片路徑")
@@ -47,32 +47,6 @@ def read_stdin():
 threading.Thread(target=read_stdin, daemon=True).start()
 
 
-def draw(frame, dets, prompts, timing, fps):
-    if args.style in ("mask", "both"):
-        overlay = frame.copy()
-        for d in dets:
-            overlay[d.mask] = COLORS[prompts.index(d.label) % len(COLORS)]
-        frame = cv2.addWeighted(overlay, 0.35 if args.style == "both" else 0.45, frame, 0.65 if args.style == "both" else 0.55, 0)
-    for d in dets:
-        c = COLORS[prompts.index(d.label) % len(COLORS)]
-        x0, y0, x1, y1 = [int(v) for v in d.box]
-        if args.style in ("contour", "both"):
-            cv2.polylines(frame, [pts.reshape(-1, 1, 2).astype(np.int32) for pts in d.contours()], True, c, 2, cv2.LINE_AA)
-        else:
-            cv2.rectangle(frame, (x0, y0), (x1, y1), c, 2)
-        cv2.putText(frame, f"{d.label} {d.score:.2f}", (x0, max(y0 - 5, 12)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, c, 1, cv2.LINE_AA)
-    y = 20
-    for i, p in enumerate(prompts):  # 各提示詞的數量與總遮罩面積
-        mine = [d for d in dets if d.label == p]
-        area = int(sum(d.mask.sum() for d in mine))
-        cv2.putText(frame, f"{p}: count={len(mine)} area={area}px", (8, y), cv2.FONT_HERSHEY_SIMPLEX, 0.55,
-                    COLORS[i % len(COLORS)], 2, cv2.LINE_AA)
-        y += 22
-    cv2.putText(frame, f"{fps:.1f} FPS  owl {timing.get('owl_ms', 0):.0f}ms  sam {timing.get('sam_ms', 0):.0f}ms",
-                (8, frame.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255, 255, 255), 2, cv2.LINE_AA)
-    return frame
-
-
 seg = OpenVocabSegmenter(sam_checkpoint=args.sam_checkpoint, owl_engine=args.owl_engine)
 seg.set_prompts(args.prompt)
 print("prompts:", seg.prompts, "（輸入新提示後按 Enter 可即時更換）")
@@ -95,7 +69,7 @@ while True:
     dets = seg(PIL.Image.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)), args.threshold)
     dt = time.perf_counter() - t0
     fps_smooth = 1 / dt if n == 0 else 0.9 * fps_smooth + 0.1 / dt
-    vis = draw(bgr, dets, seg.prompts, seg.timing, fps_smooth)
+    vis = draw_overlay(bgr, dets, seg.prompts, seg.timing, fps_smooth, args.style)
     if args.out:
         if writer is None:
             writer = cv2.VideoWriter(args.out, cv2.VideoWriter_fourcc(*"mp4v"), 15, (vis.shape[1], vis.shape[0]))

@@ -56,7 +56,8 @@
 - [x] 即時更換文字提示（不需重啟）
 - [ ] 自行蒸餾 NanoSAM ResNet18 image encoder（官方檔案需登入 Google Drive；見 [docs/training.md](docs/training.md)）
 - [ ] 修正重複偵測造成的計數偏高
-- [ ] 製造現場情境（依文字指定零件並計數／算面積）
+- [x] 攝影機／影片輸入（瀏覽器攝影機、影片檔、伺服器端攝影機或影片路徑）
+- [x] 製造情境：零件齊套數量檢查（OK / NG、遮罩面積），詳見 [docs/scenario.md](docs/scenario.md)；尚待用真實製造素材驗證
 - [ ] 提示詞測試集：≥10 張影像、≥3 種提示詞寫法，建立正確率計算腳本
 - [ ] 效能量測腳本（延遲、FPS、記憶體），之後直接在 Jetson 跑
 - [ ] 準備報告素材：情境圖、OWL-ViT／SAM 原理說明（資訊流程圖見 [docs/workflow.md](docs/workflow.md)）
@@ -92,6 +93,7 @@ python src/test_image.py <影像> "a cat" "a remote control"      # 單張：框
 python src/demo_owl.py <影像> "a cat"                           # 只跑 OWL
 python src/demo_sam.py <影像> --box 6 53 320 469                # 只跑 SAM
 python src/app.py --source <影片> --prompt "a cat" --style contour   # 即時；執行中輸入新提示 + Enter 可換
+python -m server.main                                             # Web 介面 http://127.0.0.1:8000（見 docs/web-app.md）
 ```
 
 ### 目錄結構
@@ -101,10 +103,13 @@ python src/app.py --source <影片> --prompt "a cat" --style contour   # 即時�
 ├── README.md
 ├── image-project-description/   # 題目圖檔
 ├── src/                         # pipeline.py（OWL+SAM 串接）、app.py（即時示範）、demo_owl / demo_sam / test_image
+├── server/                      # FastAPI 後端（API、日誌、推論服務）
+├── frontend/                    # Web 前端（HTML/JS，由後端提供）
+├── benchmark/                   # 分階段延遲／FPS／記憶體量測
 ├── installation/                # 環境安裝、模型下載（含 jetson/ 部署腳本）
 ├── training/                    # NanoSAM image encoder 蒸餾訓練與 COCO 下載
 ├── third_party/                 # submodule: nanoowl、nanosam
-├── docs/                        # installation / jetson-setup / training / workflow
+├── docs/                        # installation / jetson-setup / training / workflow / web-app / benchmark / experiments
 ├── environment.yml, requirements*.txt
 └── data/                        # 模型權重、引擎、測試資料（不進版控）
 ```
