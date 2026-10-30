@@ -84,7 +84,7 @@
 - 完整安裝說明（conda、模型下載、Jetson 步驟）：[docs/installation.md](docs/installation.md)
 - WSL 開發環境：`./installation/setup_env.sh`（conda: `nanoowl-sam`），模型：`./installation/download_model.sh`
 - HyDE（選用）：`./installation/install_ollama.sh` 安裝 Ollama 並下載 qwen3:4b；server 啟動時會自動拉起，詳見 [docs/hyde.md](docs/hyde.md)
-- Jetson 部署：`installation/jetson/`（編號順序執行），版本相容性筆記見 [docs/jetson-setup.md](docs/jetson-setup.md)
+- Jetson 部署：操作手冊 [docs/jetson-deploy.md](docs/jetson-deploy.md)、資料清單與量測記錄表 [docs/jetson-data.md](docs/jetson-data.md)、版本相容性筆記 [docs/jetson-setup.md](docs/jetson-setup.md)；腳本在 `installation/jetson/`（`pack_for_jetson.sh` 於開發機打包，其餘 `00`~`07` 與 `collect_env.sh` 於 Jetson 依序執行）
 
 ### 快速開始（WSL）
 

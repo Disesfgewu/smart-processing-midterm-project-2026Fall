@@ -1,5 +1,7 @@
 # Jetson Orin Nano（JetPack 6.2）部署步驟與版本相容性筆記
 
+> **一步一步的操作請看 [jetson-deploy.md](jetson-deploy.md)；要帶去的資料與量測記錄表請看 [jetson-data.md](jetson-data.md)。** 本文件保留版本預期值與已知衝突清單。
+
 ## 目標環境（預期值，請以 `00_check_jetpack.sh` 實際輸出為準並回填報告）
 
 | 項目 | 版本 |

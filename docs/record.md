@@ -425,3 +425,13 @@
 - [ ] 查明 OWL 框「往左上延伸」的偏差；試 `pad_square=True`
 - [ ] 報告：研究背景與原理（OWL-ViT、SAM）、系統情境圖
 - [ ] 前端在手機寬度與深色模式只寫了 CSS，未實測
+
+---
+
+## 12. Jetson 部署前的準備（2026-10-30）
+
+- 新增：`pack_for_jetson.sh`（開發機打包 ONNX / 權重 / 範例並附 SHA256SUMS）、`collect_env.sh`（把版本資訊寫成 Markdown）、`06_measure_engines.sh`（`trtexec` 量各引擎延遲 + 記憶體 + 電源模式，輸出可貼進報告的表）、`07_run_server.sh`；文件 `docs/jetson-deploy.md`（指令手冊）、`docs/jetson-data.md`（資料清單與量測記錄表）。
+- `benchmark/bench_pipeline.py` 新增 `--owl_engine`、`--student`、`--power_mode`；Jetson 沒有可用的 `nvidia-smi`（且 CPU / GPU 共用記憶體），改記系統記憶體與程序 RSS 峰值。
+- **發現的缺口**：`02_download_models.sh` 原本註解寫「Jetson 不需要 mobile_sam.pt」，但 pipeline 的 SAM 仍走 PyTorch，**需要它**；已修正並納入打包。
+- **驗證範圍**：打包 → 解壓 → `sha256sum -c` 全部 OK；`06` 的輸出解析只用**假的 trtexec 輸出**測過（動態形狀的 decoder 引擎會檢查有帶 `--shapes`）；`bench_pipeline.py` 在 WSL 用自訓練 encoder 實跑通過。**所有 Jetson 專屬行為（trtexec 實際輸出格式、tegrastats、nvpmodel、攝影機管線）都沒有實機驗證。**
+

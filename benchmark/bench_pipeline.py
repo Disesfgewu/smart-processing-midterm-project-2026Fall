@@ -2,6 +2,11 @@
 
   python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote control" --runs 50
 
+  # Jetson：OWL 用 TensorRT 引擎、SAM 用自訓練 encoder（PyTorch），並標註電源模式
+  python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote control" \
+      --owl_engine data/owl_image_encoder_patch32.engine --student data/models/student.pth \
+      --power_mode "MAXN (nvpmodel 0)" --out data/bench/jetson/pipeline_owltrt_student.json
+
 方法：
   * 每個階段先暖機（--warmup），再重複 --runs 次；每次計時前後都 torch.cuda.synchronize()
     （GPU 非同步，不同步會把時間算到下一階段）。
@@ -11,6 +16,8 @@
 """
 import argparse
 import json
+import os
+import resource
 import statistics
 import subprocess
 import sys
@@ -31,13 +38,26 @@ ap.add_argument("--threshold", type=float, default=0.1)
 ap.add_argument("--warmup", type=int, default=10)
 ap.add_argument("--runs", type=int, default=50)
 ap.add_argument("--out", default="data/bench/bench.json")
+ap.add_argument("--owl_engine", default=None, help="OWL image encoder 的 TensorRT 引擎（Jetson 上由 03_build_engines.sh 產生）；不給就用 PyTorch")
+ap.add_argument("--student", default=None, help="自訓練 ResNet18 encoder 的 checkpoint；給了就量它而不是 baseline MobileSAM encoder")
+ap.add_argument("--power_mode", default="", help="記錄用文字（例如 'MAXN (nvpmodel 0)'），會寫進結果 JSON；報告需註明")
 args = ap.parse_args()
 
 
 def smi_used_mb():
-    out = subprocess.run(["nvidia-smi", "--query-gpu=memory.used,temperature.gpu,clocks.sm", "--format=csv,noheader,nounits"],
-                         capture_output=True, text=True).stdout.strip().split(",")
-    return [float(x) for x in out]
+    """[GPU 記憶體使用 MB, 溫度, SM 時脈]。Jetson 沒有可用的 nvidia-smi（且 CPU / GPU 共用記憶體）→ 回傳 NaN，改看 sys_used_mb()。"""
+    try:
+        out = subprocess.run(["nvidia-smi", "--query-gpu=memory.used,temperature.gpu,clocks.sm", "--format=csv,noheader,nounits"],
+                             capture_output=True, text=True).stdout.strip().split(",")
+        return [float(x) for x in out]
+    except (OSError, ValueError):
+        return [float("nan")] * 3
+
+
+def sys_used_mb():
+    """系統記憶體使用量（MemTotal - MemAvailable）。Jetson 的 GPU 與 CPU 共用同一塊記憶體，這才是真正的用量。"""
+    m = {l.split(":")[0]: int(l.split()[1]) for l in open("/proc/meminfo")}
+    return (m["MemTotal"] - m["MemAvailable"]) / 1024
 
 
 def timeit(fn, warmup, runs):
@@ -56,15 +76,20 @@ def timeit(fn, warmup, runs):
 
 torch.cuda.reset_peak_memory_stats()
 smi_before = smi_used_mb()
+sys_before = sys_used_mb()
 t0 = time.perf_counter()
-seg = OpenVocabSegmenter()
+seg = OpenVocabSegmenter(owl_engine=args.owl_engine, student_checkpoint=args.student)
+if args.student:
+    seg.set_sam_encoder("student")
 seg.set_prompts(args.prompts)
 load_s = time.perf_counter() - t0
 image = PIL.Image.open(args.image).convert("RGB")
 image_np = np.asarray(image)
 owl, sam = seg.owl, seg.sam
 res = {"image": args.image, "image_size": list(image.size), "prompts": args.prompts, "device": torch.cuda.get_device_name(0),
-       "torch": torch.__version__, "backend": "pytorch-fp32", "model_load_s": load_s}
+       "torch": torch.__version__, "model_load_s": load_s, "power_mode": args.power_mode,
+       "backend": f"owl={'tensorrt' if args.owl_engine else 'pytorch-fp32'}, sam=pytorch-fp32",
+       "owl_engine": args.owl_engine, "sam_encoder": seg.sam_encoder, "student_checkpoint": args.student}
 
 # ---- OWL 分段 ----
 with torch.no_grad():
@@ -94,17 +119,18 @@ with torch.no_grad():
 res["memory"] = {"torch_peak_alloc_mb": torch.cuda.max_memory_allocated() / 2**20,
                  "torch_reserved_mb": torch.cuda.memory_reserved() / 2**20,
                  "nvidia_smi_used_before_mb": smi_before[0], "nvidia_smi_used_after_mb": smi_used_mb()[0],
-                 "gpu_temp_c": smi_used_mb()[1], "gpu_sm_clock_mhz": smi_used_mb()[2]}
+                 "gpu_temp_c": smi_used_mb()[1], "gpu_sm_clock_mhz": smi_used_mb()[2],
+                 "sys_used_before_mb": sys_before, "sys_used_after_mb": sys_used_mb(),                       # 系統記憶體（Jetson 為 CPU+GPU 共用）
+                 "process_peak_rss_mb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024}           # 本程序的常駐記憶體峰值（Linux 單位為 KB）
 
-import os
 os.makedirs(os.path.dirname(args.out), exist_ok=True)
 json.dump(res, open(args.out, "w"), indent=2)
 
-print(f"\n{res['device']} | {res['backend']} | image {image.size} | boxes={res['num_boxes']} | load {load_s:.1f}s")
+print(f"\n{res['device']} | {res['backend']} | SAM encoder={res['sam_encoder']} | power={res['power_mode'] or '（未標註）'} | image {image.size} | boxes={res['num_boxes']} | load {load_s:.1f}s")
 print(f"{'stage':24s} {'mean':>8s} {'median':>8s} {'p95':>8s} {'std':>7s} {'FPS':>7s}")
 for k in ["owl_preprocess", "owl_image_encoder", "owl_decode", "owl_total", "owl_text_encoder",
           "sam_image_encoder", "sam_decoder_per_box", "pipeline_total"]:
     if k in res:
         r = res[k]
         print(f"{k:24s} {r['mean_ms']:8.1f} {r['median_ms']:8.1f} {r['p95_ms']:8.1f} {r['std_ms']:7.1f} {r['fps']:7.1f}")
-print("memory(MB):", {k: round(v) for k, v in res["memory"].items()})
+print("memory(MB):", {k: (round(v) if v == v else None) for k, v in res["memory"].items()})
