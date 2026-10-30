@@ -59,7 +59,7 @@
 - [x] HyDE 提示擴展（Ollama + qwen3:4b，每組 5 詞句取組內最高信心，詳見 [docs/hyde.md](docs/hyde.md)）；尚待用真實素材驗證效果
 - [x] 攝影機／影片輸入（瀏覽器攝影機、影片檔、伺服器端攝影機或影片路徑）
 - [x] 製造情境：零件檢查（工單、預期數量、比例尺校準與 mm² 面積、單件面積範圍、PASS/FAIL、檢查紀錄、可列印報表），詳見 [docs/scenario.md](docs/scenario.md)；尚待用真實製造素材驗證
-- [ ] **SAM 的 TensorRT 後端**：pipeline 目前只有 OWL 能切換成 TensorRT 引擎（`owl_engine`），SAM 還沒有；Jetson 上建好的 NanoSAM 引擎無法被 pipeline 載入。需寫轉接層包裝 `nanosam.utils.predictor.Predictor`（框 → 兩個提示點、遮罩輸出），並接到 `src/`、`server/`、`benchmark/`。WSL 無法測 TensorRT，可先用 ONNX Runtime 後端驗證前後處理與 decoder 輸入輸出是否正確
+- [x] **SAM 的 NanoSAM 後端**（`src/sam_backends.py`）：TensorRT 引擎或 ONNX Runtime；pipeline / 網頁 / benchmark 都可選用（`NANOSAM_ENCODER` / `NANOSAM_DECODER`）。前後處理已用 ONNX Runtime 在 WSL 驗證（`tests/check_nanosam_backend.py`，與 PyTorch 遮罩 IoU ≥ 0.995）；**TensorRT 路徑（torch2trt + TensorRT 10）尚未在 Jetson 實測**
 - [ ] **批次評估腳本**（影像 × 提示詞寫法 → 偵測正確率表）與提示詞測試集：≥10 張影像、≥3 種提示詞寫法（題目功能要求 5）
 - [ ] 蒐集真實製造影像 / 影片（≥10 張 + 一段影片，人工標註實際數量），並用它驗證：製造情境、HyDE 是否有益、面積準確度、計數誤差
 - [x] 效能量測腳本 `benchmark/bench_pipeline.py`（分階段延遲 / FPS / 記憶體，**目前只支援 PyTorch baseline**）；[ ] 補上 NanoSAM / TensorRT / 電源模式的選項與官方對照表輸出

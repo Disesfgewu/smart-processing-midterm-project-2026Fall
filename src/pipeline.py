@@ -1,6 +1,7 @@
 """文字提示 → NanoOWL 物件框 → SAM 遮罩 的串接（WSL：PyTorch 後端）
 
-Jetson 的 TensorRT 後端：OWL 以 OwlPredictor(image_encoder_engine=...) 切換；SAM 之後在 __init__ 內替換。
+Jetson 的 TensorRT 後端：OWL 以 OwlPredictor(image_encoder_engine=...) 切換；
+SAM 以 nanosam_encoder / nanosam_decoder（TensorRT 引擎，或 ONNX 檔交給 ONNX Runtime 驗證）載入 NanoSAM，見 sam_backends.py。
 """
 import time
 from dataclasses import dataclass
@@ -45,21 +46,29 @@ class Detection:
 
 class OpenVocabSegmenter:
     def __init__(self, sam_checkpoint="data/models/mobile_sam.pt", owl_name="google/owlvit-base-patch32",
-                 owl_engine=None, device="cuda", student_checkpoint=None):
+                 owl_engine=None, device="cuda", student_checkpoint=None,
+                 nanosam_encoder=None, nanosam_decoder=None, nanosam_backend="auto"):
         """student_checkpoint：自行蒸餾的 ResNet18 image encoder（training/train_nanosam.py 的 best.pth / checkpoint.pth）。
         給了就和 baseline（MobileSAM 的 TinyViT encoder）一起載入、可用 set_sam_encoder() 即時切換比較；
-        prompt encoder / mask decoder 一律用 baseline 的（NanoSAM 本來就共用同一個 decoder）。baseline 權重不會被修改。"""
+        prompt encoder / mask decoder 一律用 baseline 的（NanoSAM 本來就共用同一個 decoder）。baseline 權重不會被修改。
+        nanosam_encoder / nanosam_decoder：NanoSAM 的 image encoder 與 mask decoder（.engine = TensorRT；.onnx = ONNX Runtime），
+        給了就多一個 "nanosam" 選項（set_sam_encoder("nanosam")），整個 SAM 階段改走該後端，不再用 PyTorch。"""
         t0 = time.perf_counter()
         try:
             self.owl = OwlPredictor(owl_name, device=device, image_encoder_engine=owl_engine)
             sam = sam_model_registry["vit_t"](checkpoint=sam_checkpoint).to(device).eval()
-            self.sam = SamPredictor(sam)
+            self.sam = self.sam_torch = SamPredictor(sam)
             self.sam_encoders = {"mobilesam": sam.image_encoder}               # baseline
             self.sam_encoder = "mobilesam"
             self.device = device
             self.sam_encoder_meta = {"mobilesam": {"checkpoint": sam_checkpoint, "epoch": None, "val_loss": None}}
             if student_checkpoint:
                 self.add_sam_encoder("student", student_checkpoint)
+            if nanosam_encoder and nanosam_decoder:
+                from sam_backends import NanoSamPredictor
+                self.sam_encoders["nanosam"] = NanoSamPredictor(nanosam_encoder, nanosam_decoder, nanosam_backend)
+                self.sam_encoder_meta["nanosam"] = {"checkpoint": nanosam_encoder, "epoch": None, "val_loss": None,
+                                                    "label": self.sam_encoders["nanosam"].label}
         except Exception as e:
             logger.error(f"[OpenVocabSegmenter.__init__]: input=(owl={owl_name}, engine={owl_engine}, sam={sam_checkpoint}), "
                          f"error={type(e).__name__}: {e}", exc_info=True)
@@ -94,10 +103,15 @@ class OpenVocabSegmenter:
                     f"output=epoch={ck.get('epoch')}, val_loss={ck.get('val_loss')}, elapsed={(time.perf_counter() - t0) * 1e3:.0f}ms")
 
     def set_sam_encoder(self, name: str):
-        """切換 SAM 的 image encoder（'mobilesam' = baseline；'student' = 自訓練 ResNet18）。呼叫端需自行避免與推論同時進行。"""
+        """切換 SAM 的 image encoder（'mobilesam' = baseline；'student' = 自訓練 ResNet18；'nanosam' = TensorRT / ONNX 後端）。
+        呼叫端需自行避免與推論同時進行。"""
         if name not in self.sam_encoders:
             raise ValueError(f"unknown SAM encoder {name!r}; available: {list(self.sam_encoders)}")
-        self.sam.model.image_encoder = self.sam_encoders[name]
+        if name == "nanosam":
+            self.sam = self.sam_encoders[name]                                   # 整個 SAM 階段（encoder + decoder）換成 NanoSAM 後端
+        else:
+            self.sam = self.sam_torch
+            self.sam.model.image_encoder = self.sam_encoders[name]
         self.sam_encoder = name
         self.sam.reset_image()
         logger.info(f"[OpenVocabSegmenter.set_sam_encoder]: input=(name={name}), output=active encoder = {type(self.sam_encoders[name]).__name__}")

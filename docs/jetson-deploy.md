@@ -10,10 +10,10 @@
 | 項目 | 狀態 |
 |---|---|
 | OWL 的 TensorRT 引擎 → pipeline / 網頁 | ✅ 設 `OWL_ENGINE` 即可 |
-| SAM（含自訓練 encoder）走 PyTorch | ✅ 可用，網頁可切換 baseline / 自訓練 |
-| **SAM 的 TensorRT 後端（NanoSAM 引擎）** | ❌ **pipeline 還載入不了**。encoder / decoder 的引擎仍可建、可用 `trtexec` 量延遲（步驟 6），但整個流程目前是「OWL=TensorRT + SAM=PyTorch」。補上轉接層後才能量「全 TensorRT」的整體數據 |
+| **NanoSAM 的 TensorRT 引擎 → pipeline / 網頁**（`src/sam_backends.py`） | ⚠️ **程式已寫好，但 TensorRT 路徑未在實機跑過**。前處理 / 框轉點 / 遮罩後處理是用 **ONNX Runtime 在 WSL 驗證過**（與 PyTorch 自訓練 encoder 的遮罩 IoU ≥ 0.995，橫式與直式影像都測），TensorRT 後端沿用官方 `load_image_encoder_engine` / `load_mask_decoder_engine`，只換 encode / decode 兩個呼叫。torch2trt 在 TensorRT 10 的相容性是最大風險，見步驟 5b |
+| SAM（baseline / 自訓練 encoder）走 PyTorch | ✅ 可用，網頁可切換比較 |
 
-所以第一輪部署可以完成：環境、三個引擎、各引擎延遲、OWL(TRT)+SAM(PyTorch) 的整體流程與網頁示範。
+整體流程有三種組合可以量：① OWL=TRT + MobileSAM(PyTorch)、② OWL=TRT + 自訓練 encoder(PyTorch)、③ **全 TensorRT**（OWL 引擎 + NanoSAM encoder / decoder 引擎）。③ 若 5b 失敗，就退回 ①②，並把失敗訊息記進版本問題表。
 
 ## 1. 開發機（WSL）：打包要傳過去的檔案
 
@@ -92,6 +92,30 @@ ls -lh data/*.engine
 **失敗時**：OOM / `Killed` → 確認 swap 已啟用（`free -h`）、關掉桌面與其他程式再重跑；NanoOWL 建引擎找不到 `trtexec` → 確認 `/usr/src/tensorrt/bin/trtexec`；decoder 建引擎報輸入名稱錯誤 → 用 `python -c "import onnx;m=onnx.load('data/models/mobile_sam_mask_decoder.onnx');print([i.name for i in m.graph.input])"` 檢查，應含 `image_embeddings point_coords point_labels mask_input has_mask_input`。
 **建引擎所花時間請記錄**（報告素材）。
 
+### 5b. 驗證 NanoSAM 引擎可被 pipeline 載入（全 TensorRT 的關鍵一步）
+
+```bash
+python - <<'PY'
+import sys, numpy as np, PIL.Image; sys.path.insert(0, "src")
+from sam_backends import NanoSamPredictor
+p = NanoSamPredictor("data/resnet18_image_encoder.selftrain.engine", "data/mobile_sam_mask_decoder.engine", "trt")
+img = np.asarray(PIL.Image.open("data/samples/cats.jpg").convert("RGB"))
+p.set_image(img)
+m, iou, _ = p.predict(box=[32, 48, 352, 456])
+print("mask", m.shape, "px", int(m.sum()), "iou", iou)      # WSL 上同一個框：PyTorch 約 49900 px、sam_iou 約 0.96
+PY
+```
+
+預期：不報錯，面積接近 49900 px（引擎是 fp16，會有些微差異）。
+**失敗時**（把完整 traceback 存下來，這是報告的版本相容性素材）：
+
+| 症狀 | 可能原因 / 先試 |
+|---|---|
+| `import torch2trt` 或 `TRTModule` 對 TensorRT 10 報錯 | torch2trt 舊版不支援 TRT 10 → 確認裝的是 GitHub master；仍失敗就要改用 TRT 10 的 tensor API 重寫 `_TrtBackend` |
+| decoder 報形狀 / 動態維度錯誤 | 引擎建置時 `--maxShapes` 只支援 1~10 個點；我們只傳 2 個點，應在範圍內 → 檢查 `trtexec` 建置 log |
+| 遮罩全空或位置歪 | 引擎與 ONNX 輸入名稱 / 順序不一致 → 用 `trtexec --loadEngine=… --verbose` 看 binding 名稱 |
+| 面積與 WSL 差很多 | 比對 fp16 與 fp32：用 `trtexec` 重建 encoder 時拿掉 `--fp16` 再比 |
+
 ## 6. Jetson：固定電源模式並量測
 
 ```bash
@@ -109,7 +133,7 @@ sudo nvpmodel -p --verbose | head -20                  # 看有哪些模式（Or
 
 預期：每個引擎一列 mean / median / p99 / FPS。把 `summary.md` 的表貼進 [jetson-data.md](jetson-data.md) 對應位置。
 
-### 6b. 整體流程分段延遲 + 記憶體（OWL=TensorRT、SAM=PyTorch）
+### 6b. 整體流程分段延遲 + 記憶體（①②③ 三種組合）
 
 ```bash
 python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote control" --runs 50 \
@@ -120,6 +144,14 @@ python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote contr
     --power_mode "MAXN (nvpmodel 0)" --out data/bench/jetson/pipe_owltrt_student.json
 ```
 
+```bash
+# ③ 全 TensorRT（需 5b 成功）
+python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote control" --runs 50 \
+    --owl_engine data/owl_image_encoder_patch32.engine \
+    --nanosam_encoder data/resnet18_image_encoder.selftrain.engine --nanosam_decoder data/mobile_sam_mask_decoder.engine \
+    --power_mode "MAXN (nvpmodel 0)" --out data/bench/jetson/pipe_all_trt.json
+```
+
 - 同一張圖（`cats.jpg`）、同樣的提示詞，才能與 WSL 的數據對照（[benchmark.md](benchmark.md)）。
 - Jetson 的 GPU 與 CPU **共用記憶體**，所以 `nvidia-smi` 的 GPU 記憶體欄位會是 `null`；看 `sys_used_*`（系統記憶體）與 `process_peak_rss_mb`。
 - 另開終端機同時記錄功耗與溫度（量測期間）：`tegrastats --interval 500 | tee data/bench/jetson/tegrastats_$(date +%H%M%S).log`
@@ -127,14 +159,14 @@ python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote contr
 ## 7. Jetson：啟動網頁示範
 
 ```bash
-./installation/jetson/07_run_server.sh                 # 自動使用 OWL 引擎；HyDE 預設關閉（Ollama 會吃掉大量記憶體）
+./installation/jetson/07_run_server.sh                 # 引擎齊全 → 自動用 OWL 引擎 + NanoSAM 引擎；HyDE 預設關閉（Ollama 會吃掉大量記憶體）
 ```
 
 從筆電瀏覽器開 `http://<jetson-ip>:8000`。
 
 | 要做的事 | 做法 |
 |---|---|
-| 比較 baseline 與自訓練 SAM encoder | 網頁「SAM 編碼器」下拉選單切換（掃到 `data/eval/*.pth`） |
+| 比較 TensorRT 的 NanoSAM 與 PyTorch 的 baseline / 自訓練 encoder | 網頁「SAM 編碼器」下拉選單切換（`NanoSAM（TensorRT）`、`MobileSAM（baseline）`、掃到的 `data/eval/*.pth`）；同一張圖面積應接近 |
 | 即時攝影機 | 分頁「伺服器來源」→ 來源填 `0`（USB）；CSI 填 `gst:nvarguscamerasrc ! video/x-raw(memory:NVMM),width=1280,height=720,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1` |
 | 影片檔 | 來源填 `data/samples/demo_h264.mp4` |
 | 製造情境 | 勾選零件檢查卡（見 [scenario.md](scenario.md)） |

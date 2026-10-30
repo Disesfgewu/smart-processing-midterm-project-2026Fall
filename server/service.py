@@ -22,10 +22,12 @@ MAX_IMAGE_SIDE = 4096
 
 
 class SegmentService:
-    def __init__(self, sam_checkpoint="data/models/mobile_sam.pt", owl_engine: Optional[str] = None, student_checkpoint: Optional[str] = None):
+    def __init__(self, sam_checkpoint="data/models/mobile_sam.pt", owl_engine: Optional[str] = None, student_checkpoint: Optional[str] = None,
+                 nanosam_encoder: Optional[str] = None, nanosam_decoder: Optional[str] = None, nanosam_backend: str = "auto"):
         self.started = time.time()
         t0 = time.perf_counter()
-        self.seg = OpenVocabSegmenter(sam_checkpoint=sam_checkpoint, owl_engine=owl_engine, student_checkpoint=student_checkpoint)
+        self.seg = OpenVocabSegmenter(sam_checkpoint=sam_checkpoint, owl_engine=owl_engine, student_checkpoint=student_checkpoint,
+                                    nanosam_encoder=nanosam_encoder, nanosam_decoder=nanosam_decoder, nanosam_backend=nanosam_backend)
         self.load_s = time.perf_counter() - t0
         self.backend = "tensorrt" if owl_engine else "pytorch-fp32"
         self.lock = threading.Lock()
@@ -130,7 +132,7 @@ class SegmentService:
         loaded_paths = {os.path.abspath(m["checkpoint"]): k for k, m in meta.items() if k != "mobilesam"}
         for k, m in meta.items():                                               # 已載入的（含以 SAM_STUDENT 啟動的 "student"）
             if k != "mobilesam":
-                items.append({"key": k, "label": f"自訓練 {k if k != 'student' else m['checkpoint']}",
+                items.append({"key": k, "label": m.get("label") or f"自訓練 {k if k != 'student' else m['checkpoint']}",
                               "loaded": True, "epoch": m["epoch"], "val_loss": m["val_loss"]})
         for k, path in cand.items():                                            # 掃到但還沒載入的
             if k not in meta and path not in loaded_paths:

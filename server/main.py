@@ -30,7 +30,12 @@ async def lifespan(app: FastAPI):
     logger.info("[lifespan.startup]: input=(), output=loading models")
     service = SegmentService(sam_checkpoint=os.environ.get("SAM_CHECKPOINT", os.path.join(ROOT, "data/models/mobile_sam.pt")),
                              owl_engine=os.environ.get("OWL_ENGINE") or None,
-                             student_checkpoint=os.environ.get("SAM_STUDENT") or None)   # 自訓練的 ResNet18 encoder；不給就只有 baseline
+                             student_checkpoint=os.environ.get("SAM_STUDENT") or None,
+                             nanosam_encoder=os.environ.get("NANOSAM_ENCODER") or None,       # NanoSAM 的引擎（.engine）或 ONNX
+                             nanosam_decoder=os.environ.get("NANOSAM_DECODER") or None,
+                             nanosam_backend=os.environ.get("NANOSAM_BACKEND", "auto"))   # 自訓練的 ResNet18 encoder；不給就只有 baseline
+    if os.environ.get("SAM_ACTIVE"):                                                         # 啟動時就選用哪個 SAM encoder（例如 nanosam）
+        service.switch_sam_encoder(os.environ["SAM_ACTIVE"])
     camera = CameraWorker(service)
     import threading
     threading.Thread(target=hyde.ensure_running, name="ollama-autostart", daemon=True).start()   # 不阻塞啟動；Ollama 沒在跑就自動拉起

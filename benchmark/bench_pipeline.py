@@ -2,6 +2,12 @@
 
   python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote control" --runs 50
 
+  # Jetson：全 TensorRT（OWL 引擎 + NanoSAM encoder / decoder 引擎）
+  python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote control" \
+      --owl_engine data/owl_image_encoder_patch32.engine \
+      --nanosam_encoder data/resnet18_image_encoder.selftrain.engine --nanosam_decoder data/mobile_sam_mask_decoder.engine \
+      --power_mode "MAXN (nvpmodel 0)" --out data/bench/jetson/pipeline_all_trt.json
+
   # Jetson：OWL 用 TensorRT 引擎、SAM 用自訓練 encoder（PyTorch），並標註電源模式
   python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote control" \
       --owl_engine data/owl_image_encoder_patch32.engine --student data/models/student.pth \
@@ -40,6 +46,8 @@ ap.add_argument("--runs", type=int, default=50)
 ap.add_argument("--out", default="data/bench/bench.json")
 ap.add_argument("--owl_engine", default=None, help="OWL image encoder 的 TensorRT 引擎（Jetson 上由 03_build_engines.sh 產生）；不給就用 PyTorch")
 ap.add_argument("--student", default=None, help="自訓練 ResNet18 encoder 的 checkpoint；給了就量它而不是 baseline MobileSAM encoder")
+ap.add_argument("--nanosam_encoder", default=None, help="NanoSAM image encoder：.engine（TensorRT，Jetson）或 .onnx（ONNX Runtime）；需同時給 --nanosam_decoder")
+ap.add_argument("--nanosam_decoder", default=None, help="NanoSAM mask decoder：.engine 或 .onnx")
 ap.add_argument("--power_mode", default="", help="記錄用文字（例如 'MAXN (nvpmodel 0)'），會寫進結果 JSON；報告需註明")
 args = ap.parse_args()
 
@@ -78,8 +86,13 @@ torch.cuda.reset_peak_memory_stats()
 smi_before = smi_used_mb()
 sys_before = sys_used_mb()
 t0 = time.perf_counter()
-seg = OpenVocabSegmenter(owl_engine=args.owl_engine, student_checkpoint=args.student)
-if args.student:
+if bool(args.nanosam_encoder) != bool(args.nanosam_decoder):
+    sys.exit("--nanosam_encoder 與 --nanosam_decoder 必須一起給")
+seg = OpenVocabSegmenter(owl_engine=args.owl_engine, student_checkpoint=args.student,
+                         nanosam_encoder=args.nanosam_encoder, nanosam_decoder=args.nanosam_decoder)
+if args.nanosam_encoder:
+    seg.set_sam_encoder("nanosam")
+elif args.student:
     seg.set_sam_encoder("student")
 seg.set_prompts(args.prompts)
 load_s = time.perf_counter() - t0
@@ -88,8 +101,8 @@ image_np = np.asarray(image)
 owl, sam = seg.owl, seg.sam
 res = {"image": args.image, "image_size": list(image.size), "prompts": args.prompts, "device": torch.cuda.get_device_name(0),
        "torch": torch.__version__, "model_load_s": load_s, "power_mode": args.power_mode,
-       "backend": f"owl={'tensorrt' if args.owl_engine else 'pytorch-fp32'}, sam=pytorch-fp32",
-       "owl_engine": args.owl_engine, "sam_encoder": seg.sam_encoder, "student_checkpoint": args.student}
+       "backend": f"owl={'tensorrt' if args.owl_engine else 'pytorch-fp32'}, sam={seg.sam.label if args.nanosam_encoder else 'pytorch-fp32'}",
+       "owl_engine": args.owl_engine, "nanosam_encoder": args.nanosam_encoder, "nanosam_decoder": args.nanosam_decoder, "sam_encoder": seg.sam_encoder, "student_checkpoint": args.student}
 
 # ---- OWL 分段 ----
 with torch.no_grad():

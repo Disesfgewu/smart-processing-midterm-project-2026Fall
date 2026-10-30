@@ -81,11 +81,11 @@
 
 WSL 欄位來自 [benchmark.md](benchmark.md)（GTX 1060、PyTorch fp32，**僅供對照量測方法，不可當成繳交數據**）。
 
-| 階段 | WSL baseline | WSL 自訓練 | Jetson：OWL=TRT + MobileSAM(PyTorch) | Jetson：OWL=TRT + 自訓練(PyTorch) | Jetson：全 TensorRT |
+| 階段 | WSL baseline | WSL 自訓練 | Jetson：OWL=TRT + MobileSAM(PyTorch) | Jetson：OWL=TRT + 自訓練(PyTorch) | Jetson：全 TensorRT（OWL 引擎 + NanoSAM 引擎） |
 |---|---|---|---|---|---|
 | OWL 影像編碼 (ms) | 72.7 | 75.9 | | | |
 | OWL 合計 (ms) | 74.5 | 75.3 | | | |
-| SAM 影像編碼 (ms) | 88.5 | 32.8 | | | *（SAM 轉接層完成後）* |
+| SAM 影像編碼 (ms) | 88.5 | 32.8 | | | |
 | SAM decoder / 框 (ms) | 7.9 | 7.8 | | | |
 | **完整流程 (ms)** | 197.2 | 159.1 | | | |
 | **FPS** | 5.1 | 6.3 | | | |
@@ -145,6 +145,6 @@ Jetson 的 GPU 與 CPU 共用記憶體，所以看系統記憶體，不是 GPU �
 
 ## 7. 還沒做、會影響第 4 節的事
 
-- **SAM 的 TensorRT 轉接層**（包裝 `nanosam.utils.predictor.Predictor`）：沒有它，4.4 的「全 TensorRT」欄位量不出來，也無法示範「全 TensorRT 的即時攝影機」。這是 Jetson 實測後最優先補的程式。
+- **NanoSAM 的 TensorRT 路徑沒有實機驗證**：`src/sam_backends.py` 已寫好，前後處理用 ONNX Runtime 在 WSL 驗證過，但 `torch2trt` 載入 TensorRT 10 引擎能否運作要到 Jetson 才知道（[jetson-deploy.md](jetson-deploy.md) 步驟 5b）。失敗就退回「OWL=TRT + SAM(PyTorch)」兩欄，並把錯誤記進第 6 節。
 - 自訓練 encoder 在 TensorRT fp16 下的準確度驗證（見 4.7 備註）。
 - 實體攝影機與真實製造素材：見 [scenario.md](scenario.md)。

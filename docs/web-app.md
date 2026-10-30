@@ -5,7 +5,7 @@
 ```bash
 conda activate nanoowl-sam
 python -m server.main                 # http://127.0.0.1:8000
-# 環境變數：HOST、PORT、SAM_CHECKPOINT、SAM_STUDENT（自訓練的 ResNet18 encoder，和 baseline 並存、可在網頁切換比較）、OWL_ENGINE（指定 TensorRT 引擎則改用 TensorRT）、APP_LOG（日誌路徑）
+# 環境變數：HOST、PORT、SAM_CHECKPOINT、SAM_STUDENT（自訓練的 ResNet18 encoder，和 baseline 並存、可在網頁切換比較）、OWL_ENGINE（指定 TensorRT 引擎則改用 TensorRT）、NANOSAM_ENCODER / NANOSAM_DECODER / NANOSAM_BACKEND（NanoSAM 的 `.engine` 或 `.onnx`；backend = `trt` / `onnx` / `auto`；網頁下拉選單會多出 `NanoSAM（TensorRT / ONNX Runtime）`）、SAM_ACTIVE（啟動時選用哪個 SAM encoder，例如 `nanosam`）、APP_LOG（日誌路徑）
 ```
 
 啟動時會載入模型並暖機 3 次（避免第一個請求被冷啟動拖慢）。

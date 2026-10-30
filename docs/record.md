@@ -435,3 +435,16 @@
 - **發現的缺口**：`02_download_models.sh` 原本註解寫「Jetson 不需要 mobile_sam.pt」，但 pipeline 的 SAM 仍走 PyTorch，**需要它**；已修正並納入打包。
 - **驗證範圍**：打包 → 解壓 → `sha256sum -c` 全部 OK；`06` 的輸出解析只用**假的 trtexec 輸出**測過（動態形狀的 decoder 引擎會檢查有帶 `--shapes`）；`bench_pipeline.py` 在 WSL 用自訓練 encoder 實跑通過。**所有 Jetson 專屬行為（trtexec 實際輸出格式、tegrastats、nvpmodel、攝影機管線）都沒有實機驗證。**
 
+### 12.1 NanoSAM 後端（SAM 的 TensorRT 轉接層）的第一版（2026-10-30）
+- **缺口**：pipeline 只有 OWL 能換成 TensorRT，Jetson 上建好的 NanoSAM 引擎載入不了。新增 `src/sam_backends.py`：`NanoSamPredictor(encoder, decoder, backend="trt"|"onnx")`，介面與 `SamPredictor` 相同（`set_image` / `predict(box)`），pipeline 以 `set_sam_encoder("nanosam")` 切換；`server`（`NANOSAM_ENCODER` / `NANOSAM_DECODER` / `NANOSAM_BACKEND` / `SAM_ACTIVE`）、網頁下拉選單、`bench_pipeline.py`（`--nanosam_encoder` / `--nanosam_decoder`）、`07_run_server.sh` 都接上了。
+- **做法**：沿用官方 `nanosam/utils/predictor.py`——長邊縮到 1024、正規化後在右下補 0、框轉兩個提示點（左上 label 2、右下 label 3，座標乘 1024/長邊）、decoder 取第 0 個遮罩、裁掉補 0 區後雙線性放大。TensorRT 後端直接用官方的 `load_*_engine`（torch2trt `TRTModule`）；另提供 ONNX Runtime 後端，**目的是在沒有 TensorRT 的 WSL 驗證前後處理**。
+- **驗證（`tests/check_nanosam_backend.py`，自訓練 encoder 的 ONNX vs PyTorch，5 個框）**：
+
+| 縮放方式 | 橫式 5 框的遮罩 IoU | 結果 |
+|---|---|---|
+| PIL 預設（官方 NanoSAM 的做法，雙三次） | 0.914~0.994 | 有一個框 < 0.95 |
+| 雙線性（`SamPredictor` 的做法） | **0.995~0.9996**（直式影像同為 0.993~0.999） | 全部通過 |
+
+  差異來源是影像縮放的插值方式（兩個推論路徑對同一張圖看到的輸入略有不同），不是邏輯錯誤；我先看到 0.914 時沒有直接調高容忍度，而是改縮放方式驗證這個假設，結果成立，因此預設改為雙線性，使 PyTorch 與 NanoSAM 兩條路徑吃到相同的輸入。`sam_iou`（SAM 自評）兩邊小數第三位內一致。
+- **端到端**（埠 8001，ONNX Runtime 後端）：貓圖 `a cat, a remote control`，nanosam 遮罩面積 50074 / 57631 / 4082 / 1941 px，與 PyTorch 自訓練 encoder 相同（50074 / 57629 / 4081 / 1940）；切回 baseline 後面積與之前完全相同；API 合約測試通過；`SAM_ACTIVE=nanosam` 啟動即選用。CPU 版 ORT 的 SAM 階段 ~530 ms，**只用來驗證正確性，不是效能數字**。
+- **未驗證（要到 Jetson）**：`_TrtBackend`（torch2trt 對 TensorRT 10 的相容性、動態形狀 decoder、fp16 引擎的遮罩差異）。`jetson-deploy.md` 步驟 5b 有專用的驗證指令與失敗對照表。
