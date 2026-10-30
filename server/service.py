@@ -1,5 +1,7 @@
 """推論服務：持有模型、序列化 GPU 存取、記錄歷史。"""
+import glob
 import io
+import os
 import subprocess
 import threading
 import time
@@ -110,11 +112,38 @@ class SegmentService:
                                  "total_ms": timing["total_ms"], "owl_ms": timing["owl_ms"], "sam_ms": timing["sam_ms"]})
         return result
 
+    # ---- SAM image encoder：baseline + 自訓練的 checkpoint（可在網頁挑選，第一次選用時才載入）----
+    ENCODER_GLOBS = ("data/eval/*.pth", "data/train/*/best.pth")           # 可挑選的位置（白名單；網頁只能選這裡掃到的檔案，不能指定任意路徑）
+
+    def encoder_candidates(self) -> Dict[str, str]:
+        """key（相對路徑）→ 絕對路徑。略過 _smoke 之類的測試輸出與標記為 INVALID 的作廢權重（fp16 教師訓練出的，結果是錯的）。"""
+        out = {}
+        for g in self.ENCODER_GLOBS:
+            for f in sorted(glob.glob(g)):
+                if "/_" not in f.replace("\\", "/") and "INVALID" not in f:
+                    out[f.replace("\\", "/")] = os.path.abspath(f)
+        return out
+
     def sam_encoder_info(self) -> Dict:
-        return {"active": self.seg.sam_encoder, "available": list(self.seg.sam_encoders), "student": getattr(self.seg, "student_info", None)}
+        cand, meta = self.encoder_candidates(), self.seg.sam_encoder_meta
+        items = [{"key": "mobilesam", "label": "MobileSAM（baseline）", "loaded": True, "epoch": None, "val_loss": None}]
+        loaded_paths = {os.path.abspath(m["checkpoint"]): k for k, m in meta.items() if k != "mobilesam"}
+        for k, m in meta.items():                                               # 已載入的（含以 SAM_STUDENT 啟動的 "student"）
+            if k != "mobilesam":
+                items.append({"key": k, "label": f"自訓練 {k if k != 'student' else m['checkpoint']}",
+                              "loaded": True, "epoch": m["epoch"], "val_loss": m["val_loss"]})
+        for k, path in cand.items():                                            # 掃到但還沒載入的
+            if k not in meta and path not in loaded_paths:
+                items.append({"key": k, "label": f"自訓練 {k}", "loaded": False, "epoch": None, "val_loss": None})
+        return {"active": self.seg.sam_encoder, "encoders": items, "available": list(self.seg.sam_encoders), "student": getattr(self.seg, "student_info", None)}
 
     def switch_sam_encoder(self, name: str) -> Dict:
         with self.lock:                                   # 與推論互斥：不會在某一幀中途換 encoder
+            if name not in self.seg.sam_encoders:
+                cand = self.encoder_candidates()
+                if name not in cand:
+                    raise ValueError(f"unknown SAM encoder {name!r}")
+                self.seg.add_sam_encoder(name, cand[name])          # 第一次選用：載入（約 1 秒、數十 MB 顯存）
             self.seg.set_sam_encoder(name)
         return self.sam_encoder_info()
 

@@ -54,13 +54,15 @@
 - [x] 跑通 NanoOWL（文字 → 物件框）與 SAM（框 → 遮罩）
 - [x] 串接流程與疊圖顯示（框／遮罩／輪廓／各提示詞數量與面積）
 - [x] 即時更換文字提示（不需重啟）
-- [ ] 自行蒸餾 NanoSAM ResNet18 image encoder（官方檔案需登入 Google Drive）：腳本與驗證集已就緒，`./training/run_distill.sh --bg`，說明見 [docs/training.md](docs/training.md)；訓練結果待產出
+- [ ] 自行蒸餾 NanoSAM ResNet18 image encoder（官方檔案需登入 Google Drive）：**訓練進行中**（第一輪因 fp16 教師作廢，已修正重跑，見 [docs/record.md](docs/record.md) §7.2）；完成後用 `training/compare_encoders.py` 與 baseline 比較（baseline mIoU 0.744），再匯出 ONNX。說明見 [docs/training.md](docs/training.md)
 - [ ] 計數偏高（局部／巢狀偵測）：IoU-NMS 在預設門檻 0.1 只把多報影格從 26% 降到 23%，剩下的是低分局部框；門檻 ≥ 0.2 或「包含抑制」可消除（單一場景實測，見 [docs/scenario.md](docs/scenario.md)），尚未寫進 pipeline
 - [x] HyDE 提示擴展（Ollama + qwen3:4b，每組 5 詞句取組內最高信心，詳見 [docs/hyde.md](docs/hyde.md)）；尚待用真實素材驗證效果
 - [x] 攝影機／影片輸入（瀏覽器攝影機、影片檔、伺服器端攝影機或影片路徑）
 - [x] 製造情境：零件檢查（工單、預期數量、比例尺校準與 mm² 面積、單件面積範圍、PASS/FAIL、檢查紀錄、可列印報表），詳見 [docs/scenario.md](docs/scenario.md)；尚待用真實製造素材驗證
-- [ ] 提示詞測試集：≥10 張影像、≥3 種提示詞寫法，建立正確率計算腳本
-- [ ] 效能量測腳本（延遲、FPS、記憶體），之後直接在 Jetson 跑
+- [ ] **SAM 的 TensorRT 後端**：pipeline 目前只有 OWL 能切換成 TensorRT 引擎（`owl_engine`），SAM 還沒有；Jetson 上建好的 NanoSAM 引擎無法被 pipeline 載入。需寫轉接層包裝 `nanosam.utils.predictor.Predictor`（框 → 兩個提示點、遮罩輸出），並接到 `src/`、`server/`、`benchmark/`。WSL 無法測 TensorRT，可先用 ONNX Runtime 後端驗證前後處理與 decoder 輸入輸出是否正確
+- [ ] **批次評估腳本**（影像 × 提示詞寫法 → 偵測正確率表）與提示詞測試集：≥10 張影像、≥3 種提示詞寫法（題目功能要求 5）
+- [ ] 蒐集真實製造影像 / 影片（≥10 張 + 一段影片，人工標註實際數量），並用它驗證：製造情境、HyDE 是否有益、面積準確度、計數誤差
+- [x] 效能量測腳本 `benchmark/bench_pipeline.py`（分階段延遲 / FPS / 記憶體，**目前只支援 PyTorch baseline**）；[ ] 補上 NanoSAM / TensorRT / 電源模式的選項與官方對照表輸出
 - [ ] 準備報告素材：情境圖、OWL-ViT／SAM 原理說明（資訊流程圖見 [docs/workflow.md](docs/workflow.md)；**問題與解決方式的紀錄見 [docs/record.md](docs/record.md)**）
 
 **B. 必須在 Jetson 完成（無法由 WSL 取代）**

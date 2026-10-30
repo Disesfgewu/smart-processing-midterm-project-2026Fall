@@ -56,14 +56,10 @@ class OpenVocabSegmenter:
             self.sam = SamPredictor(sam)
             self.sam_encoders = {"mobilesam": sam.image_encoder}               # baseline
             self.sam_encoder = "mobilesam"
+            self.device = device
+            self.sam_encoder_meta = {"mobilesam": {"checkpoint": sam_checkpoint, "epoch": None, "val_loss": None}}
             if student_checkpoint:
-                from nanosam.models.timm_image_encoder import TimmImageEncoder
-                stu = TimmImageEncoder("resnet18")                              # 預設 pretrained=False；權重由 checkpoint 載入，離線也能用
-                ck = torch.load(student_checkpoint, map_location="cpu")
-                stu.load_state_dict(ck["model"])
-                stu.img_size = sam.image_encoder.img_size                       # SamPredictor 需要此屬性（1024）
-                self.sam_encoders["student"] = stu.to(device).eval()
-                self.student_info = {"checkpoint": student_checkpoint, "epoch": ck.get("epoch"), "val_loss": ck.get("val_loss")}
+                self.add_sam_encoder("student", student_checkpoint)
         except Exception as e:
             logger.error(f"[OpenVocabSegmenter.__init__]: input=(owl={owl_name}, engine={owl_engine}, sam={sam_checkpoint}), "
                          f"error={type(e).__name__}: {e}", exc_info=True)
@@ -79,6 +75,23 @@ class OpenVocabSegmenter:
         self.best_scores = {}  # 每個提示詞的最高分（含低於門檻者），診斷「為什麼沒偵測到」用
         logger.info(f"[OpenVocabSegmenter.__init__]: input=(owl={owl_name}, engine={owl_engine}, sam={sam_checkpoint}, device={device}), "
                     f"output=models loaded in {(time.perf_counter() - t0):.2f}s")
+
+    def add_sam_encoder(self, name: str, checkpoint: str):
+        """載入一個自訓練的 ResNet18 image encoder（training/train_nanosam.py 的 best.pth / checkpoint.pth）並以 name 登錄，
+        之後可用 set_sam_encoder(name) 切換。prompt encoder / mask decoder 一律用 baseline 的（NanoSAM 本來就共用同一個 decoder）；baseline 不會被修改。
+        只讀取 checkpoint 的 tensor 與數字（weights_only=True），不執行檔案裡的任意程式碼。"""
+        from nanosam.models.timm_image_encoder import TimmImageEncoder
+        t0 = time.perf_counter()
+        stu = TimmImageEncoder("resnet18")                                      # 預設 pretrained=False；權重由 checkpoint 載入，離線也能用
+        ck = torch.load(checkpoint, map_location="cpu", weights_only=True)
+        stu.load_state_dict(ck["model"])
+        stu.img_size = self.sam_encoders["mobilesam"].img_size                  # SamPredictor 需要此屬性（1024）
+        self.sam_encoders[name] = stu.to(self.device).eval()
+        self.sam_encoder_meta[name] = {"checkpoint": checkpoint, "epoch": ck.get("epoch"), "val_loss": ck.get("val_loss")}
+        if name == "student":
+            self.student_info = self.sam_encoder_meta[name]
+        logger.info(f"[OpenVocabSegmenter.add_sam_encoder]: input=(name={name}, checkpoint={checkpoint}), "
+                    f"output=epoch={ck.get('epoch')}, val_loss={ck.get('val_loss')}, elapsed={(time.perf_counter() - t0) * 1e3:.0f}ms")
 
     def set_sam_encoder(self, name: str):
         """切換 SAM 的 image encoder（'mobilesam' = baseline；'student' = 自訓練 ResNet18）。呼叫端需自行避免與推論同時進行。"""

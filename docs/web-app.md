@@ -46,7 +46,7 @@ python -m server.main                 # http://127.0.0.1:8000
 | GET | `/api/camera/state` | 串流狀態、各提示詞統計、耗時（前端每 0.4 秒輪詢，不寫 log） |
 | GET | `/api/camera/stream` | MJPEG 串流（`<img src>` 直接顯示） |
 | POST | `/api/hyde/expand` | form：`prompts`。HyDE 擴展（會呼叫 LLM，數秒）；**前端必須在開始偵測之前呼叫**，偵測端點只查快取 |
-| GET / POST | `/api/sam/encoder` | 查詢 / 切換 SAM image encoder（`mobilesam` = baseline、`student` = 自訓練；需以 `SAM_STUDENT=<checkpoint>` 啟動才有 `student`）。伺服器串流中不可切換 |
+| GET / POST | `/api/sam/encoder` | 查詢 / 切換 SAM image encoder。清單 = baseline `mobilesam` + 後端掃到的自訓練 checkpoint（`data/eval/*.pth`、`data/train/*/best.pth`，略過 `_` 開頭與 `INVALID` 的）；**第一次選用才載入**（約 1 秒、數十 MB 顯存），不必重啟伺服器。只接受掃到的路徑，不能指定任意檔案；也可用 `SAM_STUDENT=<checkpoint>` 啟動時預載（名稱 `student`）。伺服器串流中不可切換 |
 | GET | `/api/hyde/status` | Ollama 是否可連線、設定的模型是否已下載（前端 HyDE 徽章用） |
 | GET | `/api/stats` | 即時 GPU 數據（前端每秒輪詢，不寫 log） |
 | GET | `/api/health` | 後端、裝置、模型載入時間、請求數 |

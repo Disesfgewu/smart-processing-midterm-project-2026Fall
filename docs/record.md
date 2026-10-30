@@ -242,13 +242,103 @@
 ## 7. NanoSAM encoder 蒸餾訓練
 
 - **動機**：官方 ResNet18 encoder 拿不到（§2.3）。
-- **官方 `train.py` 不能直接用**：教師模型是 TensorRT 引擎，WSL 沒有 TensorRT → 自寫 `training/train_nanosam.py`（教師為 PyTorch fp16 的 MobileSAM encoder、學生 ResNet18 + ImageNet 預訓練、Huber loss、Adam 3e-4、AMP、梯度累積），checkpoint 格式與官方相容，可用官方 `export_image_encoder_onnx` 匯出。
+- **官方 `train.py` 不能直接用**：教師模型是 TensorRT 引擎，WSL 沒有 TensorRT → 自寫 `training/train_nanosam.py`（教師為 PyTorch 的 MobileSAM encoder、學生 ResNet18 + ImageNet 預訓練、Huber loss、Adam 3e-4、梯度累積；**教師一開始誤用 fp16，見 7.2**），checkpoint 格式與官方相容，可用官方 `export_image_encoder_onnx` 匯出。
 - **驗證集**：依檔名排序固定留出最後 200 張，每個 epoch 算驗證 loss，並另存 `best.pth`。
 - **實測速度（COCO 真實圖片）**：batch 4 與 batch 8 **同速**（96 張 24 s ≈ 4 張/秒），顯存 1.5 vs 2.6 GB → 用 batch 4 + 累積 4（等效 16）。4800 張訓練圖 ≈ **20 分鐘 / epoch**（10 epoch ≈ 3.5 h）。小規模試跑（96 張、2 epoch）驗證 loss 0.0249 → 0.0103，只代表機制正常。
 - **訓練資料**：官方是 COCO train2017（11.8 萬張）× 200 epoch；我們只有 val2017（5000 張，778 MB），品質預期會低於官方。**準確度不能直接與官方 mIoU 比**（延遲 / FPS / 記憶體只取決於網路架構，仍可對照）。
 - **下載 COCO val2017 很慢**：約 1 小時 45 分，多次逾時重試（`wget` 自動續傳）。
 - **匯出驗證**：用 24 張圖、1 epoch 的假 checkpoint 匯出 ONNX，輸入 `image 1×3×1024×1024`、輸出 `image_embeddings`，名稱正確；測試時匯出到暫存位置，避免在 `data/models/` 留下看起來像正式的檔案。
-- **狀態**：腳本 `training/run_distill.sh`、`export_encoder.sh` 完成；**完整訓練尚未執行 / 尚無結果**。
+- **狀態**：腳本 `training/run_distill.sh`、`export_encoder.sh` 完成；訓練與結果見 §7.4。
+
+### 7.2 教師 fp16 讓第一輪訓練完全無效（2026-10-29）
+- **現象**：使用者開始訓練後貼出 epoch 0 的輸出：`train 0.001159 | val 0.000168`。使用者指出「loss 不太正常，起始應該要很大」。用 epoch 0 的 `best.pth` 跑 `compare_encoders.py`：**學生 mIoU 全是 0.000、與 baseline 遮罩的一致度 0.000**（遮罩全空）。
+- **診斷**（`教師 fp32 vs fp16`、學生輸出統計）：
+
+| | 結果 |
+|---|---|
+| 教師 fp16 vs fp32 | cosine **−0.24**、最大差 1.5、std 0.287 vs 0.100 |
+| 學生 vs fp16 教師（訓練目標） | Huber 1.4e-4（學得非常好） |
+| 學生 vs fp32 教師（正確目標） | cosine **−0.24** |
+| 跨影像變化 | 學生 0.0011、fp32 教師 0.0636 |
+- **原因**：訓練腳本把教師 `.half()`。TinyViT 在 fp16 下輸出變成**幾乎與影像無關的固定圖樣**，學生輕鬆學會，所以 loss 一開始就很小；解碼器拿到這種特徵就輸出空遮罩。**官方 README 明確寫了「MobileSAM image encoder 要用 FP32（fp16 會產生錯誤結果）」，我讀過卻沒有套用到自己寫的教師上**。
+- **為什麼沒早發現**：先前只驗證了「腳本能跑、loss 會降、checkpoint 能匯出」，**沒有驗證目標是對的**；小規模試跑的 loss（約 0.02~0.04）又剛好看起來合理。「loss 下降」不等於「學對了」。
+- **損失**：epoch 0 約 17 分鐘 + 第 2 個 epoch 的一部分（使用者的 GPU 時間）；沒有影響 baseline。
+- **修正**：教師預設 fp32；訓練前自動「目標健檢」（`--teacher_fp16` 會被擋下，已實測）；每個 epoch 印出驗證 cosine；舊版 fp16 教師訓練出的 run 禁止接續（已實測）；舊的輸出改名保留作為證據。修正後的小規模測試（192 張）：起始 loss 0.0053（≈ 全預測 0 的 0.0051）→ 驗證 cosine 0.44 → 0.60 → 0.62。
+- **教訓**：先驗證「目標」再訓練；看 loss 的絕對值是否合理（要與『全預測 0』『只猜平均』比較）；用與最終任務同一種指標（mIoU）盡早評估一次，而不是只看 loss。
+
+### 7.2b 同時啟動了兩個訓練程序（2026-10-29）
+- **現象**：重啟訓練後，進度是 **1.46~1.68 秒/it（一個 epoch 約 29~33 分鐘）**，我在乾淨環境實測的是約 0.8 秒/it（16~17 分鐘）；GPU 記憶體 5857 MiB（訓練本身只該佔約 3.3 GB 含桌面）、GPU 功耗只有 42 W（正常約 100 W）。
+- **診斷**：逐一檢查程序，發現**同時有兩個**主程序（pid 相差 9 秒啟動），都指向同一個輸出資料夾 `data/train/resnet18_run1`，各自帶一組 6 個 DataLoader worker，nvidia-smi 兩個都列為在用 GPU。其中一個是脫離終端機的背景程序（`--bg`），另一個綁在終端機上——推測是指令下了兩次。
+- **影響**：① 兩個搶同一張 GPU，各約一半速度；② **兩個寫同一個 checkpoint / best.pth / log.txt / run_info.json，會互相覆蓋**；③ 幸好才跑 6 分鐘、還沒存過 checkpoint。
+- **修正**：`train_nanosam.py` 啟動時在輸出資料夾建立 `.lock`（內含 pid）；若該 pid 仍存活就拒絕啟動並告知要 kill 哪個；殘留的舊鎖（程序已不存在）會被忽略，正常或異常結束都會自動移除。實測：存活的鎖 → 拒絕且完全沒碰到 CUDA；殘留的鎖 → 通過；結束後鎖檔清除。
+- **這次我驗證時犯的錯**：第一次的鎖測試把「建資料夾 + sleep」整串丟進背景，寫鎖檔時資料夾還不存在，所以**根本沒有鎖，程式是因為沒有 CUDA 才失敗的**，結束碼 1 讓它看起來像「成功拒絕」。**結束碼不為 0 不等於「因為預期的原因失敗」**，要檢查錯誤訊息，並確認被測的前置條件（鎖檔）真的存在。
+- **教訓**：長時間工作的程序要有「單一實例」保護；速度突然變成預期的一半，先查「是不是有兩份」，再查其他原因（我先前還推測過 NTFS 讀取是瓶頸，沒有證據，是錯的方向）。
+
+### 7.3 獨立訓練包在「乾淨環境」實測抓到的問題（2026-10-29）
+把訓練做成可搬到另一台機器 / Colab 的獨立包（`training/remote/`），並在這台機器的全新資料夾實際跑 `setup → data → smoke`。我的開發環境裡一切正常，**乾淨環境才暴露**以下問題：
+
+| 問題 | 原因 | 修正 |
+|---|---|---|
+| 安裝 PyTorch 時 `No space left on device` | 我把測試放在 `/tmp`，這台機器的 `/tmp` 是**記憶體 tmpfs（只有 7.8 GB）**，pip 暫存與 3.6 GB 的 venv 把它塞滿 | pip 暫存改放資料夾所在磁碟（`TMPDIR`）、`--no-cache-dir`、安裝前檢查可用空間 ≥ 8 GB |
+| 系統 Python 是 3.14 | PyTorch 2.5.1 沒有 3.14 的 wheel | 腳本只接受 3.9~3.12，找不到就改用 conda 建 3.10（已實測這條備援路徑） |
+| 建學生模型時 `Hugging Face hub model specified but package not installed` | 套件清單漏了 `huggingface_hub`；補上後**仍然失敗**——pip 裝了最新的 **2.3.0**，timm 1.0.11 匯入它失敗，才誤報「沒裝」。開發環境因 transformers 4.46.3 限制 `huggingface-hub<1.0`（實際 0.36.2）所以從沒遇到 | 釘 `huggingface_hub<1.0`。**教訓：不釘版本的相依套件，新版本一出就可能壞** |
+| 程式結束時 `NameError: val_cos` | 我加「驗證 cosine 偏低就警告」時，字串取代比對到**另一段一模一樣的文字**（`_verify_baseline`），警告被放錯函式；真正的訓練迴圈反而沒有 | 移回訓練迴圈（以迴圈獨有的前一行定位）。**教訓：字串取代要確認只匹配到預期的那一處** |
+| 補丁腳本呼叫 `rep(old,new,1)` 參數個數錯誤，整個補丁沒套用，卻差點被當成成功 | 我的輔助函式簽名與呼叫不一致 | 補丁後要實際確認檔案內容真的改了（grep），不能只看「沒有錯誤」 |
+
+- **實測通過**：`setup`（GPU/磁碟檢查 → conda 3.10 → torch 2.5.1+cu121，看得到 GPU → nanosam → **下載 mobile_sam.pt，sha256 與主機相同 ✓** → 匯入）、`data`（zip 完整性 + 解壓 5000 張）、`smoke`（64 張 13 秒，驗證 cosine 0.376，估一個 epoch 約 17 分鐘）。
+- **未驗證**：Colab（完全沒有在 Colab 上跑過）；RTX 50 系列的 cu128 分支；完整訓練與 `train --bg`；從 GitHub 實際下載 COCO（用本機 zip 測，沒測網路下載與續傳）。
+- **順帶量到**：把 COCO 放在 ext4 vs `/mnt/c`，速度差不多（約 4.9 張/秒 vs 使用者實際 17 分鐘/epoch），先前懷疑的「NTFS 讀取是瓶頸」**沒有證據支持**。
+
+### 7.4 蒸餾結果：主機 3 個 epoch → Colab 續訓到 79 個 epoch（2026-10-29 ~ 30）
+**過程**
+- 主機 GTX 1060 跑了 3 個 epoch（約 13 分鐘 / epoch，fp32 學生）後，改到 Google Colab（Tesla T4）接續：把主機的 `checkpoint.pth` 放進 Drive 備份資料夾，Colab 自動還原並印出 `resume from epoch 3`，再跑 epoch 3~79（共 77 個 epoch）。
+- Colab 上 AMP 自動開啟（T4 compute capability 7.5 ≥ 7）、教師仍是 fp32；batch 4 × 累積 4 = 16、驗證集同為固定的 200 張，與主機設定一致。**每個 epoch 約 8.1 分鐘（485 s）、顯存峰值 1.5 GB**，77 個 epoch 約 10.4 小時；每個 epoch 結束都自動備份到 Drive（log 逐行印出 `[備份]`）。
+- baseline sha256 驗證通過，全程未被改動。
+
+**驗證曲線**（`log.txt`；同一份固定驗證集）
+
+| epoch | val loss | val cosine |
+|---|---|---|
+| 0（主機） | 0.002252 | 0.741 |
+| 2（主機） | 0.001651 | 0.818 |
+| 10 | 0.001182 | 0.874 |
+| 30 | 0.000932 | 0.902 |
+| 50 | 0.000846 | 0.911 |
+| 78（best） | **0.000778** | **0.919** |
+| 79（最後） | 0.000779 | 0.919 |
+
+- train（0.000652）與 val（0.000779）貼得很近，沒有過擬合；最後 30 個 epoch 只從 0.000878 降到 0.000779，收益遞減。reference：全預測 0 = 5.08e-3、只猜平均 = 2.15e-3。
+
+**分割準確度**（`training/compare_encoders.py`，200 張留出影像、1349 個物件、COCO GT 框當提示、GTX 1060 PyTorch fp32；結果檔 `data/eval/compare_run1_epoch2.json`、`compare_run1_colab80.json`）
+
+| encoder | mIoU All | Small | Medium | Large | encoder 延遲 | 與 baseline 遮罩 IoU |
+|---|---|---|---|---|---|---|
+| baseline MobileSAM（TinyViT） | 0.744 | 0.685 | 0.756 | 0.822 | 87.5 ms | — |
+| 自訓練 epoch 2 | 0.649 | 0.573 | 0.657 | 0.760 | 32.2 ms | 0.669 |
+| **自訓練 epoch 78（Colab）** | **0.704** | 0.628 | 0.725 | 0.796 | **32.3 ms** | 0.791 |
+| 官方 NanoSAM（參考，非同條件） | 0.706 | 0.624 | 0.738 | 0.796 | — | — |
+| 官方 MobileSAM（參考，非同條件） | 0.728 | 0.658 | 0.759 | 0.804 | — | — |
+
+- 3 → 78 個 epoch：mIoU +0.055；與 baseline 差 0.040（小物件差 0.057，大物件只差 0.026）；encoder 在 GTX 1060 上快 **2.7 倍**。
+- 官方數字用 COCO 全部 5000 張、TensorRT、Jetson，且官方訓練資料是 train2017（11.8 萬張）× 200 epoch；我們只用 val2017（扣掉驗證集 4800 張）× 79 epoch，**只能看趨勢，不能直接比較**。
+- **「val cosine 0.82 → 0.92」與「mIoU 0.649 → 0.704」同向**，與先前的教訓（§7.2）一致：特徵相似度要用 mIoU 實際驗證，不能只看 loss。
+- 我賽前的預測是 0.68~0.71，實測 0.704，在範圍內（預測依據只是趨勢外推，非嚴謹估計）。
+
+**Colab 上遇到的問題**
+- 第一次在 Colab 建 venv 失敗：`ensurepip is not available`（Colab 的系統 Python 3.12 沒有 `python3-venv`），virtualenv 備援也失敗（系統 Python 沒有 pip）。**原因**：腳本假設「可以建 venv」，這在 Colab 不成立（獨立包只在這台機器的乾淨資料夾測過，沒在 Colab 測，§7.3 的「未驗證」就是這項）。**修正**：新增 `SYSTEM_PYTHON=1` 模式，直接用 Colab 內建的 Python 與 PyTorch，只補裝 `timm==1.0.11`、`huggingface_hub<1.0` 等小套件，筆記本預設開啟。之後整段流程在 Colab 跑通。
+- 與設計相反的改動（依使用者要求）：COCO 由使用者手動放在 Drive，腳本複製到 `/content` 本機磁碟再解壓；訓練全在本機磁碟，Drive 只當備份；備份用「先寫 `.tmp` 再 `mv`」避免斷線時損壞。這套備份 / 還原 / 複製邏輯先在隔離目錄用假資料實測過（還原後檔案內容正確）。
+- 小瑕疵：訓練結束時寫進 `log.txt` 的最後一行是 baseline 校驗訊息，不是 epoch 紀錄，備份時一起被複製，無害。
+- 沒查證：Colab 內建的 PyTorch 版本與本機（2.5.1）不同，**未比較過兩者對訓練結果的影響**；每個 epoch 的速度差異主要來自 GPU（T4 vs GTX 1060）與 AMP，兩者的貢獻沒有拆開量測。
+
+**使用的檔案**：權重 `data/eval/colab80_best.pth`（epoch 78；從 Drive 下載後改名，避免與其他 `best.pth` 混淆）；Colab 的完整 log 在 Drive 的 `nanosam_train/backup/resnet18_run1/log.txt`。
+
+### 7.5 網頁可自由切換 SAM encoder（2026-10-30）
+- **需求**：換成自訓練的 encoder 後，要在網頁上直接比較實際效果，不必每換一個權重就重啟伺服器。
+- **之前**：只能用環境變數 `SAM_STUDENT` 在啟動時載入**一個**權重，下拉選單只有 baseline 與 student 兩項。
+- **改成**：後端掃描 `data/eval/*.pth` 與 `data/train/*/best.pth`（白名單；排除 `_smoke`、`INVALID`），網頁下拉選單列出全部，第一次選用才載入，之後留在記憶體可立即來回切換；已載入的顯示 epoch 與 val loss。圖片模式切換後會自動用新 encoder 重跑同一張圖。
+- **安全**：POST 只接受掃到的 key，實測 `name=/etc/passwd` 回 400；載入改用 `torch.load(weights_only=True)`（checkpoint 只含 tensor 與數字）。作廢的 fp16 教師權重（資料夾名含 `INVALID`）不會出現在選單，避免誤選。
+- **實測（埠 8001、獨立日誌）**：貓圖 + `a cat, a remote control`，baseline 遮罩面積 49958 / 58209 / 4121 / 1975 px，colab80 為 50074 / 57629 / 4081 / 1940 px（差約 1%，與 mIoU 的小差距一致）；SAM 階段 baseline 118~135 ms vs 自訓練 67 ms（GTX 1060，單張貓圖，非嚴謹量測）；再切回 baseline，面積與第一次完全相同。API 合約測試通過；Edge headless 載入頁面，下拉選單正確顯示且標示「未載入」。
+- **未驗證**：在真實瀏覽器中點選的互動（只驗證了載入後的 DOM 與 API）；攝影機串流中切換（被擋下，需先停止）。
 
 ### 7.1 保護 baseline 與可比較性（訓練前）
 - **要求**：訓練不可蓋過 baseline，且要能比較。baseline = `data/models/mobile_sam.pt`（sha256 開頭 `6dbb90523a35330f`）。
@@ -330,7 +420,8 @@
 - [ ] ≥5 張截圖（含製造情境與失敗案例）、Demo 影片
 
 **訓練與其他**
-- [ ] 執行 NanoSAM encoder 蒸餾（`./training/run_distill.sh --bg`），匯出 ONNX、換進 pipeline 的 NanoSAM 後端，並評估品質（需 COCO 標註才能算與官方同方法的 mIoU）
+- [x] 蒸餾 NanoSAM encoder（Colab 79 個 epoch，mIoU 0.704 vs baseline 0.744，見 §7.4）
+- [ ] 匯出 ONNX、換進 pipeline 的 NanoSAM 後端（SAM 的 TensorRT / ONNX Runtime 轉接層尚未寫）
 - [ ] 查明 OWL 框「往左上延伸」的偏差；試 `pad_square=True`
 - [ ] 報告：研究背景與原理（OWL-ViT、SAM）、系統情境圖
 - [ ] 前端在手機寬度與深色模式只寫了 CSS，未實測

@@ -411,24 +411,28 @@ $("nms").addEventListener("input", (e) => { $("nms-out").textContent = (+e.targe
 $("threshold").addEventListener("change", onParam); $("nms").addEventListener("change", onParam);
 $("style").addEventListener("change", () => { draw(); onParam(); });
 $("masks").addEventListener("change", onParam); $("top1").addEventListener("change", onParam);
-// SAM image encoder 切換（baseline MobileSAM ↔ 自訓練 ResNet18；後端以 SAM_STUDENT 載入自訓練的才會出現）
-const SAM_ENC_LABEL = (k, info) => (k === "mobilesam" ? "MobileSAM（baseline）" : `自訓練 ResNet18${info && info.epoch != null ? `（epoch ${info.epoch}）` : ""}`);
+// SAM image encoder 切換：baseline MobileSAM + 後端掃到的自訓練 checkpoint（data/eval/*.pth、data/train/*/best.pth）；第一次選用才載入
+const encLabels = {};
+const encText = (e) => `${e.label}${e.epoch != null ? ` · epoch ${e.epoch}` : ""}${e.val_loss != null ? ` · val ${(+e.val_loss).toFixed(6)}` : ""}${e.loaded || e.key === "mobilesam" ? "" : "（未載入）"}`;
 async function samEncInit() {
   try {
     const j = await (await fetch("/api/sam/encoder")).json(), sel = $("sam-enc");
-    $("sam-enc-wrap").hidden = !(j.available && j.available.length > 1);
-    sel.replaceChildren(...(j.available || []).map((k) => el("option", { value: k, textContent: SAM_ENC_LABEL(k, j.student) })));
+    for (const e of j.encoders || []) encLabels[e.key] = encText(e);
+    $("sam-enc-wrap").hidden = !(j.encoders && j.encoders.length > 1);
+    sel.replaceChildren(...(j.encoders || []).map((e) => el("option", { value: e.key, textContent: encText(e) })));
     sel.value = j.active;
   } catch { /* 後端沒有這個 API 就不顯示 */ }
 }
 $("sam-enc").addEventListener("change", async (e) => {
-  showError("");
+  showError(""); const sel = e.target; sel.disabled = true;
   try {
-    const fd = new FormData(); fd.append("name", e.target.value);
+    const fd = new FormData(); fd.append("name", sel.value);
     const res = await fetch("/api/sam/encoder", { method: "POST", body: fd }), b = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(b.detail || `HTTP ${res.status}`);
-    if (state.mode === "image" && state.file) run();          // 圖片模式：切換後立刻用新 encoder 重跑同一張圖，方便並排比較
+    await samEncInit();                                       // 重新整理選單（剛載入的會顯示 epoch / val loss）
+    if (state.mode === "image" && state.file) run();          // 圖片模式：切換後立刻用新 encoder 重跑同一張圖，方便比較
   } catch (err) { showError("切換 SAM 編碼器失敗：" + err.message); samEncInit(); }
+  finally { sel.disabled = false; }
 });
 async function hydeStatus() {
   const b = $("hyde-badge");
@@ -525,7 +529,7 @@ function renderTiming(r) {
   add("含網路往返", r.client_ms == null ? "—（伺服器端迴圈）" : `${fmt(r.client_ms)} ms`);
   add("連續處理速度", $("loop-fps").textContent || "—");
   add("影像大小", r.processed ? `${r.image.width}×${r.image.height}（後端縮至 ${r.processed.width}×${r.processed.height} 處理，座標已換算）` : `${r.image.width}×${r.image.height}`); add("原始框 → NMS 後", `${t.num_raw_boxes ?? "—"} → ${r.detections.length}`);
-  add("SAM 編碼器", r.sam_encoder ? SAM_ENC_LABEL(r.sam_encoder === "student" ? "student" : "mobilesam", null) : "—");
+  add("SAM 編碼器", r.sam_encoder ? (encLabels[r.sam_encoder] || r.sam_encoder) : "—");
   add("SAM 平均每個框", r.detections.length ? `${fmt(t.sam_ms / r.detections.length)} ms（含整張影像編碼）` : "—"); add("後端", r.backend);
   state.latencies.push(t.total_ms); if (state.latencies.length > 40) state.latencies.shift(); spark();
 }
