@@ -14,6 +14,7 @@ import torch
 from torchvision.ops import nms
 
 from applog import logger, summarize
+from memutil import drop_file_cache, hf_cache_dir
 from nanoowl.owl_predictor import OwlPredictor
 from nanosam.mobile_sam import SamPredictor, sam_model_registry
 
@@ -73,6 +74,8 @@ class OpenVocabSegmenter:
             logger.error(f"[OpenVocabSegmenter.__init__]: input=(owl={owl_name}, engine={owl_engine}, sam={sam_checkpoint}), "
                          f"error={type(e).__name__}: {e}", exc_info=True)
             raise
+        # Jetson：權重已在 GPU，放掉模型檔案的頁面快取，讓出 GPU 配置需要的「真正空閒」頁面（見 memutil.py）
+        drop_file_cache([hf_cache_dir(owl_name), sam_checkpoint, student_checkpoint, owl_engine, nanosam_encoder, nanosam_decoder])
         self.prompts: List[str] = []      # 概念（使用者輸入的提示詞）
         self.groups: dict = {}            # 概念 → [OWL 查詢描述...]（HyDE）；沒有則查詢就是概念本身
         self.queries: List[str] = []      # 實際送進 OWL 的查詢（所有概念的描述展平）

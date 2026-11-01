@@ -207,7 +207,7 @@ a remote control</textarea>
   <aside class="col-side">
     <div class="card">
       <h2>執行速度 <small id="req-id"></small></h2>
-      <div class="big"><span id="t-total">—</span><small>ms 後端總計</small> <span id="t-fps">—</span><small>FPS</small></div>
+      <div class="big"><span id="t-total">—</span><small id="t-total-label">ms 端對端</small> <span id="t-fps">—</span><small id="t-fps-label">FPS</small></div>
       <small id="loop-fps" class="muted"></small>
       <div class="stack" id="stack"></div>
       <div id="stack-legend" class="chips small"></div>
@@ -224,7 +224,7 @@ a remote control</textarea>
       <div class="meter"><span>顯存</span><div class="bar"><div id="m-mem"></div></div><b id="m-mem-t">—</b></div>
       <dl class="kv" id="gpu-kv"></dl>
       <canvas id="spark" width="320" height="56"></canvas>
-      <small class="muted">近期每次請求的後端總耗時（ms）</small>
+      <small class="muted">近期每次請求的端對端耗時（ms；攝影機模式為每幀完整一圈）</small>
     </div>
 
     <div class="card" id="card-bench" hidden>
@@ -234,14 +234,14 @@ a remote control</textarea>
 
     <div class="card">
       <h2>對照官方（TensorRT, Jetson）</h2>
-      <p class="muted note">目前為 WSL + GTX 1060 + PyTorch fp32，僅供開發參考，不可與下列官方數據直接比較。Orin Nano 的 OWL 與 encoder 單項官方為 TBD。</p>
+      <p class="muted note">官方數據的測試條件（JetPack／TensorRT 版本、是否含前後處理）未公布，只能當量級參考。本專案的 SAM encoder 是<b>自行蒸餾的 ResNet18</b>（架構與官方 NanoSAM 相同、權重不同，所以延遲可對照、準確度不可）。Orin Nano 的 OWL 與 encoder 單項官方為 TBD。請以「端對端」數字為準。</p>
       <div class="table-wrap"><table class="small-table">
         <thead><tr><th>項目</th><th class="num">官方</th></tr></thead>
         <tbody>
           <tr><td>OWL-ViT B/32 · AGX Orin</td><td class="num">95 FPS</td></tr>
           <tr><td>MobileSAM 完整流程 · Orin Nano</td><td class="num">146 ms</td></tr>
-          <tr><td>NanoSAM 完整流程 · Orin Nano</td><td class="num">27 ms</td></tr>
-          <tr><td>NanoSAM 完整流程 · AGX Orin</td><td class="num">8.1 ms</td></tr>
+          <tr><td>官方 NanoSAM 完整流程 · Orin Nano</td><td class="num">27 ms</td></tr>
+          <tr><td>官方 NanoSAM 完整流程 · AGX Orin</td><td class="num">8.1 ms</td></tr>
         </tbody>
       </table></div>
     </div>

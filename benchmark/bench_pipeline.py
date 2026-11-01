@@ -35,6 +35,7 @@ import torch
 from torchvision.ops import nms
 
 sys.path.insert(0, "src")
+from memutil import jetson_stats  # noqa: E402
 from pipeline import OpenVocabSegmenter  # noqa: E402
 
 ap = argparse.ArgumentParser()
@@ -59,7 +60,8 @@ def smi_used_mb():
                              capture_output=True, text=True).stdout.strip().split(",")
         return [float(x) for x in out]
     except (OSError, ValueError):
-        return [float("nan")] * 3
+        j = jetson_stats()   # Jetson：GPU 記憶體與系統共用 → 記憶體仍回傳 NaN（看 sys_used_mb()），溫度與時脈改讀 sysfs
+        return [float("nan"), j.get("gpu_temp_c", float("nan")), j.get("gpu_clock_mhz", float("nan"))]
 
 
 def sys_used_mb():

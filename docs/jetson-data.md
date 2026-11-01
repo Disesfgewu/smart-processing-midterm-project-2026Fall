@@ -56,7 +56,7 @@
 | Python | 3.10 | |
 | PyTorch / torchvision | 2.8.0 / 0.23.0（Jetson wheel） | |
 | torch2trt | master | |
-| 電源模式 | MAXN | |
+| 電源模式 | MAXN_SUPER（nvpmodel 2；此機 0=15W、1=25W、2=MAXN_SUPER、3=7W） | |
 | 記憶體 / swap | 8 GB / 8 GB | |
 
 ### 4.2 引擎建置
@@ -105,7 +105,7 @@ Jetson 的 GPU 與 CPU 共用記憶體，所以看系統記憶體，不是 GPU �
 
 | 模式 | nvpmodel 編號 | OWL TRT (ms) | encoder TRT (ms) | 完整流程 FPS | 平均功耗 (W)* | 溫度 (°C) |
 |---|---|---|---|---|---|---|
-| MAXN | | | | | | |
+| MAXN_SUPER | 2 | | | | | |
 | 25W（若有） | | | | | | |
 | 15W | | | | | | |
 

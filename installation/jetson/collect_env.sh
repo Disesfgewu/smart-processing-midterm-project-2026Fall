@@ -20,7 +20,7 @@ sec "記憶體 / swap" free -h
 sec "磁碟" df -h .
 sec "Python 套件" python3 - <<'PY'
 import sys; print("python", sys.version.split()[0])
-for m in ["torch", "torchvision", "tensorrt", "torch2trt", "transformers", "numpy", "cv2", "timm", "onnx"]:
+for m in ["torch", "torchvision", "tensorrt", "torch2trt", "transformers", "numpy", "cv2", "timm", "onnx", "onnxruntime", "ml_dtypes"]:
     try:
         mod = __import__(m); print(f"{m:14s}", getattr(mod, "__version__", "?"))
     except Exception as e:

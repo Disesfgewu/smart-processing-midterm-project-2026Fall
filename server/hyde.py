@@ -22,10 +22,20 @@ import requests
 from applog import logger
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://127.0.0.1:11434").rstrip("/")
-DEFAULT_MODEL = os.environ.get("HYDE_MODEL", "qwen3:4b")
+IS_JETSON = os.path.exists("/etc/nv_tegra_release")
+# Jetson 預設換成 qwen2.5:1.5b：Orin Nano 實測（CPU 推論，6 個提示詞）0 次失敗、暖機後約 1.8 秒、常駐約 1.2GB；qwen3:4b 要 2.3GB 以上，
+# 且與 OWL / SAM 引擎共用 8GB（docs/record.md §13.6）。其他環境維持 qwen3:4b。
+DEFAULT_MODEL = os.environ.get("HYDE_MODEL", "qwen2.5:1.5b" if IS_JETSON else "qwen3:4b")
+# Jetson 上 Ollama 必須用 CPU：GPU 配置無法放到 swap，伺服器的 TensorRT 引擎在跑時，實測 4 個模型有 3 個每次都 `cudaMalloc failed: out of memory`。
+# num_ctx 縮到 1024（提示詞加輸出只有幾百個 token）省 KV 快取。可用 HYDE_NUM_GPU / HYDE_NUM_CTX 覆蓋；非 Jetson 不設定，維持原本行為。
+LLM_OPTIONS = {}
+if IS_JETSON or "HYDE_NUM_GPU" in os.environ or "HYDE_NUM_CTX" in os.environ:
+    LLM_OPTIONS = {"num_gpu": int(os.environ.get("HYDE_NUM_GPU", "0")), "num_ctx": int(os.environ.get("HYDE_NUM_CTX", "1024"))}
+KEEP_ALIVE = os.environ.get("HYDE_KEEP_ALIVE", "2m" if IS_JETSON else "10m")   # Jetson：閒置 2 分鐘就卸載，把約 1.2GB 還給 OWL / SAM
 N_VARIANTS = int(os.environ.get("HYDE_VARIANTS", "5"))   # 每個提示詞產生幾個類似詞句；加上原始提示共一組 N+1 個
 TIMEOUT_S = float(os.environ.get("HYDE_TIMEOUT", "90"))
-AUTOSTART = os.environ.get("HYDE_AUTOSTART", "1") != "0"   # Ollama 沒在跑時，由 server 自動啟動
+# Ollama 沒在跑時由 server 自動啟動。Jetson（8GB 共用記憶體）預設不啟動：Ollama + 模型會吃掉大量記憶體，影響引擎與量測；要用請設 HYDE_AUTOSTART=1
+AUTOSTART = os.environ.get("HYDE_AUTOSTART", "0" if os.path.exists("/etc/nv_tegra_release") else "1") != "0"
 OLLAMA_LOG = os.environ.get("OLLAMA_LOG", "/tmp/ollama.log")
 MAX_WORDS = 8          # 每個描述最多幾個字（OWL 上限 16 token）
 OWL_MAX_TOKENS = 16
@@ -156,8 +166,8 @@ def _valid(phrase: str, token_counter: Optional[Callable[[str], int]]) -> bool:
 
 def _ask(concept: str, n: int, model: str) -> List[str]:
     body = {
-        "model": model, "stream": False, "format": _schema(n), "think": False, "keep_alive": "10m",
-        "options": {"temperature": 0.3, "num_predict": 40 + 24 * n, "seed": 7},
+        "model": model, "stream": False, "format": _schema(n), "think": False, "keep_alive": KEEP_ALIVE,
+        "options": {"temperature": 0.3, "num_predict": 40 + 24 * n, "seed": 7, **LLM_OPTIONS},
         "messages": [{"role": "system", "content": SYSTEM},
                      {"role": "user", "content": f'Object: "{concept}"\nGive exactly {n} phrases.'}],
     }

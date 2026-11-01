@@ -1,4 +1,4 @@
-"""FastAPI 後端：python -m server.main  （預設 http://127.0.0.1:8000）"""
+"""FastAPI 後端：python -m server.main  （預設 http://127.0.0.1:8000；Jetson 上預設 0.0.0.0 讓區網可連，且有引擎就自動用 TensorRT，見 resolve_backends）"""
 import json
 import os
 import sys
@@ -24,22 +24,46 @@ service: Optional[SegmentService] = None
 camera: Optional[CameraWorker] = None
 
 
+def _first_existing(*paths: str) -> Optional[str]:
+    return next((p for p in paths if os.path.isfile(p)), None)
+
+
+def resolve_backends() -> dict:
+    """決定 OWL / SAM 用哪個後端。優先序：環境變數（設成空字串 = 明確關閉）> 自動偵測 data/ 裡 Jetson 上建好的 TensorRT 引擎 > PyTorch。
+    所以在 Jetson 上建好引擎後，直接 `python -m server.main` 就是全 TensorRT（OWL + NanoSAM）；網頁的「SAM 編碼器」下拉選單仍可切回 MobileSAM / 自訓練 encoder。"""
+    d = lambda name: os.path.join(ROOT, "data", name)                                             # noqa: E731
+    env = os.environ.get
+    owl = env("OWL_ENGINE") if "OWL_ENGINE" in os.environ else _first_existing(d("owl_image_encoder_patch32.engine"))
+    if "NANOSAM_ENCODER" in os.environ or "NANOSAM_DECODER" in os.environ:
+        enc, dec = env("NANOSAM_ENCODER") or None, env("NANOSAM_DECODER") or None
+    else:
+        enc = _first_existing(d("resnet18_image_encoder.selftrain.engine"), d("resnet18_image_encoder.engine"))
+        dec = _first_existing(d("mobile_sam_mask_decoder.engine")) if enc else None
+    nano = bool(enc and dec)
+    return {"owl_engine": owl or None, "nanosam_encoder": enc if nano else None, "nanosam_decoder": dec if nano else None,
+            "sam_active": env("SAM_ACTIVE") or ("nanosam" if nano else None)}
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global service, camera
     logger.info("[lifespan.startup]: input=(), output=loading models")
+    be = resolve_backends()
     service = SegmentService(sam_checkpoint=os.environ.get("SAM_CHECKPOINT", os.path.join(ROOT, "data/models/mobile_sam.pt")),
-                             owl_engine=os.environ.get("OWL_ENGINE") or None,
+                             owl_engine=be["owl_engine"],
                              student_checkpoint=os.environ.get("SAM_STUDENT") or None,
-                             nanosam_encoder=os.environ.get("NANOSAM_ENCODER") or None,       # NanoSAM 的引擎（.engine）或 ONNX
-                             nanosam_decoder=os.environ.get("NANOSAM_DECODER") or None,
+                             nanosam_encoder=be["nanosam_encoder"],                             # NanoSAM 的引擎（.engine）或 ONNX
+                             nanosam_decoder=be["nanosam_decoder"],
                              nanosam_backend=os.environ.get("NANOSAM_BACKEND", "auto"))   # 自訓練的 ResNet18 encoder；不給就只有 baseline
-    if os.environ.get("SAM_ACTIVE"):                                                         # 啟動時就選用哪個 SAM encoder（例如 nanosam）
-        service.switch_sam_encoder(os.environ["SAM_ACTIVE"])
+    if be["sam_active"]:                                                                     # 啟動時就選用哪個 SAM encoder（例如 nanosam）
+        service.switch_sam_encoder(be["sam_active"])
+    print(f"[server] 後端：OWL = {'TensorRT 引擎 ' + os.path.basename(be['owl_engine']) if be['owl_engine'] else 'PyTorch fp32'} | "
+          f"SAM = {be['sam_active'] or 'mobilesam (PyTorch fp32)'}", flush=True)
     camera = CameraWorker(service)
     import threading
     threading.Thread(target=hyde.ensure_running, name="ollama-autostart", daemon=True).start()   # 不阻塞啟動；Ollama 沒在跑就自動拉起
     logger.info("[lifespan.startup]: input=(), output=ready")
+    print("[server] 就緒，可以開啟網頁了。", flush=True)
     yield
     camera.stop()
     hyde.stop_started()
@@ -167,11 +191,18 @@ def segment(image: UploadFile = File(...), prompts: str = Form(...), threshold: 
         raise HTTPException(400, "too many prompts (max 20)")
     if not 0 < threshold < 1 or not 0 < nms_iou <= 1:
         raise HTTPException(400, "threshold must be in (0,1) and nms_iou in (0,1]")
+    t_req = time.perf_counter()
     try:
         img = service.decode_image(image.file.read())
     except Exception as e:
         raise HTTPException(400, f"cannot read image: {e}")
+    decode_ms = (time.perf_counter() - t_req) * 1e3
     result = service.run(img, plist, threshold, nms_iou, use_hyde, with_masks=with_masks, top_per_group=top_per_group)
+    # timing.total_ms 只含 run()（推論 + 序列化），不含圖片解碼與回應組裝。要讓畫面數字貼近使用者實際等待的時間，另外提供：
+    #   decode_ms = 圖片解碼＋縮放；server_ms = 本函式從開始到 run() 回傳（解碼 + 推論 + 序列化 + 組裝回應）。
+    # 瀏覽器端的 client_ms − server_ms ≈ 上傳 + FastAPI 編 JSON + 下載 + 解析（server_ms 不含 FastAPI 把 dict 編成 JSON 的時間）。
+    result["timing"]["decode_ms"] = decode_ms
+    result["timing"]["server_ms"] = (time.perf_counter() - t_req) * 1e3
     result["request_id"] = request_id_var.get()
     return result
 
@@ -244,6 +275,63 @@ async def camera_stream(request: Request):
 
 app.mount("/", StaticFiles(directory=os.path.join(ROOT, "frontend"), html=True), name="frontend")
 
+def _lan_ips() -> list:
+    """這台機器的區網 IPv4。先用「對外連線」取得預設路由的來源 IP（UDP connect 不會真的送封包），
+    再補上主機名稱解析到的位址；排除 127.* 與 docker 的 172.17.*。"""
+    import socket
+    ips = set()
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sk:
+            sk.connect(("10.255.255.255", 1))
+            ips.add(sk.getsockname()[0])
+    except OSError:
+        pass
+    try:
+        ips.update(i[4][0] for i in socket.getaddrinfo(socket.gethostname(), None, socket.AF_INET))
+    except OSError:
+        pass
+    return sorted(ip for ip in ips if not ip.startswith(("127.", "172.17.", "0.")))
+
+
+def _urls(host: str, port: int) -> str:
+    if host in ("0.0.0.0", "::"):
+        lan = "、".join(f"http://{ip}:{port}" for ip in _lan_ips()) or f"http://<這台的 IP>:{port}"
+        return f"區網內其他裝置開 {lan}（本機：http://127.0.0.1:{port}）。注意：沒有登入驗證，只在可信任的網路使用"
+    return (f"http://{host}:{port}（只有本機可連。要讓區網其他裝置連：HOST=0.0.0.0 python -m server.main；"
+            f"或用 SSH 轉發 ssh -L {port}:127.0.0.1:{port} <使用者>@<這台的 IP>）")
+
+
+def _port_free(host: str, port: int) -> bool:
+    import socket
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sk:
+        sk.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        try:
+            sk.bind((host, port))
+            return True
+        except OSError:
+            return False
+
+
+def pick_port(host: str) -> int:
+    """在載入模型「之前」決定埠（載完才發現綁不上要白等十幾秒）。PORT 有指定就一定用它，被佔直接報錯；
+    沒指定就從 8000 起找第一個空的（同一台機器上常有別的網頁服務佔著 8000）。"""
+    if "PORT" in os.environ:
+        port = int(os.environ["PORT"])
+        if not _port_free(host, port):
+            sys.exit(f"[server] 埠 {port} 已被佔用。用 `ss -ltnp | grep :{port}` 看是誰，或換一個：PORT={port + 1} python -m server.main")
+        return port
+    for port in range(8000, 8011):
+        if _port_free(host, port):
+            if port != 8000:
+                print(f"[server] 埠 8000 已被佔用，改用 {port}（要固定埠請設 PORT=…）", flush=True)
+            return port
+    sys.exit("[server] 8000~8010 都被佔用，請用 PORT=… 指定")
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("server.main:app", host=os.environ.get("HOST", "127.0.0.1"), port=int(os.environ.get("PORT", 8000)), log_level="warning")
+    # Jetson 是用來示範 / 量測的機台，預設讓區網其他裝置可連；其他環境（WSL / 桌機）仍預設只開本機。HOST=127.0.0.1 可改回只開本機
+    host = os.environ.get("HOST", "0.0.0.0" if os.path.exists("/etc/nv_tegra_release") else "127.0.0.1")
+    port = pick_port(host)
+    print(f"[server] 載入模型中（Jetson 約 10~30 秒）… 網頁：{_urls(host, port)}", flush=True)
+    uvicorn.run("server.main:app", host=host, port=port, log_level="warning")

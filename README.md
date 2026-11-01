@@ -66,9 +66,9 @@
 - [ ] 準備報告素材：情境圖、OWL-ViT／SAM 原理說明（資訊流程圖見 [docs/workflow.md](docs/workflow.md)；**問題與解決方式的紀錄見 [docs/record.md](docs/record.md)**）
 
 **B. 必須在 Jetson 完成（無法由 WSL 取代）**
-- [ ] JetPack 6.2 環境建置，記錄版本相容性問題與解法
-- [ ] 於 Jetson 建立 TensorRT 引擎（引擎不可跨 GPU 架構移植）
-- [ ] 實測延遲／FPS／記憶體，並記錄電源模式（如 15W / 25W / MAXN），對照 NanoSAM 官方數據
+- [x] JetPack 6.2 環境建置，記錄版本相容性問題與解法（見 [docs/record.md](docs/record.md) §13）
+- [x] 於 Jetson 建立 TensorRT 引擎（OWL / NanoSAM encoder / decoder 皆已建成並驗證；引擎不可跨 GPU 架構移植）
+- [ ] 實測延遲／FPS／記憶體，並記錄電源模式，對照 NanoSAM 官方數據（**MAXN_SUPER 下全 TensorRT 管線已量**，見 [docs/record.md](docs/record.md) §13.5；其他電源模式與 PyTorch baseline 尚未量）
 - [ ] 攝影機即時畫面 Demo、錄製講解影片
 - [ ] 截圖 ≥5 張（含製造情境與失敗案例）
 
@@ -85,6 +85,20 @@
 - WSL 開發環境：`./installation/setup_env.sh`（conda: `nanoowl-sam`），模型：`./installation/download_model.sh`
 - HyDE（選用）：`./installation/install_ollama.sh` 安裝 Ollama 並下載 qwen3:4b；server 啟動時會自動拉起，詳見 [docs/hyde.md](docs/hyde.md)
 - Jetson 部署：操作手冊 [docs/jetson-deploy.md](docs/jetson-deploy.md)、資料清單與量測記錄表 [docs/jetson-data.md](docs/jetson-data.md)、版本相容性筆記 [docs/jetson-setup.md](docs/jetson-setup.md)；腳本在 `installation/jetson/`（`pack_for_jetson.sh` 於開發機打包，其餘 `00`~`07` 與 `collect_env.sh` 於 Jetson 依序執行）
+
+### 快速開始（Jetson Orin Nano）
+
+環境建置與引擎的完整步驟見 [docs/jetson-deploy.md](docs/jetson-deploy.md)；實機遇到的問題與解法見 [docs/record.md](docs/record.md) §13。環境已建好、三個引擎在 `data/` 之後：
+
+```bash
+source .venv-jetson/bin/activate
+python -m server.main        # 有引擎就自動用 TensorRT（OWL + 自訓練 ResNet18 SAM encoder；沿用 NanoSAM 的推論流程，權重是我們自己蒸餾的，不是官方檔，見 [docs/measurement-report.md](docs/measurement-report.md) 的名詞說明）；8000 被佔用會自動改用 8001
+```
+
+啟動時會印出實際使用的後端與網址。**Jetson 上預設監聽 `0.0.0.0`**，區網內其他裝置直接開啟動訊息裡印的 `http://<Jetson 的 IP>:8000`（8000 被佔用時是 8001，以印出的為準）。**沒有登入驗證**，請只在可信任的網路使用；要改成只有本機能連：`HOST=127.0.0.1 python -m server.main`（再用 `ssh -L 8000:127.0.0.1:8000 <user>@<jetson-ip>` 轉發）。連不上時先檢查防火牆（`sudo ufw status`）。
+**期中實驗報告（WSL 與 Nano 數據整合）**見 [docs/experiment-report.md](docs/experiment-report.md)。
+**Nano 上的完整量測報告**（延遲、FPS、功耗、記憶體、與官方對照、HyDE 模型比較）見 [docs/measurement-report.md](docs/measurement-report.md)。與 WSL（GTX 1060）數據的對照見 [docs/wsl-vs-jetson.md](docs/wsl-vs-jetson.md)。
+建引擎前請確認可用記憶體 ≥ 4GB（用 SSH、結束 gazebo / VS Code 遠端連線），見 [docs/record.md](docs/record.md) §13.2 第 7 點。
 
 ### 快速開始（WSL）
 

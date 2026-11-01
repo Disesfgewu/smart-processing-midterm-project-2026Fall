@@ -1,0 +1,97 @@
+{
+  "image": "data/samples/cats.jpg",
+  "image_size": [
+    640,
+    480
+  ],
+  "prompts": [
+    "a cat",
+    "a remote control"
+  ],
+  "device": "Orin",
+  "torch": "2.8.0",
+  "model_load_s": 5.715530449990183,
+  "power_mode": "MAXN_SUPER (nvpmodel 2)",
+  "backend": "owl=tensorrt, sam=NanoSAM\uff08TensorRT\uff09",
+  "owl_engine": "data/owl_image_encoder_patch32.engine",
+  "nanosam_encoder": "data/resnet18_image_encoder.selftrain.engine",
+  "nanosam_decoder": "data/mobile_sam_mask_decoder.engine",
+  "sam_encoder": "nanosam",
+  "student_checkpoint": null,
+  "owl_preprocess": {
+    "mean_ms": 1.2878399423789233,
+    "median_ms": 1.2804979924112558,
+    "p95_ms": 1.3170269667170942,
+    "std_ms": 0.017131967781365293,
+    "fps": 776.4940091489788,
+    "runs": 50
+  },
+  "owl_image_encoder": {
+    "mean_ms": 16.881336321821436,
+    "median_ms": 16.860260016983375,
+    "p95_ms": 16.987367009278387,
+    "std_ms": 0.09592988991042248,
+    "fps": 59.237016604388316,
+    "runs": 50
+  },
+  "owl_decode": {
+    "mean_ms": 1.921222658129409,
+    "median_ms": 1.911122992169112,
+    "p95_ms": 1.981524983420968,
+    "std_ms": 0.035917974714142244,
+    "fps": 520.5018771606859,
+    "runs": 50
+  },
+  "owl_total": {
+    "mean_ms": 19.48815620620735,
+    "median_ms": 19.430265005212277,
+    "p95_ms": 19.87336401361972,
+    "std_ms": 0.17544922130103546,
+    "fps": 51.313217598362684,
+    "runs": 50
+  },
+  "owl_text_encoder": {
+    "mean_ms": 25.716396800708026,
+    "median_ms": 25.58971001417376,
+    "p95_ms": 26.150269026402384,
+    "std_ms": 0.2641060037557012,
+    "fps": 38.88569645855161,
+    "runs": 50
+  },
+  "sam_image_encoder": {
+    "mean_ms": 29.6853126748465,
+    "median_ms": 28.863716986961663,
+    "p95_ms": 32.04473096411675,
+    "std_ms": 1.3034323978467444,
+    "fps": 33.68669250525827,
+    "runs": 50
+  },
+  "num_boxes": 4,
+  "sam_decoder_per_box": {
+    "mean_ms": 9.770501276943833,
+    "median_ms": 9.725732990773395,
+    "p95_ms": 9.916649956721812,
+    "std_ms": 0.17107627364575353,
+    "fps": 102.34889404904672,
+    "runs": 50
+  },
+  "pipeline_total": {
+    "mean_ms": 99.43093556328677,
+    "median_ms": 99.02350199990906,
+    "p95_ms": 100.98158702021465,
+    "std_ms": 1.0410691048945704,
+    "fps": 10.057232131377365,
+    "runs": 50
+  },
+  "memory": {
+    "torch_peak_alloc_mb": 678.08203125,
+    "torch_reserved_mb": 696.0,
+    "nvidia_smi_used_before_mb": NaN,
+    "nvidia_smi_used_after_mb": NaN,
+    "gpu_temp_c": 51.437,
+    "gpu_sm_clock_mhz": 1020.0,
+    "sys_used_before_mb": 2018.19140625,
+    "sys_used_after_mb": 3596.5703125,
+    "process_peak_rss_mb": 2548.609375
+  }
+}

@@ -16,7 +16,9 @@ ENC_ENGINE=data/$(basename "$ENC_ONNX" .onnx).engine
 mkdir -p data
 
 # 建引擎很吃記憶體，先關掉不必要的服務；若 OOM 請先跑 04_setup_swap.sh
-python -m nanoowl.build_image_encoder_engine data/owl_image_encoder_patch32.engine
+# 不用 `python -m nanoowl.build_image_encoder_engine`：它把 OWL-ViT 以 fp32 載到 GPU 匯出 ONNX，記憶體吃緊時會 NvMap error 12（docs/record.md §13.2 第 7 點）。
+# build_owl_engine.py 改在 CPU 匯出同樣的 ONNX，再用 trtexec --fp16 建引擎，並載入驗證 TRTModule。
+python installation/jetson/build_owl_engine.py data/owl_image_encoder_patch32.engine
 
 "$TRTEXEC" --onnx="$ENC_ONNX" \
     --saveEngine="$ENC_ENGINE" --fp16

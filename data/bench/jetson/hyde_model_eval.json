@@ -1,0 +1,407 @@
+{
+ "gemma3:1b": {
+  "rows": [
+   {
+    "prompt": "hex nut",
+    "s": 8.120422276027966,
+    "phrases": [
+     "hex nut",
+     "small metal nut",
+     "hex fastener",
+     "metal screw-like component",
+     "hex nut fastener"
+    ],
+    "dropped": [],
+    "cold": true
+   },
+   {
+    "prompt": "screw",
+    "s": 7.090556390990969,
+    "phrases": [
+     "screw",
+     "metal fastener",
+     "threaded component",
+     "screw joint",
+     "hardware piece",
+     "pin fastener"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "circuit board",
+    "s": 4.986882739001885,
+    "phrases": [
+     "circuit board",
+     "electronic circuit",
+     "chip board",
+     "component board",
+     "wiring board",
+     "digital circuit"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "remote control",
+    "s": 5.050078635045793,
+    "phrases": [
+     "remote control",
+     "tv remote",
+     "control device",
+     "remote",
+     "electronic remote"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "螺絲",
+    "s": 4.852908116998151,
+    "phrases": [
+     "screw",
+     "metal fastener",
+     "threaded component",
+     "thread",
+     "bolt"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "貓",
+    "s": 4.8742349540116265,
+    "phrases": [
+     "cat",
+     "feline",
+     "kitty",
+     "domestic animal",
+     "animal"
+    ],
+    "dropped": [],
+    "cold": false
+   }
+  ],
+  "ps": [
+   [
+    "gemma3:1b",
+    1145,
+    0
+   ]
+  ],
+  "mem_before": {
+   "MemFree": 2147,
+   "MemAvailable": 2517
+  },
+  "mem_after": {
+   "MemFree": 3473,
+   "MemAvailable": 4212
+  },
+  "fails": 0
+ },
+ "qwen2.5:1.5b": {
+  "rows": [
+   {
+    "prompt": "hex nut",
+    "s": 7.929959497996606,
+    "phrases": [
+     "hex nut",
+     "a hex nut",
+     "a hex bolt",
+     "a hexagonal bolt",
+     "a hex screw",
+     "a hexagonal screw"
+    ],
+    "dropped": [],
+    "cold": true
+   },
+   {
+    "prompt": "screw",
+    "s": 1.7257372349849902,
+    "phrases": [
+     "screw",
+     "a screw",
+     "a metal screw",
+     "a threaded fastener",
+     "a machine part",
+     "a fastener"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "circuit board",
+    "s": 2.09057576401392,
+    "phrases": [
+     "circuit board",
+     "a circuit board",
+     "a printed circuit board",
+     "a electronic circuit",
+     "a electronic board",
+     "a electronic circuit board"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "remote control",
+    "s": 1.8367963430355303,
+    "phrases": [
+     "remote control",
+     "a remote control",
+     "a wireless remote",
+     "a remote",
+     "a handheld remote",
+     "a device for controlling electronic devices"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "螺絲",
+    "s": 1.6817193469614722,
+    "phrases": [
+     "a screw",
+     "a fastener",
+     "a hex bolt",
+     "a screwdriver",
+     "a machine screw"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "貓",
+    "s": 1.7505211610114202,
+    "phrases": [
+     "a cat",
+     "a feline",
+     "a domestic cat",
+     "a small carnivore",
+     "a furry feline"
+    ],
+    "dropped": [],
+    "cold": false
+   }
+  ],
+  "ps": [
+   [
+    "qwen2.5:1.5b",
+    1214,
+    0
+   ]
+  ],
+  "mem_before": {
+   "MemFree": 4681,
+   "MemAvailable": 5424
+  },
+  "mem_after": {
+   "MemFree": 2464,
+   "MemAvailable": 4149
+  },
+  "fails": 0
+ },
+ "llama3.2:1b": {
+  "rows": [
+   {
+    "prompt": "hex nut",
+    "s": 8.067824782978278,
+    "phrases": [
+     "hex nut",
+     "a hex nut",
+     "a six-sided fastener",
+     "a threaded fastener",
+     "a hexagonal bolt",
+     "a six-pointed fastener"
+    ],
+    "dropped": [],
+    "cold": true
+   },
+   {
+    "prompt": "screw",
+    "s": 2.197933417977765,
+    "phrases": [
+     "screw",
+     "a screw",
+     "a fastener",
+     "a threaded fastener",
+     "a device with a rotating shaft",
+     "a mechanical fastening device"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "circuit board",
+    "s": 2.1335204879869707,
+    "phrases": [
+     "circuit board",
+     "a circuit board",
+     "a printed circuit board",
+     "a pcb",
+     "a printed circuit board assembly"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "remote control",
+    "s": 2.0729023479507305,
+    "phrases": [
+     "remote control",
+     "a remote control",
+     "a tv remote",
+     "a handheld device",
+     "a wireless controller",
+     "a tv remote control"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "螺絲",
+    "s": 1.938737114018295,
+    "phrases": [
+     "a screw",
+     "a metal fastener",
+     "a threaded fastener",
+     "a fastener",
+     "a fastener device"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "貓",
+    "s": 2.251807690015994,
+    "phrases": [
+     "a cat",
+     "a feline",
+     "a small mammal",
+     "a carnivorous mammal",
+     "a domesticated cat"
+    ],
+    "dropped": [],
+    "cold": false
+   }
+  ],
+  "ps": [
+   [
+    "llama3.2:1b",
+    1620,
+    0
+   ]
+  ],
+  "mem_before": {
+   "MemFree": 3732,
+   "MemAvailable": 5418
+  },
+  "mem_after": {
+   "MemFree": 1318,
+   "MemAvailable": 4025
+  },
+  "fails": 0
+ },
+ "qwen3:1.7b": {
+  "rows": [
+   {
+    "prompt": "hex nut",
+    "s": 11.130879175034352,
+    "phrases": [
+     "hex nut",
+     "a hex nut",
+     "a metal hex nut",
+     "a threaded nut",
+     "a six-pointed nut",
+     "a hexagonal nut"
+    ],
+    "dropped": [],
+    "cold": true
+   },
+   {
+    "prompt": "screw",
+    "s": 2.4758078010054305,
+    "phrases": [
+     "screw",
+     "a screw",
+     "a metal screw",
+     "a threaded fastener",
+     "a hex nut",
+     "a screw cap"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "circuit board",
+    "s": 2.5265061529935338,
+    "phrases": [
+     "circuit board",
+     "a circuit board",
+     "a printed circuit board",
+     "a pcb",
+     "a metal circuit board",
+     "a board"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "remote control",
+    "s": 2.8445779799949378,
+    "phrases": [
+     "remote control",
+     "a remote control",
+     "a wireless control",
+     "a handheld device",
+     "a control unit",
+     "a device for operating a television or radio"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "螺絲",
+    "s": 2.507434309052769,
+    "phrases": [
+     "a screw",
+     "a metal screw",
+     "a threaded fastener",
+     "a hex nut",
+     "a screw cap"
+    ],
+    "dropped": [],
+    "cold": false
+   },
+   {
+    "prompt": "貓",
+    "s": 2.386315089999698,
+    "phrases": [
+     "a cat",
+     "a feline",
+     "a domestic cat",
+     "a cat toy",
+     "a cat picture"
+    ],
+    "dropped": [],
+    "cold": false
+   }
+  ],
+  "ps": [
+   [
+    "qwen3:1.7b",
+    1460,
+    0
+   ]
+  ],
+  "mem_before": {
+   "MemFree": 3002,
+   "MemAvailable": 5708
+  },
+  "mem_after": {
+   "MemFree": 1079,
+   "MemAvailable": 4447
+  },
+  "fails": 0
+ }
+}

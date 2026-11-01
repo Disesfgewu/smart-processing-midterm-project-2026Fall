@@ -87,3 +87,13 @@ API：`POST /api/hyde/expand`（**唯一**呼叫 LLM 的端點）；`POST /api/s
 - 擴展需等 LLM（約每個提示詞 3~4 秒，首次載入模型約 11 秒）；結果依（提示詞, 數量, 模型）快取在 server 記憶體，重啟 server 後需重新擴展。
 - 組內可能混入雜訊詞句（如 `a component`），最高分機制不保證排除；「取最高」可能讓籠統詞句搶走正確物件，需用實驗確認。
 - Jetson 上的 Ollama（aarch64 / JetPack 6）尚未實測；Orin Nano 8GB 的 GPU 記憶體是與 OWL/SAM 共用，需另行評估。
+
+## Jetson Orin Nano（8GB 共用記憶體）
+
+**Jetson 上預設與其他環境不同**（`server/hyde.py` 偵測 `/etc/nv_tegra_release`）：模型 `qwen2.5:1.5b`、Ollama 用 **CPU**（`num_gpu=0`、`num_ctx=1024`）、閒置 2 分鐘卸載、不自動啟動。原因與實測數據（GPU 版在伺服器運作時 3/4 模型 `cudaMalloc failed`；CPU 版 4 個模型都可用，`qwen2.5:1.5b` 暖機後約 1.8 s）見 [measurement-report.md](measurement-report.md) §9 與 [record.md](record.md) §13.6。
+
+```bash
+ollama pull qwen2.5:1.5b            # 約 0.92 GiB；Ollama 已是系統服務時不需要 install_ollama.sh
+HYDE_AUTOSTART=1 python -m server.main   # 或事先 `systemctl is-active ollama` 確認服務在跑
+```
+環境變數可覆蓋：`HYDE_MODEL`、`HYDE_NUM_GPU`、`HYDE_NUM_CTX`、`HYDE_KEEP_ALIVE`。

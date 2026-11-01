@@ -1,7 +1,7 @@
 # 效能量測與官方數據對照
 
 腳本：`benchmark/bench_pipeline.py`（結果 JSON 存於 `data/bench/`，不進版控）。
-**WSL 的數據只用來確認量測方法與數量級，不可作為繳交數據；繳交數據須在 Jetson Orin Nano 上以 TensorRT 重量，並註明電源模式。**
+**WSL 的數據只用來確認量測方法與數量級，不可作為繳交數據；繳交數據須在 Jetson Orin Nano 上以 TensorRT 重量，並註明電源模式。** Nano 上的實測與這份 WSL 數據的並排對照見 [wsl-vs-jetson.md](wsl-vs-jetson.md)；Nano 的完整量測報告見 [measurement-report.md](measurement-report.md)。
 
 ```bash
 conda activate nanoowl-sam

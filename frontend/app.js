@@ -5,7 +5,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const state = {
   mode: "image", file: null, src: null, srcW: 0, srcH: 0, result: null, hidden: new Set(), paths: [],
   busy: false, lastRid: null, runs: [], latencies: [], expected: {},
-  loop: { on: false, n: 0, fps: 0 },          // 瀏覽器攝影機 / 影片分析迴圈
+  loop: { on: false, n: 0, fps: 0, dt: 0 },          // 瀏覽器攝影機 / 影片分析迴圈
   video: { url: null, timeline: [] }, srv: { on: false, timer: null },
 };
 
@@ -226,12 +226,13 @@ function renderBench(b) {
   const kv = $("bench-kv"); kv.replaceChildren();
   const add = (k, v) => kv.append(el("dt", { textContent: k }), el("dd", { textContent: v }));
   add("有效樣本", `${b.totals.length}（共 ${b.n} 次，捨棄第 1 次）`);
-  for (const [name, arr] of [["後端總計", b.totals], ["OWL", b.owl], ["SAM", b.sam], ["含網路往返", b.client]]) {
+  for (const [name, arr] of [["端對端（含上傳與傳輸）", b.client], ["推論 + 序列化（timing.total_ms）", b.totals], ["OWL", b.owl], ["SAM", b.sam]]) {
     const s = stats(arr);
     add(name + " mean / median / p95", `${fmt(s.mean)} / ${fmt(s.median)} / ${fmt(s.p95)} ms`);
     add(name + " min – max (std)", `${fmt(s.min)} – ${fmt(s.max)} (${fmt(s.std)}) ms`);
   }
-  add("等效 FPS（後端總計）", fmt(1000 / stats(b.totals).mean));
+  add("端對端 FPS（連續送一張的上限）", fmt(1000 / stats(b.client).mean));
+  add("推論 + 序列化 FPS（參考上限）", fmt(1000 / stats(b.totals).mean));
   $("card-bench").hidden = false;
 }
 
@@ -262,7 +263,7 @@ async function analyzeVideo() {
   $("btn-vstart").disabled = true;
   if (!(await ensureExpanded())) { $("btn-vstart").disabled = false; return; }   // HyDE：先擴展完，才開始分析
   const step = Math.max(0.05, +$("v-step").value || 0.5), t0 = Math.max(0, +$("v-from").value || 0), dur = vid.duration;
-  state.loop = { on: true, n: 0, fps: 0 }; state.video.timeline = []; showError("");
+  state.loop = { on: true, n: 0, fps: 0, dt: 0 }; state.video.timeline = []; showError("");
   $("btn-vstart").disabled = true; $("btn-vstop").disabled = false; $("v-prog").hidden = false; $("v-prog").max = dur; $("card-timeline").hidden = false;
   // 準備某個時間點的影格（seek → 擷取 → JPEG）。推論第 N 幀的同時就開始準備第 N+1 幀。
   const prepare = async (t) => { await seekTo(Math.min(t, dur - 0.01)); await sleep(30); const c = grab(vid, vid.videoWidth, vid.videoHeight); return { t, c, blob: await toBlob(c) }; };
@@ -286,7 +287,7 @@ async function analyzeVideo() {
 $("btn-vstart").addEventListener("click", analyzeVideo);
 $("btn-vstop").addEventListener("click", () => { state.loop.on = false; });
 
-function loopFps(tStart) { const dt = performance.now() - tStart; state.loop.fps = state.loop.n++ === 0 ? 1000 / dt : 0.85 * state.loop.fps + 0.15 * (1000 / dt); $("loop-fps").textContent = `${fmt(state.loop.fps)} FPS（含網路）`; }
+function loopFps(tStart) { const dt = performance.now() - tStart; state.loop.dt = state.loop.n++ === 0 ? dt : 0.85 * state.loop.dt + 0.15 * dt; state.loop.fps = 1000 / state.loop.dt; $("loop-fps").textContent = `${fmt(state.loop.fps)} FPS（含網路）`; }
 
 function renderTimeline() {
   const tl = state.video.timeline, c = $("timeline"), g = c.getContext("2d"), W = c.width, H = c.height, pad = { l: 36, r: 10, t: 10, b: 22 };
@@ -333,7 +334,7 @@ async function camStart() {
   } catch (e) { $("btn-camstart").disabled = false; return showError("無法開啟攝影機：" + e.message); }
   listCams();
   const cam = $("cam"); cam.srcObject = state.camStream; await cam.play(); $("empty").hidden = true;
-  $("btn-camstop").disabled = false; state.loop = { on: true, n: 0, fps: 0 };
+  $("btn-camstop").disabled = false; state.loop = { on: true, n: 0, fps: 0, dt: 0 };
   try {
     for (let i = 0; state.loop.on; i++) {
       await waitIfPaused();
@@ -372,7 +373,7 @@ async function pollServer() {
     const s = await (await fetch("/api/camera/state")).json();
     if (s.error) { showError("伺服器來源錯誤：" + s.error); return serverStop(false); }
     if (!s.running || !s.summary) return;
-    $("loop-fps").textContent = `${fmt(s.fps)} FPS（後端迴圈）`;
+    $("loop-fps").textContent = `${fmt(s.fps)} FPS（後端迴圈完整一圈，含疊圖與編碼）`;
     const r = { ...s, hyde: s.hyde || { requested: false }, backend: "server", client_ms: null, request_id: "camera", threshold: +$("threshold").value };
     state.result = r; render(r, { skipDraw: true });
   } catch { /* 暫時失敗略過 */ }
@@ -519,22 +520,43 @@ function renderHint(r) {
   if (miss.length) msgs.push(`沒偵測到：${miss.map((s) => `${s.label}（最高分 ${s.best_score == null ? "—" : s.best_score.toFixed(2)}${s.best_score != null && s.best_score < th ? "，低於門檻" : ""}）`).join("、")}。可降低門檻，或改用 "a …" / 更具體的英文描述。`);
   $("hint").hidden = !msgs.length; $("hint").textContent = msgs.join("\n");
 }
+// 畫面上的主數字要貼近使用者實際等待的時間：
+//  * 網頁上傳（單張／影片／瀏覽器攝影機）：端對端 = client_ms（fetch 前後，含上傳、伺服器處理、下載與解析）。
+//  * 伺服器端攝影機：沒有 client_ms，用 timing.total_ms（= 後端迴圈完整一圈：讀取 + 推論 + 疊圖 + JPEG 編碼）。
+// timing.total_ms 在一般請求裡只含推論 + 序列化（不含圖片解碼、回應組裝、傳輸），所以只作為「純推論」的參考，不再當主數字。
+const e2eMs = (r) => (r.client_ms != null ? r.client_ms : r.timing.total_ms);
 function renderTiming(r) {
-  const t = r.timing, other = Math.max(0, t.total_ms - t.text_encode_ms - t.owl_ms - t.sam_ms - t.serialize_ms);
-  $("t-total").textContent = fmt(t.total_ms); $("t-fps").textContent = fmt(1000 / t.total_ms); $("req-id").textContent = `request ${r.request_id}`;
-  const parts = [["文字編碼", t.text_encode_ms, "#a78bfa"], ["OWL（含 NMS）", t.owl_ms, "#3b82f6"], ["SAM", t.sam_ms, "#f97316"], ["序列化", t.serialize_ms, "#14b8a6"], ["其他", other, "#94a3b8"]];
+  const t = r.timing, http = r.client_ms != null, total = e2eMs(r);
+  const infer = (t.owl_ms ?? 0) + (t.sam_ms ?? 0);
+  $("t-total").textContent = fmt(total);
+  $("t-total-label").textContent = http ? "ms 端對端（含上傳與傳輸）" : "ms 每幀完整一圈";
+  $("t-fps").textContent = fmt(1000 / total);
+  $("t-fps-label").textContent = http ? "FPS（端對端）" : "FPS（完整一圈）";
+  $("req-id").textContent = `request ${r.request_id}`;
+  // 分段條：HTTP 請求才有 decode_ms / server_ms，可把「解碼」與「上傳＋傳輸（推算）」補進來；其餘（舊後端、伺服器攝影機）維持原樣
+  const hasSrv = http && t.server_ms != null;
+  const known = (t.decode_ms ?? 0) + (t.text_encode_ms ?? 0) + (t.owl_ms ?? 0) + (t.sam_ms ?? 0) + (t.serialize_ms ?? 0);
+  const parts = [];
+  if (hasSrv) parts.push(["圖片解碼", t.decode_ms ?? 0, "#eab308"]);
+  parts.push(["文字編碼", t.text_encode_ms ?? 0, "#a78bfa"], ["OWL（含 NMS）", t.owl_ms, "#3b82f6"], ["SAM", t.sam_ms, "#f97316"], ["序列化", t.serialize_ms ?? 0, "#14b8a6"]);
+  if (hasSrv) {
+    parts.push(["伺服器其他", Math.max(0, t.server_ms - known), "#94a3b8"], ["上傳＋傳輸（推算）", Math.max(0, total - t.server_ms), "#ef4444"]);
+  } else {
+    parts.push(["其他", Math.max(0, total - known), "#94a3b8"]);
+  }
   const stack = $("stack"), lg = $("stack-legend"); stack.replaceChildren(); lg.replaceChildren();
-  parts.forEach(([n, v, c]) => { stack.append(el("div", { style: `width:${(v / t.total_ms) * 100}%;background:${c}`, title: `${n} ${fmt(v)} ms` })); lg.append(el("span", { className: "chip" }, el("i", { className: "sw", style: `background:${c}` }), `${n} ${fmt(v)}`)); });
+  parts.forEach(([n, v, c]) => { stack.append(el("div", { style: `width:${(v / total) * 100}%;background:${c}`, title: `${n} ${fmt(v)} ms` })); lg.append(el("span", { className: "chip" }, el("i", { className: "sw", style: `background:${c}` }), `${n} ${fmt(v)}`)); });
   const kv = $("timing-kv"); kv.replaceChildren(); const add = (k, v) => kv.append(el("dt", { textContent: k }), el("dd", { textContent: v }));
-  add("含網路往返", r.client_ms == null ? "—（伺服器端迴圈）" : `${fmt(r.client_ms)} ms`);
+  if (hasSrv) add("伺服器處理", `${fmt(t.server_ms)} ms（解碼 + 推論 + 序列化 + 組裝回應）`);
+  add("純推論（OWL + SAM）", `${fmt(infer)} ms ≈ ${fmt(1000 / infer)} FPS（上限，不含解碼、序列化、傳輸）`);
   add("連續處理速度", $("loop-fps").textContent || "—");
   add("影像大小", r.processed ? `${r.image.width}×${r.image.height}（後端縮至 ${r.processed.width}×${r.processed.height} 處理，座標已換算）` : `${r.image.width}×${r.image.height}`); add("原始框 → NMS 後", `${t.num_raw_boxes ?? "—"} → ${r.detections.length}`);
   add("SAM 編碼器", r.sam_encoder ? (encLabels[r.sam_encoder] || r.sam_encoder) : "—");
   add("SAM 平均每個框", r.detections.length ? `${fmt(t.sam_ms / r.detections.length)} ms（含整張影像編碼）` : "—"); add("後端", r.backend);
-  state.latencies.push(t.total_ms); if (state.latencies.length > 40) state.latencies.shift(); spark();
+  state.latencies.push(total); if (state.latencies.length > 40) state.latencies.shift(); spark();
 }
 function pushRun(r) {
-  state.runs.unshift({ time: new Date().toLocaleTimeString(), prompts: r.prompts.join(", "), n: r.detections.length, owl: r.timing.owl_ms, sam: r.timing.sam_ms, total: r.timing.total_ms });
+  state.runs.unshift({ time: new Date().toLocaleTimeString(), prompts: r.prompts.join(", "), n: r.detections.length, owl: r.timing.owl_ms, sam: r.timing.sam_ms, total: e2eMs(r) });
   state.runs.length = Math.min(state.runs.length, 15);
   const tb = $("tbl-hist").tBodies[0]; tb.replaceChildren();
   state.runs.forEach((x) => tb.append(el("tr", {}, el("td", { textContent: x.time }), el("td", { textContent: x.prompts }), el("td", { className: "num", textContent: x.n }),

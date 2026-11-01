@@ -92,7 +92,7 @@ Pascal 只能用 TensorRT 8.x（10.x 已移除支援）。裝不起來可忽略�
 
 已存在的檔案會略過；`data/` 已在 `.gitignore`。`resnet18_image_encoder.onnx` 請用瀏覽器下載後存成 `data/models/resnet18_image_encoder.onnx`；腳本在檔案缺少時會印出提示。
 
-> 注意：WSL 用的 MobileSAM 與 Jetson 最終用的 NanoSAM（ResNet18 encoder）不是同一個模型，準確度與效能數據一律以 Jetson 為準。
+> 注意：WSL 用的 MobileSAM 與 Jetson 最終用的 ResNet18 encoder 不是同一個模型，準確度與效能數據一律以 Jetson 為準。Jetson 用的 ResNet18 是**我們自己蒸餾的權重**（沿用 NanoSAM 的架構與推論流程，官方預訓練檔需登入 Google Drive、沒有取得），見 [measurement-report.md](measurement-report.md) 開頭的名詞說明。
 
 ## 2.5 （選用）HyDE：Ollama 與本機 LLM
 

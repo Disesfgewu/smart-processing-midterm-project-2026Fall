@@ -15,6 +15,9 @@ import PIL.ImageOps
 import torch
 
 from applog import log_call, logger
+from memutil import jetson_stats
+
+IS_JETSON = os.path.exists("/etc/nv_tegra_release")
 from pipeline import OpenVocabSegmenter
 from server import hyde
 
@@ -128,15 +131,15 @@ class SegmentService:
 
     def sam_encoder_info(self) -> Dict:
         cand, meta = self.encoder_candidates(), self.seg.sam_encoder_meta
-        items = [{"key": "mobilesam", "label": "MobileSAM（baseline）", "loaded": True, "epoch": None, "val_loss": None}]
+        items = [{"key": "mobilesam", "label": "MobileSAM（baseline，PyTorch fp32）", "loaded": True, "epoch": None, "val_loss": None}]
         loaded_paths = {os.path.abspath(m["checkpoint"]): k for k, m in meta.items() if k != "mobilesam"}
         for k, m in meta.items():                                               # 已載入的（含以 SAM_STUDENT 啟動的 "student"）
             if k != "mobilesam":
-                items.append({"key": k, "label": m.get("label") or f"自訓練 {k if k != 'student' else m['checkpoint']}",
+                items.append({"key": k, "label": m.get("label") or f"自訓練 ResNet18 encoder（PyTorch fp32）· {os.path.basename(m['checkpoint'])}",
                               "loaded": True, "epoch": m["epoch"], "val_loss": m["val_loss"]})
         for k, path in cand.items():                                            # 掃到但還沒載入的
             if k not in meta and path not in loaded_paths:
-                items.append({"key": k, "label": f"自訓練 {k}", "loaded": False, "epoch": None, "val_loss": None})
+                items.append({"key": k, "label": f"自訓練 ResNet18 encoder（PyTorch fp32）· {k}", "loaded": False, "epoch": None, "val_loss": None})
         return {"active": self.seg.sam_encoder, "encoders": items, "available": list(self.seg.sam_encoders), "student": getattr(self.seg, "student_info", None)}
 
     def switch_sam_encoder(self, name: str) -> Dict:
@@ -173,12 +176,22 @@ class SegmentService:
     def gpu_stats(self) -> Dict:
         s = {"device": torch.cuda.get_device_name(0), "torch_allocated_mb": torch.cuda.memory_allocated() / 2**20,
              "torch_peak_mb": torch.cuda.max_memory_allocated() / 2**20}
-        try:
-            out = subprocess.run(["nvidia-smi", "--query-gpu=memory.used,memory.total,temperature.gpu,utilization.gpu,clocks.sm,power.draw",
-                                  "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=2).stdout.strip().split(",")
-            used, total, temp, util, clk, pw = [x.strip() for x in out]
-            s.update({"gpu_used_mb": float(used), "gpu_total_mb": float(total), "temp_c": float(temp),
-                      "util_pct": float(util), "sm_clock_mhz": float(clk), "power_w": None if pw in ("[N/A]", "N/A") else float(pw)})
-        except Exception as e:  # nvidia-smi 不可用時（例如 Jetson）略過
-            s["nvidia_smi_error"] = str(e)
+        # Jetson 的 nvidia-smi 只回傳 [N/A]，卻要約 18 ms 啟動子程序；gpu_stats() 又在每個 /api/segment 回應裡呼叫，
+        # 實測整個 gpu_stats() 約 24~26 ms（約佔 108 ms 請求的四分之一）。所以 Jetson 直接讀 sysfs，其他平台第一次失敗後就不再試。
+        if not IS_JETSON and not getattr(self, "_smi_failed", False):
+            try:
+                out = subprocess.run(["nvidia-smi", "--query-gpu=memory.used,memory.total,temperature.gpu,utilization.gpu,clocks.sm,power.draw",
+                                      "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=2).stdout.strip().split(",")
+                used, total, temp, util, clk, pw = [x.strip() for x in out]
+                s.update({"gpu_used_mb": float(used), "gpu_total_mb": float(total), "temp_c": float(temp),
+                          "util_pct": float(util), "sm_clock_mhz": float(clk), "power_w": None if pw in ("[N/A]", "N/A") else float(pw)})
+                return s
+            except Exception as e:
+                self._smi_failed = True
+                s["nvidia_smi_error"] = str(e)
+        j = jetson_stats()    # CPU / GPU 共用記憶體：RAM 用量、GPU 溫度 / 時脈 / 使用率、整板功耗（memutil.jetson_stats）
+        if j:
+            s.update({"gpu_used_mb": j.get("ram_used_mb"), "gpu_total_mb": j.get("ram_total_mb"), "temp_c": j.get("gpu_temp_c"),
+                      "util_pct": j.get("gpu_util_pct"), "sm_clock_mhz": j.get("gpu_clock_mhz"), "power_w": j.get("power_w"),
+                      "memory_is_shared": True})
         return s

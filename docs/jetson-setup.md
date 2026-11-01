@@ -48,3 +48,10 @@ git clone --recurse-submodules <repo-url> && cd <repo>
 - Jetson AI Lab 的 index 網址與可用版本會變動；若 `torch==2.8.0` 找不到，到該 index 頁面查可用版本，或改設 `JP_INDEX`。
 - `nanosam/utils/predictor.py` 的 `TRTModule` 在 TensorRT 10 下是否正常，需實測；若失敗，需改用 TRT 10 的 tensor API（`num_io_tensors`），這也是報告「版本相容性問題」的素材。
 - NanoSAM 的 `resnet18_image_encoder.onnx` 只在 Google Drive（需登入，gdown 無法下載），請在電腦下載後放到 Jetson 的 `data/models/`（或用 scp）；`mobile_sam_mask_decoder.onnx` 由腳本從 HuggingFace 下載，建引擎前請確認輸入名稱與官方一致（`point_coords`、`point_labels`）。
+
+## 實機驗證結果（2026-10-30）
+
+此機（Orin Nano 8GB，L4T R36.4.7）已驗證的組合與遇到的問題見 [record.md §13](record.md)。重點：
+- torch 2.8.0 / torchvision 0.23.0（Jetson AI Lab `jp6/cu126`）+ numpy 1.26.4 + TensorRT 10.3.0 + CUDA 12.6 + cuDNN 9.3 可用；**`--extra-index-url` 會裝到 PyPI 的 CPU 版，請只用 Jetson index（`--no-deps`）**。
+- 電源模式編號以 `/etc/nvpmodel.conf` 為準：此機 2 = MAXN_SUPER（不是 0）。
+- 若 `import torch` 段錯誤，先用 `dpkg -V` 檢查 CUDA 套件是否損毀（record.md §13.2 第 3 點）。

@@ -80,7 +80,7 @@ class CameraWorker:
 
     def _loop(self, cap, source, is_file, max_side):
         seg, svc = self.service.seg, self.service
-        fps, fails, n = 0.0, 0, 0
+        fps, fails, n, dt_ema = 0.0, 0, 0, 0.0
         try:
             while not self.stop_evt.is_set():
                 t0 = time.perf_counter()
@@ -113,9 +113,8 @@ class CameraWorker:
                         seg.set_prompts(prompts, groups)
                     dets = seg(PIL.Image.fromarray(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)), p["threshold"], p["nms_iou"], p.get("with_masks", True), p.get("top_per_group", False))
                     timing = dict(seg.timing)
-                dt = time.perf_counter() - t0
-                fps = 1 / dt if n == 0 else 0.85 * fps + 0.15 / dt
-                vis = draw_overlay(bgr, dets, prompts, timing, fps, p["style"], p.get("expected"))
+                infer_dt = time.perf_counter() - t0                  # 讀取畫面 + 推論（舊版把這段當作整圈，FPS 因此偏高）
+                vis = draw_overlay(bgr, dets, prompts, timing, fps, p["style"], p.get("expected"))   # 畫面上的 FPS 是上一幀的完整一圈
                 ok, buf = cv2.imencode(".jpg", vis, [cv2.IMWRITE_JPEG_QUALITY, 80])
                 summary = []
                 for pr in prompts:
@@ -125,12 +124,16 @@ class CameraWorker:
                                     "mean_score": float(sum(d.score for d in mine) / len(mine)) if mine else None,
                                     "best_score": seg.best_scores.get(pr), "queries": (p.get("groups") or {}).get(pr) or [pr], "primary": seg.primary.get(pr),
                                     "mean_sam_iou": float(sum(d.sam_iou for d in mine) / len(mine)) if mine and p.get("with_masks", True) else None})
+                dt = time.perf_counter() - t0                        # 完整一圈：讀取 + 推論 + 疊圖 + JPEG 編碼 + 組摘要
+                dt_ema = dt if n == 0 else 0.85 * dt_ema + 0.15 * dt   # 平均「每幀時間」再換算 FPS；平均瞬時 FPS 在時間抖動時會偏高
+                fps = 1.0 / dt_ema
                 with self.cond:
                     self.jpeg = buf.tobytes()
                     self.frame_id += 1
                     self.state = {"running": True, "error": None, "source": source, "fps": fps, "frame_id": self.frame_id, "hyde": self.hyde_info,
                                   "image": {"width": vis.shape[1], "height": vis.shape[0]}, "prompts": prompts,
-                                  "summary": summary, "timing": {**timing, "total_ms": dt * 1e3, "text_encode_ms": 0, "serialize_ms": 0},
+                                  "summary": summary, "timing": {**timing, "total_ms": dt * 1e3, "infer_ms": infer_dt * 1e3, "overlay_encode_ms": (dt - infer_dt) * 1e3,
+                                             "text_encode_ms": 0, "serialize_ms": 0},
                                   "detections": [{"id": i, "label": d.label, "score": d.score, "box": [float(v) for v in d.box],
                                                   "box_area": int((d.box[2] - d.box[0]) * (d.box[3] - d.box[1])), "mask_area": d.area if d.mask is not None else None, "sam_iou": d.sam_iou, "query": d.query, "primary": d.primary, "contours": []}
                                                  for i, d in enumerate(dets)]}

@@ -75,6 +75,8 @@ source .venv-jetson/bin/activate
 
 ## 5. Jetson：OWL-ViT 權重與建三個引擎
 
+> **建引擎前先確認 `free -m` 的 available ≥ 4GB**（實測 OWL 引擎的 trtexec 需要約 3GB 以上；available 只有 3.3GB 時連續失敗 4 次，改用 SSH、停掉 gazebo、available 約 5GB 後一次成功）。請用 SSH 終端機而非 VS Code 遠端連線，並先結束 gazebo / ollama。OWL 引擎改由 `build_owl_engine.py` 建（見 `docs/record.md` §13.2 第 7 點與 §13.4）。
+
 ```bash
 ./installation/jetson/02_download_models.sh            # OWL-ViT（已帶快取就會直接用）；decoder ONNX 已在 data/models 會略過
 ENC_ONNX=data/models/resnet18_image_encoder.selftrain.onnx ./installation/jetson/03_build_engines.sh
@@ -119,8 +121,8 @@ PY
 ## 6. Jetson：固定電源模式並量測
 
 ```bash
-sudo nvpmodel -p --verbose | head -20                  # 看有哪些模式（Orin Nano 常見 15W / 25W / MAXN）
-./installation/jetson/05_set_power_mode.sh 0           # 0 = 通常是最高效能；實際編號以上一行為準
+sudo nvpmodel -p --verbose | head -20                  # 看有哪些模式（此機 Orin Nano 8GB：0=15W、1=25W、2=MAXN_SUPER、3=7W；編號以此為準）
+./installation/jetson/05_set_power_mode.sh             # 依名稱自動選 MAXN*（此機為 MAXN_SUPER = 2）；也可指定名稱或編號：… 15W / … 1
 ```
 
 **量測期間電源模式必須固定，且要寫進報告**。要比較多種模式就每種都完整跑一輪（改 `--power_mode` 與輸出檔名）。
@@ -138,10 +140,10 @@ sudo nvpmodel -p --verbose | head -20                  # 看有哪些模式（Or
 ```bash
 python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote control" --runs 50 \
     --owl_engine data/owl_image_encoder_patch32.engine \
-    --power_mode "MAXN (nvpmodel 0)" --out data/bench/jetson/pipe_owltrt_mobilesam.json
+    --power_mode "MAXN_SUPER (nvpmodel 2)" --out data/bench/jetson/pipe_owltrt_mobilesam.json
 python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote control" --runs 50 \
     --owl_engine data/owl_image_encoder_patch32.engine --student data/eval/colab80_best.pth \
-    --power_mode "MAXN (nvpmodel 0)" --out data/bench/jetson/pipe_owltrt_student.json
+    --power_mode "MAXN_SUPER (nvpmodel 2)" --out data/bench/jetson/pipe_owltrt_student.json
 ```
 
 ```bash
@@ -149,7 +151,7 @@ python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote contr
 python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote control" --runs 50 \
     --owl_engine data/owl_image_encoder_patch32.engine \
     --nanosam_encoder data/resnet18_image_encoder.selftrain.engine --nanosam_decoder data/mobile_sam_mask_decoder.engine \
-    --power_mode "MAXN (nvpmodel 0)" --out data/bench/jetson/pipe_all_trt.json
+    --power_mode "MAXN_SUPER (nvpmodel 2)" --out data/bench/jetson/pipe_all_trt.json
 ```
 
 - 同一張圖（`cats.jpg`）、同樣的提示詞，才能與 WSL 的數據對照（[benchmark.md](benchmark.md)）。
@@ -166,7 +168,7 @@ python benchmark/bench_pipeline.py data/samples/cats.jpg "a cat" "a remote contr
 
 | 要做的事 | 做法 |
 |---|---|
-| 比較 TensorRT 的 NanoSAM 與 PyTorch 的 baseline / 自訓練 encoder | 網頁「SAM 編碼器」下拉選單切換（`NanoSAM（TensorRT）`、`MobileSAM（baseline）`、掃到的 `data/eval/*.pth`）；同一張圖面積應接近 |
+| 比較 TensorRT 與 PyTorch 的 SAM encoder | 網頁「SAM 編碼器」下拉選單切換：`自訓練 ResNet18 encoder（TensorRT）`（內部 key 仍叫 `nanosam`）、`MobileSAM（baseline，PyTorch fp32）`、掃到的 `自訓練 ResNet18 encoder（PyTorch fp32）· data/eval/*.pth`。**TensorRT 與 PyTorch 的自訓練項目是同一份權重**，只差執行方式；同一張圖面積應接近 |
 | 即時攝影機 | 分頁「伺服器來源」→ 來源填 `0`（USB）；CSI 填 `gst:nvarguscamerasrc ! video/x-raw(memory:NVMM),width=1280,height=720,framerate=30/1 ! nvvidconv ! video/x-raw,format=BGRx ! videoconvert ! video/x-raw,format=BGR ! appsink drop=1` |
 | 影片檔 | 來源填 `data/samples/demo_h264.mp4` |
 | 製造情境 | 勾選零件檢查卡（見 [scenario.md](scenario.md)） |

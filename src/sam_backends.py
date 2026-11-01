@@ -14,6 +14,7 @@
   * decoder 輸出 4 個遮罩，取第 0 個（= multimask_output=False 時 SAM 採用的那一個）；
     裁掉補 0 的部分後雙線性放大到原圖大小，logit > 0 為前景
 """
+import os
 import time
 
 import numpy as np
@@ -91,7 +92,19 @@ class NanoSamPredictor:
 
     @property
     def label(self):
-        return f"NanoSAM（{'TensorRT' if self.backend == 'trt' else 'ONNX Runtime'}）"
+        """顯示用名稱。類別名稱 NanoSamPredictor 指的是「官方 NanoSAM 的推論流程」（框→兩點、前後處理、TensorRT 載入），
+        不代表權重是官方的：檔名含 selftrain 的是我們自己蒸餾的 ResNet18 encoder（官方權重放在需登入的 Google Drive，沒有取得）。"""
+        n = os.path.basename(self.encoder)
+        if "selftrain" in n:
+            who = "自訓練 ResNet18 encoder"
+        elif n.startswith("mobile_sam"):
+            who = "MobileSAM TinyViT encoder"
+        elif n.startswith("resnet18_image_encoder"):
+            who = "官方 ResNet18 encoder"
+        else:
+            who = f"SAM encoder（{n}）"
+        prec = " fp32" if ".fp32" in n else " fp16" if ".fp16" in n else ""    # 檔名帶精度時才標（selftrain.engine 慣例上是 fp16，但檔名看不出來）
+        return f"{who}（{'TensorRT' + prec if self.backend == 'trt' else 'ONNX Runtime'}）"
 
     def reset_image(self):
         self.feats = None
