@@ -1,4 +1,4 @@
-> **分支說明：** — WSL2 / Windows 開發機（GTX 1060，PyTorch / ONNX Runtime）版本，含 WSL 端量測資料（`data/bench/wsl`）與報告檔（`docs/reports`）。Jetson Orin Nano（TensorRT）版本在 `jetson` 分支。
+> **分支說明：`wsl`** — WSL2 / Windows 開發機（GTX 1060，PyTorch / ONNX Runtime）版本，含 WSL 端量測資料（`data/bench/wsl`）與報告檔（`docs/reports`）。Jetson Orin Nano（TensorRT）版本在 `jetson` 分支。
 
 # smart-processing-midterm-project-2026Fall
 
