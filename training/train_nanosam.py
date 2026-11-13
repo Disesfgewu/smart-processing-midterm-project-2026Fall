@@ -36,7 +36,7 @@ parser.add_argument("--batch_size", type=int, default=4, help="GTX 1060 6GB 建�
 parser.add_argument("--accum_steps", type=int, default=4, help="梯度累積，等效 batch = batch_size * accum_steps")
 parser.add_argument("--num_workers", type=int, default=4)
 parser.add_argument("--learning_rate", type=float, default=3e-4)
-parser.add_argument("--val_count", type=int, default=200, help="固定留出最後 N 張（依檔名排序）當驗證集，不參與訓練；0 = 不驗證")
+parser.add_argument("--val_count", type=int, default=200, help="固定取最後 N 張作 held-out（依檔名排序）當驗證集，不參與訓練；0 = 不驗證")
 parser.add_argument("--teacher_fp16", action="store_true",
                     help="（不建議）教師用 fp16。MobileSAM 的 TinyViT 在 fp16 下輸出是錯的（實測與 fp32 的 cosine ≈ -0.24；官方 README 也註明此 encoder 必須用 fp32），學生會學到壞掉的目標")
 parser.add_argument("--amp", choices=["auto", "on", "off"], default="auto",

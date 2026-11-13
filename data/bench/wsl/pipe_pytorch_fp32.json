@@ -1,0 +1,97 @@
+{
+  "image": "data/samples/cats.jpg",
+  "image_size": [
+    640,
+    480
+  ],
+  "prompts": [
+    "a cat",
+    "a remote control"
+  ],
+  "device": "NVIDIA GeForce GTX 1060 6GB",
+  "torch": "2.5.1+cu121",
+  "model_load_s": 2.4258519359864295,
+  "power_mode": "WSL2 / GTX 1060, APP_LOG on ext4",
+  "backend": "owl=pytorch-fp32, sam=pytorch-fp32",
+  "owl_engine": null,
+  "nanosam_encoder": null,
+  "nanosam_decoder": null,
+  "sam_encoder": "mobilesam",
+  "student_checkpoint": null,
+  "owl_preprocess": {
+    "mean_ms": 0.8206587983295321,
+    "median_ms": 0.6918800063431263,
+    "p95_ms": 1.2054401449859142,
+    "std_ms": 0.6740342555789102,
+    "fps": 1218.5332101910326,
+    "runs": 50
+  },
+  "owl_image_encoder": {
+    "mean_ms": 75.67506591323763,
+    "median_ms": 75.9427510201931,
+    "p95_ms": 77.89384387433529,
+    "std_ms": 1.5729088943224037,
+    "fps": 13.214392190242847,
+    "runs": 50
+  },
+  "owl_decode": {
+    "mean_ms": 0.9077090723440051,
+    "median_ms": 0.7977280765771866,
+    "p95_ms": 1.489030895754695,
+    "std_ms": 0.29330934505291384,
+    "fps": 1101.6745678410696,
+    "runs": 50
+  },
+  "owl_total": {
+    "mean_ms": 77.30655212886631,
+    "median_ms": 77.4234279524535,
+    "p95_ms": 79.49754106812179,
+    "std_ms": 1.5749554505426948,
+    "fps": 12.935514163573716,
+    "runs": 50
+  },
+  "owl_text_encoder": {
+    "mean_ms": 9.430131078697741,
+    "median_ms": 8.943947032094002,
+    "p95_ms": 12.109355069696903,
+    "std_ms": 2.1367959091003605,
+    "fps": 106.04306468856586,
+    "runs": 50
+  },
+  "sam_image_encoder": {
+    "mean_ms": 90.73581501841545,
+    "median_ms": 90.61700745951384,
+    "p95_ms": 93.82971213199198,
+    "std_ms": 2.0294972145554966,
+    "fps": 11.021006421742541,
+    "runs": 50
+  },
+  "num_boxes": 4,
+  "sam_decoder_per_box": {
+    "mean_ms": 7.812753492034972,
+    "median_ms": 7.5475265039131045,
+    "p95_ms": 9.538773912936449,
+    "std_ms": 0.9556012649946848,
+    "fps": 127.99584692125389,
+    "runs": 50
+  },
+  "pipeline_total": {
+    "mean_ms": 206.9578101206571,
+    "median_ms": 206.8104373756796,
+    "p95_ms": 212.95773494057357,
+    "std_ms": 3.3354565066148436,
+    "fps": 4.831902692713054,
+    "runs": 50
+  },
+  "memory": {
+    "torch_peak_alloc_mb": 900.5595703125,
+    "torch_reserved_mb": 984.0,
+    "nvidia_smi_used_before_mb": 1145.0,
+    "nvidia_smi_used_after_mb": 2211.0,
+    "gpu_temp_c": 62.0,
+    "gpu_sm_clock_mhz": 1923.0,
+    "sys_used_before_mb": 2687.5078125,
+    "sys_used_after_mb": 3221.5,
+    "process_peak_rss_mb": 1198.3515625
+  }
+}

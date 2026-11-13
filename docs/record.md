@@ -243,7 +243,7 @@
 
 - **動機**：官方 ResNet18 encoder 拿不到（§2.3）。
 - **官方 `train.py` 不能直接用**：教師模型是 TensorRT 引擎，WSL 沒有 TensorRT → 自寫 `training/train_nanosam.py`（教師為 PyTorch 的 MobileSAM encoder、學生 ResNet18 + ImageNet 預訓練、Huber loss、Adam 3e-4、梯度累積；**教師一開始誤用 fp16，見 7.2**），checkpoint 格式與官方相容，可用官方 `export_image_encoder_onnx` 匯出。
-- **驗證集**：依檔名排序固定留出最後 200 張，每個 epoch 算驗證 loss，並另存 `best.pth`。
+- **驗證集**：依檔名排序固定取最後 200 張作 held-out，每個 epoch 算驗證 loss，並另存 `best.pth`。
 - **實測速度（COCO 真實圖片）**：batch 4 與 batch 8 **同速**（96 張 24 s ≈ 4 張/秒），顯存 1.5 vs 2.6 GB → 用 batch 4 + 累積 4（等效 16）。4800 張訓練圖 ≈ **20 分鐘 / epoch**（10 epoch ≈ 3.5 h）。小規模試跑（96 張、2 epoch）驗證 loss 0.0249 → 0.0103，只代表機制正常。
 - **訓練資料**：官方是 COCO train2017（11.8 萬張）× 200 epoch；我們只有 val2017（5000 張，778 MB），品質預期會低於官方。**準確度不能直接與官方 mIoU 比**（延遲 / FPS / 記憶體只取決於網路架構，仍可對照）。
 - **下載 COCO val2017 很慢**：約 1 小時 45 分，多次逾時重試（`wget` 自動續傳）。
@@ -309,7 +309,7 @@
 
 - train（0.000652）與 val（0.000779）貼得很近，沒有過擬合；最後 30 個 epoch 只從 0.000878 降到 0.000779，收益遞減。reference：全預測 0 = 5.08e-3、只猜平均 = 2.15e-3。
 
-**分割準確度**（`training/compare_encoders.py`，200 張留出影像、1349 個物件、COCO GT 框當提示、GTX 1060 PyTorch fp32；結果檔 `data/eval/compare_run1_epoch2.json`、`compare_run1_colab80.json`）
+**分割準確度**（`training/compare_encoders.py`，200 張 held-out 影像、1349 個物件、COCO GT 框當提示、GTX 1060 PyTorch fp32；結果檔 `data/eval/compare_run1_epoch2.json`、`compare_run1_colab80.json`）
 
 | encoder | mIoU All | Small | Medium | Large | encoder 延遲 | 與 baseline 遮罩 IoU |
 |---|---|---|---|---|---|---|
@@ -345,7 +345,7 @@
 - **檢查出的風險**：① 匯出 ONNX 的預設檔名 `resnet18_image_encoder.onnx` 與**官方檔同名**，之後手動下載官方檔會互相覆蓋；② Jetson 的 `03_build_engines.sh` 也寫死這個名字，引擎檔會撞名；③ 訓練腳本沒有任何防呆，輸出目錄若設成 `data/models` 會和 baseline 混在一起。
 - **解法**：自訓練 ONNX 固定為 `resnet18_image_encoder.selftrain.onnx`（寫官方檔名需 `FORCE=1`），Jetson 腳本以 `ENC_ONNX` 選擇、引擎檔名跟著 ONNX 走；訓練腳本拒絕輸出到 `data/models`、每次啟動寫 `run_info.json`、結束時校驗 baseline 的 sha256；每次實驗用 `RUN` 名稱分開存放。四項防護都實測過（拒絕寫入、`未被改動 ✓`、拒絕官方檔名）。
 - **比較工具**：`training/compare_encoders.py`（用 COCO GT 框當提示算 mIoU，與官方相同方法）；pipeline / 網頁可載入自訓練 encoder 並即時切換（`SAM_STUDENT`）。實測切換再切回，遮罩面積與第一次完全相同。
-- **baseline 基準（先量好、之後訓練結果才有東西可比）**：200 張留出影像、1349 個物件，mIoU All **0.744** / Small 0.685 / Medium 0.756 / Large 0.822，encoder 87.4 ms。官方報的 MobileSAM 為 0.728 / 0.658 / 0.759 / 0.804——差距在 0.02 以內，表示**評估方法複現正確**（但影像子集、後端不同，只是方法驗證，不是數字相等）。
+- **baseline 基準（先量好、之後訓練結果才有東西可比）**：200 張 held-out 影像、1349 個物件，mIoU All **0.744** / Small 0.685 / Medium 0.756 / Large 0.822，encoder 87.4 ms。官方報的 MobileSAM 為 0.728 / 0.658 / 0.759 / 0.804——差距在 0.02 以內，表示**評估方法複現正確**（但影像子集、後端不同，只是方法驗證，不是數字相等）。
 - **已知的訓練 / 推論不一致（沿用官方做法，未改）**：訓練時影像被壓成 1024×1024 正方形（RandomResizedCrop / Resize），推論時 SAM 保持長寬比、縮到長邊 1024 再補零，所以學生在非正方形影像上看到的輸入分佈與訓練不同；是否影響品質未驗證。
 - **未驗證**：自訓練 encoder 的準確度（尚未訓練）；速度差距目前只有「假 checkpoint」的結構性數字（SAM 階段約 54 vs 107 ms）。
 
@@ -448,3 +448,154 @@
   差異來源是影像縮放的插值方式（兩個推論路徑對同一張圖看到的輸入略有不同），不是邏輯錯誤；我先看到 0.914 時沒有直接調高容忍度，而是改縮放方式驗證這個假設，結果成立，因此預設改為雙線性，使 PyTorch 與 NanoSAM 兩條路徑吃到相同的輸入。`sam_iou`（SAM 自評）兩邊小數第三位內一致。
 - **端到端**（埠 8001，ONNX Runtime 後端）：貓圖 `a cat, a remote control`，nanosam 遮罩面積 50074 / 57631 / 4082 / 1941 px，與 PyTorch 自訓練 encoder 相同（50074 / 57629 / 4081 / 1940）；切回 baseline 後面積與之前完全相同；API 合約測試通過；`SAM_ACTIVE=nanosam` 啟動即選用。CPU 版 ORT 的 SAM 階段 ~530 ms，**只用來驗證正確性，不是效能數字**。
 - **未驗證（要到 Jetson）**：`_TrtBackend`（torch2trt 對 TensorRT 10 的相容性、動態形狀 decoder、fp16 引擎的遮罩差異）。`jetson-deploy.md` 步驟 5b 有專用的驗證指令與失敗對照表。
+
+## 13. Jetson 實機環境建置（2026-10-30，Orin Nano 8GB，實測）
+
+### 13.1 已驗證可用的版本組合
+
+| 項目 | 實測版本 | 備註 |
+|---|---|---|
+| L4T / JetPack | R36.4.7（`nvidia-jetpack` meta 套件未裝，apt 候選 6.2.1+b38） | 元件齊全，不影響建置 |
+| Ubuntu / Python / glibc | 22.04.5 / 3.10.12 / 2.35 | |
+| CUDA / cuDNN | 12.6.68 / 9.3.0.75 | `nvcc` 不在 PATH，位於 `/usr/local/cuda/bin` |
+| TensorRT | 10.3.0（`python3-libnvinfer` 10.3.0.30，系統提供） | venv 需 `--system-site-packages` 才 import 得到 |
+| PyTorch / torchvision | **2.8.0 / 0.23.0**（Jetson AI Lab `jp6/cu126` 的 cp310 aarch64 wheel） | 驗證：`torch.cuda.is_available()` True、2048×2048 matmul、`torchvision.ops.nms` 在 CUDA 上可執行 |
+| numpy | **1.26.4**（必須裝在 venv 內） | 系統為 1.21.5 |
+| OpenCV | 4.8.0-jetpack（apt，GStreamer YES） | 不要 pip 安裝 |
+| 電源模式 | 0=15W、1=25W、**2=MAXN_SUPER**（目前） | 見 13.2 第 5 點 |
+| torch2trt | **0.5.0**（GitHub master，commit `4e820ae`；需 `--no-build-isolation`） | `TRTModule` 已使用 TensorRT 10 API（`num_io_tensors` / `set_tensor_address` / `execute_async_v3`）；**執行期尚未驗證** |
+| onnxruntime-gpu | **1.23.0**（Jetson AI Lab index，`--no-deps`） | providers：`TensorrtExecutionProvider`、`CUDAExecutionProvider`、`CPUExecutionProvider` |
+| 其他 Python 套件 | transformers 4.46.3、timm 1.0.11、onnx 1.23.2、ml_dtypes **0.5.4**、protobuf 7.36.2、fastapi 0.162.0、uvicorn 0.54.0、python-multipart 0.0.32、flatbuffers 25.12.19、coloredlogs 15.0.1 | ml_dtypes 必須 <0.6（0.6 要求 numpy>=2） |
+| NanoOWL / NanoSAM | 子模組 `fb553de` / `6536336`；nanoowl 以 `pip install -e`，nanosam 以 `.pth` 加入路徑 | `import nanoowl, nanosam.utils.predictor` 成功 |
+
+Jetson AI Lab index 上 cp310 的 torch 另有 2.9.1 / 2.10.0 / 2.11.0；2.9.1 需要 `libcudss.so.0`，PyPI 的 `nvidia-cudss-cu12` 只有 `.so.1`（>=1.0），**未採用**。
+
+### 13.2 遇到的問題（寫報告用）
+
+1. **pip 裝到 CPU 版 torch（`2.8.0+cpu`）**。原因：同時指定 `--extra-index-url https://pypi.org/simple`，PyPI 也有 torch 2.8.0 的 aarch64 CPU wheel，版本號相同，pip 選到它；症狀 `AssertionError: Torch not compiled with CUDA enabled`。解決：移除後只用 Jetson index 以 `--no-deps` 重裝（依賴先前已裝）。`01_install_env.sh` 目前仍是 `--extra-index-url` 寫法，**有同樣風險**。
+2. **`pip install "numpy<2"` 沒有在 venv 內安裝**：系統的 1.21.5 滿足條件，pip 直接略過；venv 實際用系統 numpy。解決：`pip install numpy==1.26.4`（明確指定）。（這一項後來證實**不是**段錯誤的原因，但仍是潛在的 ABI 風險。）
+3. **`import torch` 段錯誤（exit 139），根因是系統 CUDA 函式庫檔案損毀，與 torch 版本無關。**
+   - 排查：`python -X faulthandler` 只指到 `torch/__init__.py:422`（載入 `torch._C`）→ 用 `ctypes.CDLL` 逐一載入 torch 的 .so，`libtorch_cuda.so` 崩潰 → `gdb -batch -ex run -ex "frame 2" -ex "p l->l_name"` 顯示崩潰的是動態連結器在重定位 **`/usr/local/cuda/lib64/libcublasLt.so.12`**；單獨 `ctypes.CDLL` 該檔也崩潰。
+   - 交叉驗證：Jetson AI Lab 的 2.8.0 與 NVIDIA 官方 JP6.1 的 `torch 2.5.0a0+nv24.08` 都在同一處崩潰，排除 wheel 本身。
+   - 證據：`dpkg -V` 顯示 14 個 CUDA/cuDNN/TensorRT/VPI 套件的檔案 MD5 與套件記錄不符；`apt-get download libcublas-12-6` 後與磁碟檔逐位元組比對，**大小相同，僅 287 個位元組不同，且集中在約 8KB 範圍**（偏移 3070983~3079164）。
+   - 解決：`sudo apt-get install --reinstall`（版本與 apt 候選相同，不改版）14 個套件：`cuda-nvrtc-12-6 libcublas-12-6 libcublas-dev-12-6 libcudnn9-cuda-12 libcufft-12-6 libcufft-dev-12-6 libcufile-dev-12-6 libcurand-12-6 libcusolver-12-6 libcusparse-dev-12-6 libnvinfer10 libnvinfer-dev libnvinfer-lean-dev libnvvpi3`。重裝後 `dpkg -V` 全部通過，`import torch` 正常。
+   - 損毀原因**未確認**。同時發現 dpkg 曾被中斷：`dpkg.log` 有一次 PackageKit 自動更新（時間戳 1970-01-01，開機後時鐘尚未校正）做到一半，留下 176 個 `iU` 套件，使 `apt` 回報 `dpkg was interrupted`；但那次更新的是 Ubuntu 一般套件，CUDA 檔案的 mtime 為 2024-08，不是它改的。
+4. **`dpkg --configure -a` 後剩 `packagekit` 為 `iHR`**，`packagekit-tools` 與 `gstreamer1.0-packagekit` 因依賴 `packagekit (= 1.2.5-2ubuntu3.1)` 無法設定；`sudo apt-get -f install` 重裝 `packagekit` 後解決（0 個移除；不可直接移除 packagekit，`ubuntu-desktop` 等會連帶被拆）。
+5. **電源模式編號與文件不符**：`05_set_power_mode.sh` 預設 `0`，但此機 `/etc/nvpmodel.conf` 為 0=15W、1=25W、2=MAXN_SUPER；照原文件執行會降到 15W。報告應寫 **MAXN_SUPER（nvpmodel 2）**，不是 MAXN。（**腳本與 `jetson-data.md` 尚未修正**。）
+6. **`01_install_env.sh` 漏裝 server 依賴**：未安裝 `fastapi`、`uvicorn`、`python-multipart`，`07_run_server.sh` 會 import 失敗。（**腳本尚未修正**。）
+7. **GPU 記憶體不足導致 `build_image_encoder_engine` 失敗（實測）**：`03_build_engines.sh` 的第一步（NanoOWL 建 OWL-ViT 引擎）在 `OwlViTForObjectDetection.from_pretrained(...).to("cuda")` 失敗：`NvMapMemAllocInternalTagged: ... error 12`（ENOMEM）後接 `RuntimeError: NVML_SUCCESS == r INTERNAL ASSERT FAILED at c10/cuda/CUDACachingAllocator.cpp:1131`。
+   - 最小復現（與 NanoOWL 無關）：`torch.empty(64MB, device="cuda")` 連續配置，在 384MB 失敗，而 `torch.cuda.mem_get_info()` 回報空閒 1677MB。
+   - 上限不固定、隨系統空閒記憶體變動：同樣的測試後來 4MB 小塊配到 840MB、256MB 大塊配到 1536MB，所以不是碎片化或區塊大小；`/proc/buddyinfo`、`Cached`（約 340MB）也無異常。
+   - 原因：Jetson 的 CPU 與 GPU 共用 7.6GB 記憶體，GPU 配置無法放到 swap；此時 `MemAvailable` 僅約 1.5GB。最大使用者是 `ign gazebo`（745MB，TurtleBot3 模擬）與多個 VS Code server。建好的 8GB swap 檔使用量為 0B，對此無幫助。
+   - `NVML_SUCCESS == r` 為**推測**：Jetson 沒有 NVML，PyTorch 在配置失敗的錯誤路徑上查詢 NVML 而觸發此斷言，遮住了真正的 OOM 訊息；未驗證。
+   - 嘗試 1：改用 `installation/jetson/build_owl_engine.py`（CPU 匯出 ONNX，再 `trtexec --fp16`；不 fp16 載入 torch，因為會讓匯出的 ONNX 與引擎輸入變 fp16，與 pipeline 傳入的 float32 不符）。**ONNX 匯出成功**（342MB，不佔 GPU 記憶體）；**`trtexec` 建引擎失敗**：`Cuda Runtime (out of memory)`，要求 50MB / 174MB 的 GPU 配置失敗，最後 `Could not find any implementation for node {ForeignNode[/vision_model/embeddings/position_embedding/...`、`Engine could not be created`（3 分 17 秒；日誌 `data/bench/jetson/build_owl_engine.attempt1_oom.log`）。
+   - 嘗試 2（可用記憶體曾回到約 3GB 後重試）：同樣失敗，這次要求 348MB 的 `__mye…-consts` 區域配置失敗（2 分 50 秒）。trtexec 執行期間系統 `used` 升到約 6.6GB、可用降到約 770MB，也就是 **建引擎本身需要約 3GB 以上的共用記憶體**，與背景程序（gazebo 約 500~745MB、多個 VS Code server、ollama）加總超過 7.6GB。結論：fp16 / CPU 匯出只解決 torch 那一段，TensorRT 建引擎的記憶體需求省不掉，**必須先釋放背景程序**。
+   - 嘗試 3（gazebo 已停止，可用記憶體約 3.3GB）與 嘗試 4（逐 2 秒取樣記憶體）：仍失敗。取樣顯示建置期間 `MemAvailable` 從 3374MB 降到 **246MB**、`MemFree` 降到 93MB、swap 用掉約 1.4GB：**trtexec 本身要吃掉約 3GB 以上**，3.3GB 起點不夠。
+   - 嘗試 5（成功）：改用 SSH 終端機、gazebo 停止，起點 `MemAvailable` 約 5.0GB（已用 2.3GB；VS Code 遠端程序從約 1.76GB 降到約 0.54GB）→ 同一支腳本、同一個 ONNX **一次成功**：引擎 176MB、建置 135 秒；建置期間 `MemAvailable` 最低 2393MB、`MemFree` 最低 354MB。結論：**失敗原因就是可用記憶體不足，沒有其他版本或安裝問題**。
+   - 與「檔案快取」有關的假設只得到部分支持：torch 配置測試中，空閒 276MB 時仍可配 2560MB，空閒 131MB 時卻只配到 512MB，結果不一致，沒有得到結論。但 `src/memutil.py` 在載入模型後放掉模型檔案快取（MemFree 352→976MB）後，PyTorch 管線的 SAM 階段由失敗轉為成功（兩次測試都先以相同方式清快取，屬受控對照；但整個過程 MemFree 最低仍到 157MB，餘裕很薄）。
+8. 子模組 `third_party/nanoowl`、`nanosam` 原為空目錄，需 `git submodule update --init --recursive`。
+9. `/dev/video*` 不存在，目前無攝影機；Demo 需接 USB 攝影機，否則只能用影片檔。
+
+10. **安裝 `onnx` 等套件時 numpy 被升到 2.2.6**：`pip install transformers timm … onnx fastapi …` 的依賴（`ml_dtypes 0.6.0` 要求 numpy>=2）讓 pip 把 venv 內的 numpy 1.26.4 換成 2.2.6，之後 `import torch` 出現 `Failed to initialize NumPy`（"A module that was compiled using NumPy 1.x cannot be run in NumPy 2.2.6"；CUDA 本身仍正常）。解決：`pip install numpy==1.26.4` 與 `ml_dtypes<0.6`，並建立 `.venv-jetson/pip-constraints.txt`（`numpy==1.26.4`），之後安裝前 `export PIP_CONSTRAINT=…` 讓 pip 拒絕升級 numpy。**`01_install_env.sh` 目前沒有這個保護**，其安裝順序（numpy 先裝、之後 `pip install transformers … onnx`）會遇到同樣問題。
+11. **torch2trt 從 GitHub 安裝失敗 `ModuleNotFoundError: No module named 'tensorrt'`**：pip 預設用隔離的暫時環境建置（`Getting requirements to build wheel`），看不到 JetPack 提供的系統 `tensorrt`，而 torch2trt 的 `setup.py` 第 2 行 `import tensorrt`。解決：`pip install --no-build-isolation git+https://github.com/NVIDIA-AI-IOT/torch2trt.git`（venv 需已有 torch、setuptools、wheel）。**`01_install_env.sh` 的 torch2trt 那一行沒有此旗標，會失敗。**
+12. **`--no-deps` 安裝 `onnxruntime-gpu` 後缺依賴**：`flatbuffers`、`coloredlogs` 未裝（`import onnxruntime` 仍成功），需手動補裝。
+
+### 13.3 目前進度與尚未完成
+
+- **完成**：`.venv-jetson` 內 torch / torchvision / TensorRT / torch2trt / NanoOWL / NanoSAM / onnxruntime-gpu 全部可 import，`torch.cuda.is_available()` 為 True（Orin）。
+- **已完成（2026-11-01，Nano 實測）**：三個 TensorRT 引擎建成（見 §13.4）；`torch2trt.TRTModule` 載入並執行 OWL 與 NanoSAM 引擎成功（即 TensorRT 10.3 相容）；PyTorch 後端的完整管線與網頁 API 契約檢查通過。
+- **未做**：以 TensorRT 引擎跑完整管線與網頁（`OWL_ENGINE` + `NANOSAM_*`）、`bench_pipeline.py` 與 `06_measure_engines.sh` 的正式量測（含電源模式、功耗、與 NanoSAM 官方數據對照）、攝影機（`/dev/video*` 不存在）、提示詞比較實驗、截圖與 Demo。
+- **已修的腳本（2026-10-30）**：`01_install_env.sh`（只用 Jetson index + `--no-deps` 裝 torch 並檢查不是 `+cpu`、numpy / ml_dtypes constraints、server 依賴、onnxruntime-gpu 與其依賴、torch2trt `--no-build-isolation`、子模組初始化）、`05_set_power_mode.sh`（依名稱從 `/etc/nvpmodel.conf` 查編號，預設 `MAXN*` → 此機 MAXN_SUPER=2；找不到名稱會列出可用模式）、`00_check_jetpack.sh`（新增 CUDA / cuDNN / TensorRT 套件 `dpkg -V` 完整性與 dpkg 狀態檢查，並修正 nvcc 不在 PATH 時 CUDA 欄空白）、`collect_env.sh`（加 onnxruntime / ml_dtypes）、`jetson-data.md` / `jetson-deploy.md`（MAXN → MAXN_SUPER、nvpmodel 2）。**`01` 只做了語法檢查與守衛判斷式的單項實測，沒有整支重跑**（需 sudo 與大量下載）；此機的環境是依 §13.2 的指令逐步裝成，與 `01` 內容一致但不是由 `01` 產生。
+- **模型檔（2026-10-30 放入 `data/`）**：已用 `onnx.checker` 與 `torch.load` 逐一載入驗證（encoder / decoder 的輸入輸出名稱與 `03` 腳本一致）；沒有 `SHA256SUMS` 可對照傳輸完整性。尚缺 `data/samples/`（`cats.jpg`、影片）與 OWL-ViT 的 HuggingFace 快取（由 `02` 下載）。
+
+### 13.4 Nano 上的 TensorRT 引擎與管線驗證（2026-11-01，實測；電源模式 MAXN_SUPER，nvpmodel 2）
+
+| 引擎 | 大小 | 建置時間 | trtexec 單獨 GPU 延遲（平均） | 吞吐 |
+|---|---|---|---|---|
+| `owl_image_encoder_patch32.engine`（fp16，768×768） | 176MB | 135s | 16.13ms | 64.9 qps |
+| `resnet18_image_encoder.selftrain.engine`（fp16，自訓練 NanoSAM encoder） | 31MB | 127s | 11.62ms | 100.5 qps |
+| `mobile_sam_mask_decoder.engine`（fp32，點數 1~10） | 18MB | 29s | 8.68ms | 121.5 qps |
+
+- trtexec 數字為純 GPU 推論（不含前後處理與資料搬移），日誌在 `data/bench/jetson/`（`build_owl_engine.log`、`build_sam_encoder.log`、`build_sam_decoder.log`）。
+- **OWL 引擎的建法**：`installation/jetson/build_owl_engine.py`（CPU 匯出 ONNX → `trtexec --fp16` → 載入驗證）。ONNX 匯出約數十秒、不佔 GPU 記憶體。官方 `python -m nanoowl.build_image_encoder_engine` 會先把 fp32 模型載到 GPU，記憶體吃緊時風險較高，但本次**沒有**單獨驗證它在記憶體充足時是否也能成功。
+- **NanoSAM TensorRT 後端（`src/sam_backends.py`）在 Nano 上可用**：`set_image` 暖機後 38.5ms、`predict` 10.3ms（含前後處理，單一框；此為單次量測，不是正式統計）。
+- **fp16 引擎的遮罩保真度**（`data/samples/cats.jpg`，4 個框，TRT 引擎 vs 同一個自訓練 encoder 的 PyTorch fp32）：遮罩 IoU 0.960 / 0.972 / 0.986 / 0.974；面積差 1~3%（例：4133 vs 4078 px）。對 MobileSAM baseline 的 IoU 為 0.946~0.976。
+- **PyTorch fp32 後端（未用引擎）參考值**：OWL 224ms + SAM 401ms 約 625ms/幀（暖機後）；網頁 API 一次請求 438ms。尚未量 TensorRT 全流程。
+- **記憶體**：建三個引擎期間 `MemAvailable` 最低 2393MB（OWL）與 3565MB（NanoSAM 兩個）。
+
+### 13.5 全 TensorRT 管線與網頁（2026-11-01，Nano 實測）
+
+**`python -m server.main`（不設任何環境變數）**：`server/main.py` 的 `resolve_backends()` 會自動使用 `data/` 裡建好的引擎（OWL + NanoSAM，預設選用 `nanosam`）；環境變數仍優先（`OWL_ENGINE=` 設成空字串 = 強制 PyTorch）。Jetson 上 HyDE（Ollama）預設不自動啟動（`HYDE_AUTOSTART` 預設 0）。Jetson 上預設監聽 `0.0.0.0`（其他環境預設 `127.0.0.1`；`HOST=` 可覆蓋），啟動訊息會印出區網網址；實測從本機用此機的校內位址與 WireGuard 位址都連得到（**沒有從另一台裝置驗證，防火牆規則需 root 才看得到**），伺服器沒有登入驗證。沒指定 `PORT` 時，8000 被佔用會自動改用 8001~8010，並在載入模型前就決定（指定的 `PORT` 被佔會在約 8 秒內報錯退出，不必等模型載完）。
+
+驗收（引擎已建好、未設環境變數）：`/api/health` → `backend: tensorrt`；`GET /` HTTP 200；`tests/check_api_contract.py` 全部 OK；`/api/segment` 連打 6 次，`cats.jpg` 兩個提示詞偵測到 2 隻貓 / 2 個遙控器，遮罩面積 6 次完全一致（110696 / 6040 px）。單次請求（含 JPEG 編碼與序列化）約 108~117ms：OWL 26~28ms、SAM 77~85ms（4 個框）；同圖 PyTorch fp32 為 438ms。
+
+**正式量測**（`benchmark/bench_pipeline.py`，50 次，`cats.jpg` 640×480、4 個框，電源模式 **MAXN_SUPER（nvpmodel 2）**，GPU 約 50°C、時脈 1020MHz；原始檔 `data/bench/jetson/pipe_all_trt.json`）：
+
+| 階段 | 平均 (ms) | p95 (ms) | FPS |
+|---|---|---|---|
+| OWL 前處理 | 1.3 | 1.4 | 763.8 |
+| OWL 影像編碼器（TRT fp16） | 16.9 | 17.1 | 59.0 |
+| OWL 解碼 | 1.9 | 2.0 | 525.0 |
+| **OWL 合計** | **19.7** | 20.0 | **50.7** |
+| OWL 文字編碼器（換提示詞時才執行） | 25.2 | 25.7 | 39.6 |
+| NanoSAM 影像編碼器（含前處理） | 29.2 | 31.1 | 34.2 |
+| NanoSAM decoder（每個框） | 10.4 | 10.6 | 96.4 |
+| **整體流程（4 個框）** | **99.1** | 100.8 | **10.1** |
+
+記憶體：torch 配置峰值 678MB；程序 RSS 峰值 2502MB；系統已用量量測前 2722MB → 量測後 4218MB（Jetson 的 GPU 與 CPU 共用，`nvidia-smi` 數值為 N/A）。
+
+**與官方數據對照**（官方表格見 `third_party/nanosam/README.md`、`third_party/nanoowl/README.md`）：
+
+| 項目 | 官方 | 本次實測 | 備註 |
+|---|---|---|---|
+| NanoSAM (ResNet18) Orin Nano「Full Pipeline」 | **27 ms** | encoder 29.2 + decoder 10.4（1 個框）≈ **39.6 ms** | 官方未定義「Full Pipeline」是否含前處理；本次 encoder 含 CPU 前處理。trtexec 純 GPU：encoder 11.6ms、decoder 8.7ms |
+| MobileSAM Orin Nano「Full Pipeline」 | 146 ms | 未量（PyTorch fp32 baseline 另行量） | |
+| NanoSAM Orin Nano「Image Encoder」 | **TBD**（官方未公布） | 29.2 ms（含前處理） | 無法對照 |
+| NanoOWL (ViT-B/32) Orin Nano FPS | **TBD**（官方未公布） | OWL 合計 50.7 FPS（不含 SAM） | AGX Orin 官方為 95 FPS |
+| 官方 README 註記 | OWL-ViT（PyTorch）在 Orin Nano 約 3 秒/張 | PyTorch fp32 OWL 約 224ms（暖機後） | 本機已用 MAXN_SUPER、較新的 JetPack / TensorRT，條件與官方不同，不能直接比較 |
+
+**限制（誠實版）**：只有單一影像（`cats.jpg`）、4 個框；官方數據的測試條件（JetPack / TensorRT 版本、電源模式、框數、是否含前後處理）未公布，所以對照只能當量級參考。本次 NanoSAM 的 encoder 比官方「整個 Full Pipeline」還慢，主因推測是 CPU 前處理（trtexec 純 GPU 只有 11.6ms，差約 17ms），**這個推測尚未驗證**。提示詞比較實驗、攝影機 Demo、截圖尚未做。
+
+### 13.6 HyDE（Ollama）在 Nano 上的模型選擇與設定（2026-11-01，實測）
+
+完整表格與限制見 [measurement-report.md](measurement-report.md) §9。
+
+- **Nano 上原本沒有任何 Ollama 模型**（`ollama list` 為空），文件裡的 `qwen3:4b` 數據都是 WSL 的 CPU 量的。Ollama 0.40.12 已作為系統服務運行。
+- **Ollama 預設用 GPU 時，在伺服器（TensorRT 引擎）運作中會失敗**：4 個候選模型有 3 個（`qwen2.5:1.5b`、`gemma3:1b`、`llama3.2:1b`）每次請求都 `cudaMalloc failed: out of memory`（llama-server 程序崩潰），`qwen3:1.7b` 只有 GPU 放得下 65MB、其餘退到 CPU，且測試結束時系統 `MemAvailable` 一度降到 377MB。原因與 §13.2 第 7 點相同（共用記憶體、GPU 配置不能 swap）。**這輪測試當時使用者的伺服器正在運作，事後確認它沒有受影響**（`/api/health` 正常、日誌無錯誤）。
+- **改用 CPU（`num_gpu=0`）加 `num_ctx=1024`**：4 個模型 × 6 個提示詞 0 次失敗；暖機後 `qwen2.5:1.5b` 1.8 s、`llama3.2:1b` 2.1 s、`qwen3:1.7b` 2.5 s、`gemma3:1b` 5.4 s；常駐 1.1~1.6 GB。品質：4 個模型都能把中文翻成英文，也都會混入少量不相關或過於籠統的詞組（人工判讀，只有 6 個提示詞，非統計結論）。
+- **寫入 `server/hyde.py` 的 Jetson 預設**：模型 `qwen2.5:1.5b`、`num_gpu=0`、`num_ctx=1024`、`keep_alive=2m`（環境變數 `HYDE_MODEL`、`HYDE_NUM_GPU`、`HYDE_NUM_CTX`、`HYDE_KEEP_ALIVE` 可覆蓋；非 Jetson 行為不變）。HyDE 仍預設不自動啟動（`HYDE_AUTOSTART=0`），用 `ollama pull qwen2.5:1.5b` 準備模型。
+- **端對端**（TensorRT 伺服器運作中）：`螺絲,貓` 不用 HyDE 偵測 0 個，用 HyDE 後 `貓` 偵測到 2 隻（遮罩與英文 `a cat` 相同）；擴展 3.6~10 s（只在換提示詞時），偵測維持 90~94 ms/請求；無 OOM。
+- **我自己犯的測試錯誤（留作紀錄）**：兩次在腳本裡呼叫 `/usr/bin/time`（這台沒有），指令失敗但外層仍回報成功，一次讓「建引擎」沒有真的執行、一次讓 HyDE 擴展請求沒有送出；另一次以「擴展 `螺絲,貓`、偵測 `a cat,螺絲`」測試，因 HyDE 要求所有提示詞都已擴展才套用而顯示 `applied=False`。結論都沒有受影響，但說明**背景任務的 exit code 0 不等於內容成功，要讀輸出**。
+
+### 13.7 端對端延遲、畫面數字的準確度、「NanoSAM」標籤的更正（2026-11-01）
+
+完整數據見 [measurement-report.md](measurement-report.md) §6。這一節記錄這輪發現的問題與修正。
+
+- **端對端矩陣**（`benchmark/bench_e2e.py`：每種組合啟動一次真正的 `python -m server.main`，loopback 打 `/api/segment`，50 次）：640×480 的端對端 PyTorch fp32 461 ms → 全 TensorRT 129 ms（3.6 倍）；4096×3072 只有 961 → 628 ms（1.5 倍），因為 TensorRT 只加速模型，解碼與輪廓序列化等 CPU 端成本沒變。功耗 15.2 W → 11.6 W，每個請求能耗約 7.0 J → 1.5 J。
+- **功耗量測瑕疵（已修）**：tegrastats 取樣窗口前後各 1 秒的 `sleep` 會把平均功耗往閒置值拉低（小圖最明顯）；改成只取 GPU 有負載的取樣點（`benchmark/bench_e2e.py` 的 `parse_tegra`），並從保存的 log 重新計算。
+- **`gpu_stats()` 每個請求多花約 20–26 ms（已修）**：它每次都啟動 `nvidia-smi` 子程序，在這台 Jetson 上約 18 ms 且只回傳 `[N/A]`。Jetson 改直接讀 sysfs（平均 5.9 ms），非 Jetson 平台第一次失敗後不再重試。這也解釋了先前日誌中 `run` 與 `timing.total_ms` 的 30 ms 差距（先前寫「成因未查證」，現已查證）。
+- **畫面上的主數字不是使用者等待的時間（已修）**：「ms 後端總計」是 `timing.total_ms`，只含推論＋序列化，不含圖片解碼、回應組裝、上傳與傳輸，旁邊的 FPS 是 `1000/total_ms`，只是上限。獨立量測：小圖低估 25.4 ms（19%）；使用者的手機照片實際等 4.8 秒，畫面約 0.5 秒。現在伺服器多回報 `decode_ms`、`server_ms`；前端主數字改為端對端（`client_ms`），分段條補上「圖片解碼」與「上傳＋傳輸（推算）」，純推論另列為參考上限。
+- **伺服器攝影機的 FPS 偏高（已修）**：舊版只算到推論結束，不含疊圖與 JPEG 編碼，且平均的是瞬時 FPS。獨立量測（數 `frame_id` 的增量）：實際 7.89 FPS，修正後顯示 8.11 FPS（差 3%），舊算法會顯示 9.97 FPS（高估 26%）。瀏覽器端迴圈 FPS 也改為先平均每幀時間再換算。
+- **「NanoSAM」標籤誤導（已修）**：網頁與報告把部署的引擎標成「NanoSAM（TensorRT）」，但裡面是我們自己蒸餾的 ResNet18 encoder（官方預訓練權重在需登入的 Google Drive，沒有取得）。驗證：`resnet18_image_encoder.selftrain.onnx` 對 `colab80_best.pth`（epoch 78）輸出 cosine = 1.000000、最大差異 0.00000；對 epoch 2 檢查點 0.951；對隨機初始化 −0.07。「自訓練（PyTorch）」與「（TensorRT）」是**同一份權重**，只差執行方式。標籤現在由載入的檔名決定（`src/sam_backends.py`），例如「自訓練 ResNet18 encoder（TensorRT）」；API／環境變數的內部 key 仍叫 `nanosam`，沒有改。架構相同 → 延遲可與官方對照；權重不同 → 準確度不可（自訓練 mIoU 0.704、baseline 0.744、官方 0.706 為不同條件的參考值）。
+- **驗證方式與限制**：前端邏輯用 node 抽出 `renderTiming` 做單元測試（9 項通過，使用我代入的典型數字）；真實數字用獨立客戶端與 `frame_id` 計數對照。**沒有在真實瀏覽器裡操作畫面確認外觀**（沒有自動化瀏覽器），分段條新增的顏色與長圖例的版面未目視檢查。
+- **使用者畫面上的 280／320／440 ms**：日誌中大圖、1 個偵測的情況，TensorRT 約 295–360 ms、MobileSAM 約 500–525 ms，與 280、440 大致吻合；日誌中找不到「自訓練（PyTorch）」的請求，所以 320 ms 無法證實。
+
+### 13.8 Nano 上所有 SAM encoder 的 TensorRT 量測，以及 TensorRT mask decoder 的數值問題（2026-11-01）
+
+並排表見 [wsl-vs-jetson.md](wsl-vs-jetson.md) §2.1。
+
+- **新建的引擎**：baseline MobileSAM encoder（`mobile_sam_image_encoder.fp32.engine`、`.fp16.engine`，由 `nanosam.tools.export_sam_image_encoder_onnx` 匯出 ONNX，匯出約 10 s 走 CPU；fp32 建置 2 m 45 s、fp16 5 m 46 s）、自訓練 ResNet18 的 fp32 引擎（預設與 `--noTF32` 各一）。注意 ResNet18 的 ONNX 是固定形狀，`trtexec` 不接受 `--shapes`（第一次建置因此失敗），MobileSAM 的 ONNX 有動態批次維度才需要。
+- **MobileSAM 在 TensorRT fp16 下輸出錯誤**：4 個框的遮罩全是空的（IoU 0.000），證實官方 README 的註記；自訓練 ResNet18 用 fp16 與 fp32 的遮罩相同（IoU 0.9730 對 0.9729），沒有損失。
+- **TF32**：ResNet18 的 TensorRT fp32 引擎 22.1 ms，加 `--noTF32` 要 49.7 ms（Nano 的 Ampere 預設啟用 TF32 的行為，沒有直接檢查引擎設定）；遮罩 IoU 不變。
+- **TensorRT 10.3 的 mask decoder 與其來源 ONNX 的結果不同**（我連續猜錯了三次才釐清，記下過程）：
+  1. 現象：TensorRT 路徑的遮罩對 PyTorch 的 IoU 只有 0.973（MobileSAM 0.981），ONNX Runtime 路徑是 0.9997；`sam_iou`（模型自評）TensorRT 約 0.67，PyTorch／ORT 約 0.96。
+  2. **猜測 1：encoder 的 TF32／fp16 精度**。錯：fp16、TF32、嚴格 fp32 的 encoder 遮罩 IoU 完全相同（0.9729）。
+  3. **猜測 2：decoder 的 TF32**。錯：用 `--noTF32` 重建 decoder，IoU 不變。
+  4. **猜測 3：decoder 以 1 個點的形狀最佳化，實際送 2 個點**。錯：以 2 個點最佳化、固定 2 個點，結果完全相同。
+  5. 逐層比對：encoder 特徵 TensorRT 與 ORT 幾乎一致（相對誤差 0.05%）；**同一份特徵、同樣的框丟進兩個 decoder，logits 相對誤差 21%**，4 個 mask token 兩兩之間都對不上（不是順序問題）。
+  6. 決定性實驗：同一個 decoder ONNX 用 ORT 的 CPU、CUDA、**TensorRT 執行器**各跑一次：CPU 與 CUDA 一致，**TensorRT 執行器與我們的 torch2trt 引擎幾乎逐位相同的錯**（`iou_pred` 0.6668 對 0.6669）。結論：不是我們的程式、不是 torch2trt，是 TensorRT 10.3 對這個模型的處理。
+  7. 建置選項（最佳化等級 0／1／5、關閉 cuBLAS／cuDNN tactic、`--noTF32`）全都修不好。**根本原因（TensorRT 解析 ONNX 的哪個運算子不同）沒有查出來。**
+  - 影響：baseline 與自訓練共用同一個 decoder，所以兩者的相對比較不受影響；兩者的絕對遮罩品質都比 PyTorch 低約 2–3%，網頁顯示的 `sam_iou` 偏低（約 0.67）。
+  - 可用的替代：decoder 改用 ORT 的 CUDA 後端是精確的（與 PyTorch 遮罩 IoU 0.9997），每次呼叫約慢 6 ms（15.7 對 9.8 ms，單次量測）。**目前沒有採用**，預設仍用較快的 TensorRT decoder；需要時可再實作混合後端。
+- **標籤**：`src/sam_backends.py` 的標籤現在依檔名區分「自訓練 ResNet18」「MobileSAM TinyViT」「官方 ResNet18」，並在檔名帶 `.fp32`／`.fp16` 時標出精度。
+

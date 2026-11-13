@@ -49,11 +49,11 @@ python training/compare_encoders.py --student data/train/run1/best.pth --student
 SAM_STUDENT=data/train/resnet18_run1/best.pth python -m server.main
 ```
 
-評估的是訓練時固定留出的 200 張影像（沒參與訓練）。結果存 `data/eval/*.json`（不進版控）。
+評估的是訓練時固定 held-out 的 200 張影像（沒參與訓練）。結果存 `data/eval/*.json`（不進版控）。
 
 ### baseline 基準數字（已量，`data/eval/baseline_mobilesam.json`）
 
-200 張留出影像、1349 個物件（Small 529 / Medium 493 / Large 327），GT 框提示，PyTorch fp32，GTX 1060：
+200 張 held-out 影像、1349 個物件（Small 529 / Medium 493 / Large 327），GT 框提示，PyTorch fp32，GTX 1060：
 
 | | mIoU All | Small | Medium | Large | encoder 延遲 |
 |---|---|---|---|---|---|
@@ -72,7 +72,7 @@ SAM_STUDENT=data/train/resnet18_run1/best.pth python -m server.main
 
 ## 驗證集與訓練設定
 
-- 依檔名排序，**固定留出最後 200 張**當驗證集（不參與訓練、不做隨機裁切），其餘約 4800 張訓練。每個 epoch 結束計算驗證 loss，可看出是否過擬合。
+- 依檔名排序，**固定取最後 200 張作 held-out**當驗證集（不參與訓練、不做隨機裁切），其餘約 4800 張訓練。每個 epoch 結束計算驗證 loss，可看出是否過擬合。
 - 學生 ResNet18 使用 ImageNet 預訓練；Adam 3e-4、Huber loss、等效 batch 16（batch 4 × 累積 4）、教師 fp32；學生 AMP 僅在有 Tensor Core 的 GPU 自動開啟。
 
 ## 實測速度（GTX 1060 6GB，COCO 真實圖片）

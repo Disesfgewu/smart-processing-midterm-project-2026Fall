@@ -8,10 +8,10 @@
     python training/compare_encoders.py --student A/best.pth --student B/best.pth    # 一次比較多個實驗
 
 需要：data/coco/val2017（影像）、data/coco/instances_val2017.json（./training/download_coco.sh annotations）。
-預設只評估「訓練時固定留出的驗證集」（依檔名排序的最後 --val_count 張，與 train_nanosam.py 相同的切法）——這些影像沒參與訓練。
+預設只評估「訓練時固定 held-out 的驗證集」（依檔名排序的最後 --val_count 張，與 train_nanosam.py 相同的切法）——這些影像沒參與訓練。
 結果另存 JSON 到 data/eval/（不進版控）；baseline 權重只讀不寫。
 
-注意：官方數字是 COCO val2017 全部 5000 張、TensorRT；本腳本預設只用 200 張留出影像、PyTorch 後端、自行蒸餾的 encoder，
+注意：官方數字是 COCO val2017 全部 5000 張、TensorRT；本腳本預設只用 200 張 held-out 影像、PyTorch 後端、自行蒸餾的 encoder，
 **數字不能與官方直接比較**，只能用來比較「我們的 baseline 與我們自訓練的」。
 """
 import argparse
@@ -36,7 +36,7 @@ ap.add_argument("--student", action="append", default=[], help="自訓練 encode
 ap.add_argument("--sam_checkpoint", default="data/models/mobile_sam.pt")
 ap.add_argument("--images", default="data/coco/val2017")
 ap.add_argument("--annotations", default="data/coco/instances_val2017.json")
-ap.add_argument("--val_count", type=int, default=200, help="取依檔名排序的最後 N 張（= 訓練時留出的驗證集）；0 = 全部")
+ap.add_argument("--val_count", type=int, default=200, help="取依檔名排序的最後 N 張（= 訓練時 held-out 的驗證集）；0 = 全部")
 ap.add_argument("--max_images", type=int, default=None, help="（除錯用）最多評估幾張")
 ap.add_argument("--min_area", type=float, default=64, help="忽略 COCO area 小於此值的物件（太小的標註雜訊大）")
 ap.add_argument("--out", default=None)

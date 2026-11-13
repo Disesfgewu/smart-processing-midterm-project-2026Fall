@@ -1,5 +1,10 @@
 # 模型、資料集、訓練輸出（體積大，不進版控）
-data/
+data/*
+# 量測原始資料（體積小）要進版控，讓 docs/ 裡的數字可以重算；模型、引擎、資料集、大型日誌仍然不進
+!data/bench/
+data/bench/*
+!data/bench/jetson/
+!data/bench/wsl/
 
 # 測試輸出
 out*.png
@@ -13,3 +18,8 @@ __pycache__/
 
 # 日誌
 *.log
+
+# 例外：量測證據（放在 *.log 規則之後才會生效）
+!data/bench/jetson/tegrastats_*.log
+!data/bench/jetson/build_*.log
+!data/bench/jetson/e2e_*_tegra.log
