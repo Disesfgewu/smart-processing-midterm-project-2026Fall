@@ -1,3 +1,5 @@
+> **分支說明：`jetson`** — Jetson Orin Nano（TensorRT）實機版本，含 Nano 端量測資料（`data/bench/jetson`）與報告來源（`docs/report-source`）。WSL 開發機版本在 `wsl` 分支。
+
 # smart-processing-midterm-project-2026Fall
 
 ## 主題四：文字提示之開放詞彙物件偵測與分割系統
