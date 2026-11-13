@@ -24,6 +24,13 @@ from server import hyde
 MAX_IMAGE_SIDE = 4096
 
 
+def _iou(a, b) -> float:
+    x0, y0, x1, y1 = max(a[0], b[0]), max(a[1], b[1]), min(a[2], b[2]), min(a[3], b[3])
+    i = max(0.0, x1 - x0) * max(0.0, y1 - y0)
+    u = (a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - i
+    return i / u if u > 0 else 0.0
+
+
 class SegmentService:
     def __init__(self, sam_checkpoint="data/models/mobile_sam.pt", owl_engine: Optional[str] = None, student_checkpoint: Optional[str] = None,
                  nanosam_encoder: Optional[str] = None, nanosam_decoder: Optional[str] = None, nanosam_backend: str = "auto"):
@@ -67,21 +74,37 @@ class SegmentService:
 
     @log_call
     def run(self, image: PIL.Image.Image, prompts: List[str], threshold: float, nms_iou: float,
-            use_hyde: bool, contour_eps: float = 0.002, with_masks: bool = True, top_per_group: bool = False) -> Dict:
-        groups, hyde_info = self.hyde_groups(prompts, use_hyde)
+            use_hyde: bool, contour_eps: float = 0.002, with_masks: bool = True, top_per_group: bool = False,
+            exemplar: Optional[Dict] = None) -> Dict:
+        """exemplar（以圖找圖）：{"box": [x0,y0,x1,y1]（本影像縮圖後的像素座標）, "mode": "inplace"|"crop", "with_text": bool}。
+        給了就用範例的影像特徵取代文字查詢（此時 prompts 必須只有一個：範例所屬的概念，HyDE 不套用）；
+        範例影像就是這次要偵測的影像（網頁流程：先偵測 → 點一個框 → 以它為範例重新偵測）。"""
+        if exemplar:
+            groups, hyde_info = {}, {"requested": False, "applied": False, "note": None, "expanded": None, "model": hyde.DEFAULT_MODEL, "elapsed_ms": 0, "cached": None}
+        else:
+            groups, hyde_info = self.hyde_groups(prompts, use_hyde)
 
         t_all = time.perf_counter()
         with self.lock:
             t_wait = time.perf_counter()
-            if self.seg.prompts != prompts or self.seg.groups != groups:
+            if exemplar:
+                t = time.perf_counter()
+                self.seg.set_image_queries({prompts[0]: [(image, exemplar["box"])]}, mode=exemplar["mode"], with_text=exemplar["with_text"])
+                text_ms = (time.perf_counter() - t) * 1e3
+            elif self.seg.prompts != prompts or self.seg.groups != groups:
                 t = time.perf_counter()
                 self.seg.set_prompts(prompts, groups)
                 torch.cuda.synchronize()
                 text_ms = (time.perf_counter() - t) * 1e3
             else:
                 text_ms = 0.0
-            dets = self.seg(image, threshold, nms_iou, with_masks, top_per_group)
-            timing = dict(self.seg.timing)
+            try:
+                dets = self.seg(image, threshold, nms_iou, with_masks, top_per_group)
+                timing = dict(self.seg.timing)
+            finally:
+                if exemplar:
+                    # 影像查詢用的是「範例特徵」而不是文字：讓文字快取失效，否則下一個同名文字請求（seg.prompts == prompts）會誤用影像特徵
+                    self.seg.prompts, self.seg.groups, self.seg.text_encodings = [], {}, None
         lock_wait_ms = (t_wait - t_all) * 1e3
 
         t = time.perf_counter()
@@ -92,6 +115,7 @@ class SegmentService:
             out_dets.append({
                 "id": i, "label": d.label, "score": d.score, "box": [x0, y0, x1, y1],
                 "box_area": int(max(x1 - x0, 0) * max(y1 - y0, 0)), "mask_area": mask_area, "sam_iou": d.sam_iou, "query": d.query, "primary": d.primary,
+                "exemplar": bool(exemplar and _iou(exemplar["box"], [x0, y0, x1, y1]) >= 0.5),   # 這個偵測就是使用者點選的範例本身
                 "contours": [c.astype(int).tolist() for c in d.contours(contour_eps)],
             })
         summary = []
@@ -112,6 +136,7 @@ class SegmentService:
         # image.width × height 是偵測結果（框 / 輪廓 / 面積）的座標系；original_* 是縮圖前的尺寸
         result = {"image": {"width": image.width, "height": image.height, "original_width": ow, "original_height": oh},
                   "prompts": prompts, "threshold": threshold, "nms_iou": nms_iou, "with_masks": with_masks, "top_per_group": top_per_group, "hyde": hyde_info, "detections": out_dets, "summary": summary,
+                  "exemplar": ({"mode": exemplar["mode"], "with_text": exemplar["with_text"], "box": [float(v) for v in exemplar["box"]]} if exemplar else None),
                   "timing": timing, "backend": self.backend, "sam_encoder": self.seg.sam_encoder, "memory": self.gpu_stats()}
         self.history.appendleft({"time": time.strftime("%H:%M:%S"), "prompts": prompts, "n": len(out_dets),
                                  "total_ms": timing["total_ms"], "owl_ms": timing["owl_ms"], "sam_ms": timing["sam_ms"]})

@@ -1,0 +1,173 @@
+{
+ "date": "2026-11-10 16:17:49",
+ "pipeline": "OWL TensorRT fp16 + 自訓練 ResNet18 TensorRT fp16 + mask decoder TensorRT fp32",
+ "threshold": 0.1,
+ "images": [
+  {
+   "file": "01_cats_success.jpg",
+   "source_image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "queries": [
+    "a cat"
+   ],
+   "expected_count": 2,
+   "detected": 2,
+   "kind": "成功（日常物件）",
+   "note": "貓與遙控器：框、遮罩都正確",
+   "scores": [
+    0.661,
+    0.624
+   ],
+   "sam_ms": 96.2,
+   "owl_ms": 55.1
+  },
+  {
+   "file": "02_buns_descriptive_success.jpg",
+   "source_image": "data/samples/eval/buns_f143.jpg",
+   "concept": "steamed bun",
+   "queries": [
+    "a round white dough ball with a twisted top"
+   ],
+   "expected_count": 2,
+   "detected": 2,
+   "kind": "成功（輸送帶，製造情境）",
+   "note": "包子成型線：外觀描述式數出 2 顆",
+   "scores": [
+    0.315,
+    0.204
+   ],
+   "sam_ms": 127.1,
+   "owl_ms": 56.7
+  },
+  {
+   "file": "03_buns_category_miss.jpg",
+   "source_image": "data/samples/eval/buns_f143.jpg",
+   "concept": "steamed bun",
+   "queries": [
+    "a steamed bun"
+   ],
+   "expected_count": 2,
+   "detected": 1,
+   "kind": "失敗：漏報",
+   "note": "同一張圖，類別式 `a steamed bun` 只數出 1 顆",
+   "scores": [
+    0.128
+   ],
+   "sam_ms": 99.1,
+   "owl_ms": 53.9
+  },
+  {
+   "file": "04_limes_success.jpg",
+   "source_image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "queries": [
+    "a citrus fruit"
+   ],
+   "expected_count": 3,
+   "detected": 3,
+   "kind": "成功（輸送帶，製造情境）",
+   "note": "萊姆分選線近處：3 顆",
+   "scores": [
+    0.333,
+    0.273,
+    0.263
+   ],
+   "sam_ms": 121.5,
+   "owl_ms": 50.1
+  },
+  {
+   "file": "05_pcb_capacitor_descriptive.jpg",
+   "source_image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "queries": [
+    "a cylindrical metal can component on a circuit board"
+   ],
+   "expected_count": 7,
+   "detected": 7,
+   "kind": "部分成功（電路板）",
+   "note": "外觀描述式找到 7 個，多數位置正確（見 prompt_styles.json）",
+   "scores": [
+    0.239,
+    0.169,
+    0.125,
+    0.11,
+    0.106,
+    0.102,
+    0.1
+   ],
+   "sam_ms": 278.6,
+   "owl_ms": 70.9
+  },
+  {
+   "file": "06_pcb_capacitor_hyde_overcount.jpg",
+   "source_image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "queries": [
+    "capacitor",
+    "a capacitor",
+    "a electrical component",
+    "a electronic device",
+    "a device for storing electric charge",
+    "a component for electrical circuits"
+   ],
+   "expected_count": 7,
+   "detected": 30,
+   "kind": "失敗：多報（HyDE）",
+   "note": "HyDE 多描述取最高分：偵測數遠多於真實數量，大量誤報",
+   "scores": [
+    0.356,
+    0.318,
+    0.313,
+    0.282,
+    0.258,
+    0.227,
+    0.226,
+    0.22,
+    0.207,
+    0.205,
+    0.199,
+    0.191
+   ],
+   "sam_ms": 820.0,
+   "owl_ms": 61.2
+  },
+  {
+   "file": "07_welding_person_overcount.jpg",
+   "source_image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "person",
+   "queries": [
+    "a person"
+   ],
+   "expected_count": 1,
+   "detected": 3,
+   "kind": "失敗：多報（焊接現場）",
+   "note": "真實 1 位，偵測 3 個（局部／重疊框）",
+   "scores": [
+    0.403,
+    0.349,
+    0.113
+   ],
+   "sam_ms": 146.0,
+   "owl_ms": 68.6
+  },
+  {
+   "file": "08_cnc_spindle_wrong_object.jpg",
+   "source_image": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "concept": "spindle motor",
+   "queries": [
+    "a spindle motor"
+   ],
+   "expected_count": 1,
+   "detected": 3,
+   "kind": "失敗：框到別的物件（相似物件）",
+   "note": "真實 1 個主軸；偵測 3 個，最高分框到彈簧",
+   "scores": [
+    0.167,
+    0.164,
+    0.101
+   ],
+   "sam_ms": 166.3,
+   "owl_ms": 46.2
+  }
+ ]
+}

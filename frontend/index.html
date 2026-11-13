@@ -110,6 +110,15 @@ a remote control</textarea>
             <option value="box">只畫框</option>
           </select>
         </label>
+        <label class="inline" title="圖片模式下，點結果畫面上的任一個框，就用它當範例去找同類（以圖找圖）。原位＝用這張圖自己在該框位置的特徵（建議）；裁切＝把該框單獨裁出再編碼">以圖找圖
+          <select id="ex-mode">
+            <option value="inplace">原位（建議）</option>
+            <option value="crop">裁切</option>
+          </select>
+        </label>
+        <label class="inline" title="以圖找圖時專用的門檻。影像查詢的分數會飽和（許多零件都 ≥ 0.9），所以要用很高的值：太低會出現數十到數百個誤報（而且每個框都要跑 SAM，很慢）；太高會漏掉。預設 0.95">範例門檻 <output id="ex-th-out">0.95</output>
+          <input type="range" id="ex-th" min="0.5" max="0.999" step="0.005" value="0.95" style="width:7em">
+        </label>
         <div class="spacer"></div>
         <label class="inline">重複 <input type="number" id="bench-n" value="10" min="2" max="200" style="width:4.5em"> 次
           <button id="btn-bench" class="ghost" disabled>量測速度</button></label>
@@ -125,6 +134,7 @@ a remote control</textarea>
         <div id="legend" class="chips small"></div>
       </div>
       <div id="hint" class="hint" hidden></div>
+      <div id="ex-bar" class="hint" hidden></div>
       <div class="stage" id="stage">
         <canvas id="canvas" width="640" height="360"></canvas>
         <div id="tip" class="tip" hidden></div>
@@ -212,6 +222,12 @@ a remote control</textarea>
       <div class="stack" id="stack"></div>
       <div id="stack-legend" class="chips small"></div>
       <dl class="kv" id="timing-kv"></dl>
+    </div>
+
+    <div class="card" id="card-official">
+      <h2>官方口徑（可對照 NVIDIA README）<small>本幀實測，與上方「端對端」是不同範圍</small></h2>
+      <dl class="kv" id="official-kv"></dl>
+      <small class="muted">NanoOWL：<code>owl.predict()</code>（前處理 + TensorRT 編碼 + decode；不含 NMS、SAM）。NanoSAM：image encoder + 1 個框的 decoder。官方 Orin Nano：NanoSAM(ResNet18) Full Pipeline 27 ms、MobileSAM 146 ms、NanoOWL FPS 與 Encoder 皆 TBD。</small>
     </div>
 
     <div class="card" id="card-hyde" hidden>

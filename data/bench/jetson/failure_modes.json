@@ -1,0 +1,729 @@
+{
+ "date": "2026-11-10 16:17:04",
+ "power_mode": "MAXN_SUPER (nvpmodel 2)",
+ "note": "synthetic: shrink onto gray canvas; gray-patch occlusion",
+ "small_objects": [
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "scale": 1.0,
+   "gt": 2,
+   "apparent_size_px": 431.5,
+   "count_ge_0.1": 2,
+   "count_ge_0.05": 6,
+   "mean_top_gt_score": 0.6423,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "scale": 0.7,
+   "gt": 2,
+   "apparent_size_px": 302.1,
+   "count_ge_0.1": 4,
+   "count_ge_0.05": 5,
+   "mean_top_gt_score": 0.5761,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "scale": 0.5,
+   "gt": 2,
+   "apparent_size_px": 215.8,
+   "count_ge_0.1": 4,
+   "count_ge_0.05": 6,
+   "mean_top_gt_score": 0.5445,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "scale": 0.35,
+   "gt": 2,
+   "apparent_size_px": 151.0,
+   "count_ge_0.1": 2,
+   "count_ge_0.05": 3,
+   "mean_top_gt_score": 0.2266,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "scale": 0.25,
+   "gt": 2,
+   "apparent_size_px": 107.9,
+   "count_ge_0.1": 2,
+   "count_ge_0.05": 3,
+   "mean_top_gt_score": 0.1657,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "scale": 0.18,
+   "gt": 2,
+   "apparent_size_px": 77.7,
+   "count_ge_0.1": 2,
+   "count_ge_0.05": 2,
+   "mean_top_gt_score": 0.1443,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "scale": 0.125,
+   "gt": 2,
+   "apparent_size_px": 53.9,
+   "count_ge_0.1": 0,
+   "count_ge_0.05": 1,
+   "mean_top_gt_score": 0.0563,
+   "found_gt_ge_0.1": 0.0,
+   "located_ge_0.1": 0.0,
+   "located_ge_0.05": 0.5
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "scale": 1.0,
+   "gt": 2,
+   "apparent_size_px": 85.6,
+   "count_ge_0.1": 2,
+   "count_ge_0.05": 2,
+   "mean_top_gt_score": 0.3499,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "scale": 0.7,
+   "gt": 2,
+   "apparent_size_px": 59.9,
+   "count_ge_0.1": 2,
+   "count_ge_0.05": 2,
+   "mean_top_gt_score": 0.3901,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "scale": 0.5,
+   "gt": 2,
+   "apparent_size_px": 42.8,
+   "count_ge_0.1": 2,
+   "count_ge_0.05": 2,
+   "mean_top_gt_score": 0.2792,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "scale": 0.35,
+   "gt": 2,
+   "apparent_size_px": 30.0,
+   "count_ge_0.1": 1,
+   "count_ge_0.05": 2,
+   "mean_top_gt_score": 0.1265,
+   "found_gt_ge_0.1": 0.5,
+   "located_ge_0.1": 0.5,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "scale": 0.25,
+   "gt": 2,
+   "apparent_size_px": 21.4,
+   "count_ge_0.1": 0,
+   "count_ge_0.05": 0,
+   "mean_top_gt_score": 0.0389,
+   "found_gt_ge_0.1": 0.0,
+   "located_ge_0.1": 0.0,
+   "located_ge_0.05": 0.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "scale": 0.18,
+   "gt": 2,
+   "apparent_size_px": 15.4,
+   "count_ge_0.1": 0,
+   "count_ge_0.05": 0,
+   "mean_top_gt_score": 0.0218,
+   "found_gt_ge_0.1": 0.0,
+   "located_ge_0.1": 0.0,
+   "located_ge_0.05": 0.0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "scale": 0.125,
+   "gt": 2,
+   "apparent_size_px": 10.7,
+   "count_ge_0.1": 0,
+   "count_ge_0.05": 0,
+   "mean_top_gt_score": 0.0082,
+   "found_gt_ge_0.1": 0.0,
+   "located_ge_0.1": 0.0,
+   "located_ge_0.05": 0.0
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "scale": 1.0,
+   "gt": 2,
+   "apparent_size_px": 162.4,
+   "count_ge_0.1": 1,
+   "count_ge_0.05": 2,
+   "mean_top_gt_score": 0.1059,
+   "found_gt_ge_0.1": 0.5,
+   "located_ge_0.1": 0.5,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "scale": 0.7,
+   "gt": 2,
+   "apparent_size_px": 113.7,
+   "count_ge_0.1": 0,
+   "count_ge_0.05": 2,
+   "mean_top_gt_score": 0.0809,
+   "found_gt_ge_0.1": 0.0,
+   "located_ge_0.1": 0.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "scale": 0.5,
+   "gt": 2,
+   "apparent_size_px": 81.2,
+   "count_ge_0.1": 0,
+   "count_ge_0.05": 1,
+   "mean_top_gt_score": 0.056,
+   "found_gt_ge_0.1": 0.0,
+   "located_ge_0.1": 0.0,
+   "located_ge_0.05": 0.5
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "scale": 0.35,
+   "gt": 2,
+   "apparent_size_px": 56.8,
+   "count_ge_0.1": 0,
+   "count_ge_0.05": 2,
+   "mean_top_gt_score": 0.0796,
+   "found_gt_ge_0.1": 0.0,
+   "located_ge_0.1": 0.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "scale": 0.25,
+   "gt": 2,
+   "apparent_size_px": 40.6,
+   "count_ge_0.1": 0,
+   "count_ge_0.05": 0,
+   "mean_top_gt_score": 0.0346,
+   "found_gt_ge_0.1": 0.0,
+   "located_ge_0.1": 0.0,
+   "located_ge_0.05": 0.0
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "scale": 0.18,
+   "gt": 2,
+   "apparent_size_px": 29.2,
+   "count_ge_0.1": 0,
+   "count_ge_0.05": 1,
+   "mean_top_gt_score": 0.0551,
+   "found_gt_ge_0.1": 0.0,
+   "located_ge_0.1": 0.0,
+   "located_ge_0.05": 0.5
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "scale": 0.125,
+   "gt": 2,
+   "apparent_size_px": 20.3,
+   "count_ge_0.1": 0,
+   "count_ge_0.05": 1,
+   "mean_top_gt_score": 0.0616,
+   "found_gt_ge_0.1": 0.0,
+   "located_ge_0.1": 0.0,
+   "located_ge_0.05": 0.5
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "scale": 1.0,
+   "gt": 3,
+   "apparent_size_px": 325.1,
+   "count_ge_0.1": 3,
+   "count_ge_0.05": 3,
+   "mean_top_gt_score": 0.2897,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "scale": 0.7,
+   "gt": 3,
+   "apparent_size_px": 227.6,
+   "count_ge_0.1": 3,
+   "count_ge_0.05": 3,
+   "mean_top_gt_score": 0.1348,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "scale": 0.5,
+   "gt": 3,
+   "apparent_size_px": 162.6,
+   "count_ge_0.1": 3,
+   "count_ge_0.05": 3,
+   "mean_top_gt_score": 0.2673,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "scale": 0.35,
+   "gt": 3,
+   "apparent_size_px": 113.8,
+   "count_ge_0.1": 3,
+   "count_ge_0.05": 4,
+   "mean_top_gt_score": 0.2896,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "scale": 0.25,
+   "gt": 3,
+   "apparent_size_px": 81.3,
+   "count_ge_0.1": 3,
+   "count_ge_0.05": 4,
+   "mean_top_gt_score": 0.2844,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "scale": 0.18,
+   "gt": 3,
+   "apparent_size_px": 58.5,
+   "count_ge_0.1": 3,
+   "count_ge_0.05": 4,
+   "mean_top_gt_score": 0.2958,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "scale": 0.125,
+   "gt": 3,
+   "apparent_size_px": 40.6,
+   "count_ge_0.1": 3,
+   "count_ge_0.05": 4,
+   "mean_top_gt_score": 0.2267,
+   "found_gt_ge_0.1": 1.0,
+   "located_ge_0.1": 1.0,
+   "located_ge_0.05": 1.0
+  }
+ ],
+ "occlusion": [
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "occluded_fraction": 0.0,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.6606,
+     "area_ratio_vs_full": 1.0,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.6241,
+     "area_ratio_vs_full": 1.0,
+     "found_ge_0.1": true
+    }
+   ],
+   "mean_score": 0.6423,
+   "found_rate_ge_0.1": 1.0,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "occluded_fraction": 0.25,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.1345,
+     "area_ratio_vs_full": 0.418,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.1179,
+     "area_ratio_vs_full": 0.571,
+     "found_ge_0.1": true
+    }
+   ],
+   "mean_score": 0.1262,
+   "found_rate_ge_0.1": 1.0,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "occluded_fraction": 0.5,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.0307,
+     "area_ratio_vs_full": 0.605,
+     "found_ge_0.1": false
+    },
+    {
+     "score": 0.115,
+     "area_ratio_vs_full": 0.454,
+     "found_ge_0.1": true
+    }
+   ],
+   "mean_score": 0.0728,
+   "found_rate_ge_0.1": 0.5,
+   "false_extra_ge_0.1": 1
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "occluded_fraction": 0.75,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.0,
+     "area_ratio_vs_full": null,
+     "found_ge_0.1": false
+    },
+    {
+     "score": 0.0559,
+     "area_ratio_vs_full": 0.202,
+     "found_ge_0.1": false
+    }
+   ],
+   "mean_score": 0.0279,
+   "found_rate_ge_0.1": 0.0,
+   "false_extra_ge_0.1": 1
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "occluded_fraction": 0.0,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.4439,
+     "area_ratio_vs_full": 1.0,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.256,
+     "area_ratio_vs_full": 1.0,
+     "found_ge_0.1": true
+    }
+   ],
+   "mean_score": 0.3499,
+   "found_rate_ge_0.1": 1.0,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "occluded_fraction": 0.25,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.1848,
+     "area_ratio_vs_full": 0.925,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.2482,
+     "area_ratio_vs_full": 0.983,
+     "found_ge_0.1": true
+    }
+   ],
+   "mean_score": 0.2165,
+   "found_rate_ge_0.1": 1.0,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "occluded_fraction": 0.5,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.1344,
+     "area_ratio_vs_full": 0.892,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.0338,
+     "area_ratio_vs_full": 0.757,
+     "found_ge_0.1": false
+    }
+   ],
+   "mean_score": 0.0841,
+   "found_rate_ge_0.1": 0.5,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "occluded_fraction": 0.75,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.0124,
+     "area_ratio_vs_full": 1.138,
+     "found_ge_0.1": false
+    },
+    {
+     "score": 0.0201,
+     "area_ratio_vs_full": 0.901,
+     "found_ge_0.1": false
+    }
+   ],
+   "mean_score": 0.0163,
+   "found_rate_ge_0.1": 0.0,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "occluded_fraction": 0.0,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.1332,
+     "area_ratio_vs_full": 1.0,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.0786,
+     "area_ratio_vs_full": 1.0,
+     "found_ge_0.1": false
+    }
+   ],
+   "mean_score": 0.1059,
+   "found_rate_ge_0.1": 0.5,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "occluded_fraction": 0.25,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.1368,
+     "area_ratio_vs_full": 0.784,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.0522,
+     "area_ratio_vs_full": 0.771,
+     "found_ge_0.1": false
+    }
+   ],
+   "mean_score": 0.0945,
+   "found_rate_ge_0.1": 0.5,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "occluded_fraction": 0.5,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.0306,
+     "area_ratio_vs_full": 0.564,
+     "found_ge_0.1": false
+    },
+    {
+     "score": 0.0162,
+     "area_ratio_vs_full": 0.543,
+     "found_ge_0.1": false
+    }
+   ],
+   "mean_score": 0.0234,
+   "found_rate_ge_0.1": 0.0,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/eval/buns_f099.jpg",
+   "concept": "steamed bun",
+   "occluded_fraction": 0.75,
+   "gt": 2,
+   "per_object": [
+    {
+     "score": 0.0172,
+     "area_ratio_vs_full": 0.236,
+     "found_ge_0.1": false
+    },
+    {
+     "score": 0.0,
+     "area_ratio_vs_full": null,
+     "found_ge_0.1": false
+    }
+   ],
+   "mean_score": 0.0086,
+   "found_rate_ge_0.1": 0.0,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "occluded_fraction": 0.0,
+   "gt": 3,
+   "per_object": [
+    {
+     "score": 0.3335,
+     "area_ratio_vs_full": 1.0,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.2726,
+     "area_ratio_vs_full": 1.0,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.263,
+     "area_ratio_vs_full": 1.0,
+     "found_ge_0.1": true
+    }
+   ],
+   "mean_score": 0.2897,
+   "found_rate_ge_0.1": 1.0,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "occluded_fraction": 0.25,
+   "gt": 3,
+   "per_object": [
+    {
+     "score": 0.3484,
+     "area_ratio_vs_full": 0.743,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.3573,
+     "area_ratio_vs_full": 0.729,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.2992,
+     "area_ratio_vs_full": 0.734,
+     "found_ge_0.1": true
+    }
+   ],
+   "mean_score": 0.335,
+   "found_rate_ge_0.1": 1.0,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "occluded_fraction": 0.5,
+   "gt": 3,
+   "per_object": [
+    {
+     "score": 0.1765,
+     "area_ratio_vs_full": 0.498,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.1513,
+     "area_ratio_vs_full": 0.466,
+     "found_ge_0.1": true
+    },
+    {
+     "score": 0.1483,
+     "area_ratio_vs_full": 0.486,
+     "found_ge_0.1": true
+    }
+   ],
+   "mean_score": 0.1587,
+   "found_rate_ge_0.1": 1.0,
+   "false_extra_ge_0.1": 0
+  },
+  {
+   "image": "data/samples/eval/limes_f346_crop.jpg",
+   "concept": "citrus fruit",
+   "occluded_fraction": 0.75,
+   "gt": 3,
+   "per_object": [
+    {
+     "score": 0.0962,
+     "area_ratio_vs_full": 0.256,
+     "found_ge_0.1": false
+    },
+    {
+     "score": 0.0853,
+     "area_ratio_vs_full": 0.205,
+     "found_ge_0.1": false
+    },
+    {
+     "score": 0.0684,
+     "area_ratio_vs_full": 0.261,
+     "found_ge_0.1": false
+    }
+   ],
+   "mean_score": 0.0833,
+   "found_rate_ge_0.1": 0.0,
+   "false_extra_ge_0.1": 0
+  }
+ ]
+}

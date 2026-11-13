@@ -1,0 +1,133 @@
+{
+  "image": "data/samples/cats.jpg",
+  "prompts": [
+    "a cat",
+    "a remote control"
+  ],
+  "power_mode": "MAXN_SUPER (nvpmodel 2), jetson_clocks locked",
+  "device": "Orin",
+  "date": "2026-11-10 16:54:36",
+  "image_size": [
+    640,
+    480
+  ],
+  "nanoowl": {
+    "model": "OWL-ViT ViT-B/32, 768, patch 32, TensorRT fp16",
+    "protocol": "owl_predict.py --profile（同一張圖連跑 N 次，前後 synchronize）",
+    "runs_per_repeat": 200,
+    "fps_each_repeat": [
+      51.69228001005791,
+      51.84809172262364,
+      51.850386250754475,
+      51.64932080869395,
+      51.725109551544925
+    ],
+    "fps_mean": 51.75303766873498,
+    "fps_min": 51.64932080869395,
+    "fps_max": 51.850386250754475,
+    "ms_per_predict": 19.32253728565424
+  },
+  "nanosam_decoder_trtexec": {
+    "gpu_compute_mean_ms": 8.32491,
+    "latency_mean_ms": 8.80758,
+    "cmd": "/usr/src/tensorrt/bin/trtexec --loadEngine=data/mobile_sam_mask_decoder.engine --warmUp=1000 --duration=5 --iterations=100 --avgRuns=100 --shapes=point_coords:1x2x2,point_labels:1x2"
+  },
+  "nanosam": [
+    {
+      "name": "MobileSAM (TinyViT, fp32)",
+      "engine": "data/mobile_sam_image_encoder.fp32.engine",
+      "trtexec_encoder": {
+        "gpu_compute_mean_ms": 90.1001,
+        "latency_mean_ms": 92.3752,
+        "cmd": "/usr/src/tensorrt/bin/trtexec --loadEngine=data/mobile_sam_image_encoder.fp32.engine --warmUp=1000 --duration=5 --iterations=100 --avgRuns=100"
+      },
+      "trtexec_full_gpu_compute_ms": 98.42501,
+      "trtexec_full_latency_ms": 101.18278000000001,
+      "python_encoder_set_image": {
+        "mean_ms": 113.05393696995452,
+        "median_ms": 112.64736804878339,
+        "p95_ms": 115.3554089833051,
+        "std_ms": 0.915502620696082,
+        "runs": 100
+      },
+      "python_decoder_1box": {
+        "mean_ms": 10.273239277303219,
+        "median_ms": 10.206145467236638,
+        "p95_ms": 10.591516038402915,
+        "std_ms": 0.17719274760579756,
+        "runs": 100
+      },
+      "python_full_1box": {
+        "mean_ms": 123.32717624725774,
+        "median_ms": 122.90506606223062,
+        "p95_ms": 125.78019988723099,
+        "std_ms": 0.9900956327662727,
+        "runs": 100
+      }
+    },
+    {
+      "name": "MobileSAM (TinyViT, fp16)",
+      "engine": "data/mobile_sam_image_encoder.fp16.engine",
+      "trtexec_encoder": {
+        "gpu_compute_mean_ms": 36.0512,
+        "latency_mean_ms": 38.5618,
+        "cmd": "/usr/src/tensorrt/bin/trtexec --loadEngine=data/mobile_sam_image_encoder.fp16.engine --warmUp=1000 --duration=5 --iterations=100 --avgRuns=100"
+      },
+      "trtexec_full_gpu_compute_ms": 44.37611,
+      "trtexec_full_latency_ms": 47.36938,
+      "python_encoder_set_image": {
+        "mean_ms": 59.358611073112115,
+        "median_ms": 58.69030702160671,
+        "p95_ms": 61.12185993697494,
+        "std_ms": 1.52167953477169,
+        "runs": 100
+      },
+      "python_decoder_1box": {
+        "mean_ms": 10.235253440914676,
+        "median_ms": 10.14214352471754,
+        "p95_ms": 10.81888098269701,
+        "std_ms": 0.2299377190924541,
+        "runs": 100
+      },
+      "python_full_1box": {
+        "mean_ms": 69.59386451402679,
+        "median_ms": 69.0067905234173,
+        "p95_ms": 71.86925201676786,
+        "std_ms": 1.5563546098048404,
+        "runs": 100
+      }
+    },
+    {
+      "name": "NanoSAM-arch ResNet18 自訓練 (fp16)",
+      "engine": "data/resnet18_image_encoder.selftrain.engine",
+      "trtexec_encoder": {
+        "gpu_compute_mean_ms": 9.9066,
+        "latency_mean_ms": 11.5954,
+        "cmd": "/usr/src/tensorrt/bin/trtexec --loadEngine=data/resnet18_image_encoder.selftrain.engine --warmUp=1000 --duration=5 --iterations=100 --avgRuns=100"
+      },
+      "trtexec_full_gpu_compute_ms": 18.23151,
+      "trtexec_full_latency_ms": 20.40298,
+      "python_encoder_set_image": {
+        "mean_ms": 33.093441744567826,
+        "median_ms": 32.621641003061086,
+        "p95_ms": 35.1057720836252,
+        "std_ms": 0.957697745306647,
+        "runs": 100
+      },
+      "python_decoder_1box": {
+        "mean_ms": 10.138725388096645,
+        "median_ms": 10.066797549370676,
+        "p95_ms": 10.465687955729663,
+        "std_ms": 0.20652105771773507,
+        "runs": 100
+      },
+      "python_full_1box": {
+        "mean_ms": 43.23216713266447,
+        "median_ms": 42.66786202788353,
+        "p95_ms": 45.38963106460869,
+        "std_ms": 1.0883524370398663,
+        "runs": 100
+      }
+    }
+  ]
+}

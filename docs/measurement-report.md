@@ -12,7 +12,7 @@
 - **分階段**（`bench_pipeline.py`，只含推論呼叫，不含圖片解碼、序列化與 HTTP；640×480、4 個框）：整體 99.4 ms（10.1 FPS），其中 OWL 19.5 ms（51.3 FPS）、SAM 影像編碼器 29.7 ms、mask decoder 每個框 9.8 ms。**這組數字比端對端小約 30 ms，不要拿它當使用者感受到的延遲。**
 - **功耗**：閒置 5.8 W → 全 TensorRT 負載中約 11.6 W（PyTorch baseline 15.2 W）；每個請求能耗約 1.5 J，PyTorch 約 7.0 J（約 4.7 倍）。接面溫度最高 52.3 °C；`tegrastats` 此版本沒有逐點時脈，**無法保證**整個過程完全沒降頻。
 - **大圖時瓶頸不在模型**：手機照片（4284×5712，伺服器縮成 3072×4096）每次請求解碼＋縮放固定約 681 ms，另有 0.4–3.9 秒的上傳／傳輸浮動；SAM 每個框約 36 ms（小圖 10 ms）；偵測數量（閾值）才是 SAM 耗時的主因（§7）。
-- **與官方對照**：官方 Orin Nano 的 SAM encoder 與 NanoOWL FPS 都是 TBD；唯一可對照的官方「NanoSAM (ResNet18) Full Pipeline」27 ms（架構相同），本次 encoder＋decoder（1 個框）約 39.5 ms，**較慢**，詳見 §8。
+- **與官方對照**：官方 Orin Nano 的 SAM encoder 與 NanoOWL FPS 都是 TBD；可對照的是 NanoSAM(ResNet18) Full Pipeline 27 ms（架構相同、權重不同）。純 GPU（trtexec）下，MAXN_SUPER 為 18.2 ms（比官方快），切到 15W 為 26.3 ms（與官方只差 2.6%）；官方未公布電源模式與計時範圍，詳見 §8。
 
 ## 1. 測試環境
 
@@ -146,7 +146,9 @@
 | ④ **全 TensorRT：OWL + 自訓練 ResNet18 encoder** | 1280×960 | 11.0 | 11.1 | 1.85 | 52 | 54 |
 | ④ **全 TensorRT：OWL + 自訓練 ResNet18 encoder** | 4096×3072 | 8.6 | 8.9 | 5.39 | 56 | 53 |
 
-能耗＝負載中平均功耗 × 端對端延遲，假設單客戶端連續請求時整板都在忙；是估算，不是直接量到的能量。小圖的 TensorRT 組合負載取樣點只有約 10 個（5 秒），誤差較大。
+能耗＝負載中平均功耗 × 端對端延遲，假設單客戶端連續請求時整板都在忙；是估算，不是直接量到的能量。
+
+> **2026-11-10 核對註記**：使用者鎖頻（`sudo jetson_clocks`）後，我把端對端、流程基準、功耗與官方口徑對照全部重跑，結果在 `data/bench/jetson/locked_2026-11-10/`，**本報告的數字全部重現**（端對端 12 格中 9 格差在 ±1.4% 內、最大差 +11.7%（大圖 4096×3072 的③）；全 TensorRT 640×480：129.0 對 129.1 ms、11.61 對 11.6 W；流程基準整體 99.92 對 99.43 ms；官方口徑差在 1.2% 內；穩態功耗 13.37 對 13.31 W）。完整對照表見 [report-data-supplement.md](report-data-supplement.md) §7。**本報告所有延遲／FPS／功耗數字的成立條件是 MAXN_SUPER 且鎖頻（`jetson_clocks`）**：沒鎖頻時同一組設定慢約 2.2 倍（640×480 全 TensorRT 283 ms）、功耗約 7.2 W。另外，§12 的 15W 重現指令切回 `nvpmodel -m 2` 後**沒有再執行 `jetson_clocks`**，照做會得到沒鎖頻的結果；「④ 全 TensorRT」三列當初的原始資料已被後來的重跑覆蓋，但鎖頻重量重現了這些數字。重複量測本身有 ±數% 的變異（大圖更大），引用請寫「約」並附 p95。
 
 ### 6.4 記憶體
 
@@ -226,15 +228,32 @@
 
 （與 WSL／GTX 1060 的對照見 [wsl-vs-jetson.md](wsl-vs-jetson.md)。）
 
-官方表格來自子模組 README（`third_party/nanosam/README.md`、`third_party/nanoowl/README.md`），已用欄位解析確認：
+### 8.1 官方的量測範圍（逐項查證）
 
-| 項目 | 官方（Orin Nano） | 本次實測 | 說明 |
-|---|---|---|---|
-| NanoSAM (ResNet18) Full Pipeline | **27 ms** | encoder 29.7 + decoder 9.8（1 個框）≈ **39.5 ms** | 本次較慢；官方未說明 Full Pipeline 是否含前處理。純 GPU 的 encoder＋decoder（trtexec）只有 18.1 ms |
-| MobileSAM Full Pipeline | 146 ms | SAM 階段（4 個框，PyTorch fp32）287 ms（§6.2） | 框數與「Full Pipeline」的定義不同，不可直接比 |
-| NanoSAM Image Encoder | **TBD**（官方未公布） | 29.7 ms（含前處理） | 無法對照 |
-| NanoOWL (ViT-B/32) FPS | **TBD**（官方未公布） | OWL 合計 51.3 FPS（不含 SAM） | 官方 AGX Orin 為 95 FPS，不同硬體不可比 |
-| OWL-ViT（PyTorch）在 Orin Nano | 官方 README：約 3 秒/張 | 本機 PyTorch fp32 約 224 ms（暖機後，單次） | 條件不同（較新的 JetPack / TensorRT、MAXN_SUPER），不能直接比較 |
+- **NanoOWL FPS**：`third_party/nanoowl/examples/owl_predict.py --profile`——前後 `synchronize`，同一張圖連跑 N 次 `predict(..., pad_square=False)`，文字編碼預先算好。範圍 = 前處理 + TensorRT 影像編碼 + decode；**不含** NMS、搬回 CPU、SAM。
+- **NanoSAM Image Encoder / Full Pipeline**：README 與程式碼都**沒有**寫計時方法，所以兩種口徑並列：(a) `trtexec` 純 GPU（encoder + 1 框 decoder）；(b) 官方 `nanosam.utils.predictor.Predictor` 的 `set_image` + `predict`（含前處理與 upscale_mask）。MobileSAM 的 encoder 官方用 fp32、NanoSAM 用 fp16、decoder 皆 fp32。
+
+量測腳本 `benchmark/bench_official.py`（640×480，`cats.jpg`，1 個框，單位 ms；結果 `official_compare.json` = MAXN_SUPER、`official_compare_15W.json` = 15W）：
+
+| 項目 | 官方 Orin Nano | MAXN_SUPER：trtexec Full | MAXN_SUPER：Python Full | 15W：trtexec Full | 15W：Python Full |
+|---|---|---|---|---|---|
+| MobileSAM（TinyViT fp32） Full Pipeline（1 框） | 146 ms | 98.8 | 123.6 | 121.1 | 149.7 |
+| MobileSAM（TinyViT fp16） Full Pipeline（1 框） | — | 44.4 | 69.7 | 61.2 | 89.5 |
+| ResNet18 自訓練 fp16（NanoSAM 架構） Full Pipeline（1 框） | 27 ms | 18.2 | 42.7 | 26.3 | 54.4 |
+| 　└ MobileSAM（TinyViT fp32） encoder | TBD | 90.5（trtexec）/ 113.2（Python） | | 109.5 / 135.7 | |
+| 　└ MobileSAM（TinyViT fp16） encoder | TBD | 36.1（trtexec）/ 59.5（Python） | | 49.6 / 75.7 | |
+| 　└ ResNet18 自訓練 fp16（NanoSAM 架構） encoder | TBD | 9.9（trtexec）/ 32.7（Python） | | 14.7 / 40.8 | |
+| mask decoder（1 框） | — | 8.28 | | 11.58 | |
+| NanoOWL ViT-B/32 FPS | TBD | 51.7 FPS（19.3 ms） | | 34.8 FPS（28.7 ms） | |
+
+**電源模式**（`/etc/nvpmodel.conf`）：7W（GPU 408 MHz）、15W（612 MHz）、25W（918 MHz）、MAXN_SUPER（1020 MHz，無功耗上限）。官方 README **沒有寫電源模式、JetPack 或時脈**；Orin Nano 表格的 commit 日期是 2023-09-01（NanoSAM）與 2023-09-19（NanoOWL），早於 Super 模式（2024 年底），所以官方不可能是 Super。MAXN_SUPER 是本機最快的模式；實測的整板功耗約 11.6 W（§5），沒有用到 15W 的上限。
+
+- **電源模式是我們與官方差距的主因**：NanoSAM(ResNet18) Full Pipeline 純 GPU，MAXN_SUPER 18.2 ms → 15W 26.3 ms，與官方 27 ms 只差 2.6%。同一模型 NanoOWL 也從 51.7 降到 34.8 FPS。
+- **口徑不能一概而論**：NanoSAM 的官方 27 ms 貼近 15W 的純 GPU（26.3 ms），遠低於含前處理的 Python（54.4 ms）→ 官方很可能不含 CPU 前處理；但 MobileSAM 的官方 146 ms 貼近 15W 的 **Python**（149.7 ms）而不是純 GPU（121.1 ms，快 17%）。兩個模型指向不同口徑，**官方沒寫範圍，我們無法斷定**；可能的原因（官方舊版 TensorRT 8.x 上 fp32 TinyViT 較慢）是推測，沒有驗證。
+- 先前的推測「官方 ÷ 我們 = 固定 1.48 倍」只在 MAXN_SUPER 的純 GPU 數字上成立，15W 量測後不再成立，已撤回。
+- MobileSAM fp16 官方說 TensorRT 會產生錯誤結果（README 註腳），此列只供速度參考，不能當準確的 baseline。
+- 15W 量測時沒有同時記錄 `tegrastats`，所以沒有 15W 的功耗數字。
+- 網頁右側新增「官方口徑」卡片，每幀即時顯示同一範圍的數字（`timing.official_*`：OWL predict、SAM encoder、decoder/框、Full Pipeline），與「端對端」分開。pipeline 內量到的 SAM encoder 含前處理，約 29.5 ms，decoder 約 11 ms（含遮罩後處理與搬回 CPU），所以 Full ≈ 40 ms，接近 (b)。
 
 **架構相同、權重不同**：官方 NanoSAM 與本專案都是「ResNet18 image encoder ＋ MobileSAM mask decoder」，所以延遲（由架構與精度決定）可以對照；但官方預訓練權重沒有取得，我們用的是自行蒸餾的權重（mIoU 0.704，官方 0.706 為不同條件的參考值），**準確度不可對照**。
 
@@ -266,8 +285,8 @@ HyDE 的套用條件是「這次請求的**所有**提示詞都已擴展過」�
 
 ## 10. 限制與尚未完成
 
-1. 基準測試只有**單一影像（cats.jpg）、4 個框、單一電源模式（MAXN_SUPER）**；沒有 15W / 25W / 7W 的比較。
-2. MobileSAM baseline 的 `bench_pipeline.py` 逐階段統計（PyTorch fp32：`pipe_pytorch_fp32.json`；TensorRT fp32：`pipe_trt_mobilesam_fp32.json`）是後來補量的，見 [wsl-vs-jetson.md](wsl-vs-jetson.md) §2.1；**沒有量官方 NanoSAM 預訓練權重**（`resnet18_image_encoder.onnx` 需從 Google Drive 登入下載，沒有取得），所有「SAM encoder」數字都是自行蒸餾的權重。
+1. 基準測試只有**單一影像（cats.jpg）、4 個框**；電源模式只比較了 MAXN_SUPER 與 15W（§8，且 15W 只量延遲、沒有功耗）；沒有 25W / 7W。
+2. MobileSAM baseline 只有端對端（§6）與 SAM 階段的數字，沒有 `bench_pipeline.py` 的逐階段統計；**沒有量官方 NanoSAM 預訓練權重**（`resnet18_image_encoder.onnx` 需從 Google Drive 登入下載，沒有取得），所有「SAM encoder」數字都是自行蒸餾的權重。
 3. 功耗取樣只有 18 個穩態樣本（每個 0.5 秒）；`tegrastats` 在此版本不輸出 GPU 時脈。
 4. 第 6.2 節大圖資料是使用者操作網頁時留下的日誌，不是受控實驗；`gap` 的成因是推論。
 5. **提示詞寫法比較（≥ 10 張影像、≥ 3 種寫法）、攝影機即時 Demo（本機沒有偵測到攝影機）、截圖與影片尚未做。**
@@ -279,8 +298,58 @@ HyDE 的套用條件是「這次請求的**所有**提示詞都已擴展過」�
 |---|---|
 | 流程基準（最終） | `data/bench/jetson/pipe_all_trt_final.json`（另一次：`pipe_all_trt.json`） |
 | 功耗 / 溫度 | `data/bench/jetson/tegrastats_idle.log`、`tegrastats_bench.log` |
+| 官方口徑對照 | `data/bench/jetson/official_compare.json`（MAXN_SUPER）、`official_compare_15W.json`（15W）；腳本 `benchmark/bench_official.py` |
 | 引擎建置與 trtexec | `build_owl_engine.log`、`build_sam_encoder.log`、`build_sam_decoder.log`（失敗嘗試：`build_owl_engine.attempt*_oom*.log`、`mem_samples*.log`） |
 | 網頁逐請求日誌 | `app.log` |
 | Ollama 模型評估 | `data/bench/jetson/hyde_model_eval.json` |
 
 （`data/` 與 `app.log` 不進版控；重現方式見 `docs/jetson-deploy.md`。）
+
+## 12. 重現指令（官方口徑量測，§8）
+
+在專案根目錄、`.venv-jetson` 環境下執行。
+
+**事前準備**
+
+```bash
+cd ~/midterm_P76154278/smart-processing-midterm-project-2026Fall
+source .venv-jetson/bin/activate
+pkill -f server.main        # 先關網頁伺服器；Nano 記憶體很緊（建議 free -m 的 available > 3000 MB）
+nvpmodel -q                 # 確認電源模式
+```
+
+**完整重跑（`benchmark/bench_official.py`）**——預設參數即報告所用：`cats.jpg`、提示詞 `a cat` / `a remote control`、NanoOWL 5 輪 × 200 次、NanoSAM 100 次；`trtexec` 會在載入模型前先跑完（避免 OOM）。
+
+```bash
+# MAXN_SUPER（nvpmodel 2）
+python benchmark/bench_official.py --power_mode "MAXN_SUPER" --out data/bench/jetson/official_compare.json
+
+# 15W（nvpmodel 0）——量完務必切回
+sudo nvpmodel -m 0 && sudo jetson_clocks
+python benchmark/bench_official.py --power_mode "15W (nvpmodel 0)" --out data/bench/jetson/official_compare_15W.json
+sudo nvpmodel -m 2
+```
+
+**單項驗證**
+
+```bash
+# NanoOWL：官方 --profile（預設 30 次；旗標已對照 owl_predict.py 原始碼）
+cd third_party/nanoowl/examples
+python owl_predict.py --prompt="[a cat, a remote control]" --threshold=0.1,0.1 \
+    --image=../../../data/samples/cats.jpg --image_encoder_engine=../../../data/owl_image_encoder_patch32.engine \
+    --output=/tmp/owl_out.jpg --num_profiling_runs=200 --profile
+cd ../../..
+
+# NanoSAM encoder 純 GPU
+/usr/src/tensorrt/bin/trtexec --loadEngine=data/resnet18_image_encoder.selftrain.engine \
+    --warmUp=1000 --duration=5 --iterations=100 --avgRuns=100 | grep "GPU Compute Time"
+
+# mask decoder 純 GPU（1 個框 = 2 個點）
+/usr/src/tensorrt/bin/trtexec --loadEngine=data/mobile_sam_mask_decoder.engine \
+    --shapes=point_coords:1x2x2,point_labels:1x2 \
+    --warmUp=1000 --duration=5 --iterations=100 --avgRuns=100 | grep "GPU Compute Time"
+```
+
+官方 Full Pipeline 的純 GPU 口徑 ＝ encoder 的 `GPU Compute Time` 平均 ＋ decoder 的平均。
+
+**注意**：trtexec 結果有約 ±1% 的波動，不會與表中數字逐位相同；量測時不要同時開瀏覽器、Ollama 推論或網頁伺服器；網頁「官方口徑」卡片的數字是流程內計時（SAM encoder 含前處理），範圍與 trtexec 不同，不要拿來和純 GPU 數字直接比。

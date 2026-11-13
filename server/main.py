@@ -182,7 +182,10 @@ def logs(lines: int = 120, request_id: Optional[str] = None):
 @app.post("/api/segment")
 @log_call(name="api.segment")
 def segment(image: UploadFile = File(...), prompts: str = Form(...), threshold: float = Form(0.1),
-            nms_iou: float = Form(0.5), use_hyde: bool = Form(False), quiet: bool = Form(False), with_masks: bool = Form(True), top_per_group: bool = Form(False)):
+            nms_iou: float = Form(0.5), use_hyde: bool = Form(False), quiet: bool = Form(False), with_masks: bool = Form(True), top_per_group: bool = Form(False),
+            exemplar_box: str = Form(""), exemplar_mode: str = Form("inplace"), exemplar_with_text: bool = Form(False)):
+    """exemplar_box（以圖找圖，選用）：JSON [x0, y0, x1, y1]，**占整張圖寬高的比例（0~1）**，所以不受伺服器縮圖影響；
+    此時 prompts 必須只有一個（範例所屬的概念），use_hyde 不套用。exemplar_mode：inplace（預設，用這張圖自己在範例框位置的特徵）或 crop（把範例裁出單獨編碼）。"""
     quiet_var.set(quiet)  # 連續影格（攝影機／影片）由前端取樣記錄，其餘只記 WARNING 以上
     plist = parse_prompts(prompts)
     if not plist:
@@ -191,13 +194,30 @@ def segment(image: UploadFile = File(...), prompts: str = Form(...), threshold: 
         raise HTTPException(400, "too many prompts (max 20)")
     if not 0 < threshold < 1 or not 0 < nms_iou <= 1:
         raise HTTPException(400, "threshold must be in (0,1) and nms_iou in (0,1]")
+    exemplar_frac = None
+    if exemplar_box.strip():
+        if len(plist) != 1:
+            raise HTTPException(400, "exemplar query needs exactly one prompt (the concept of the exemplar)")
+        if exemplar_mode not in ("inplace", "crop"):
+            raise HTTPException(400, "exemplar_mode must be 'inplace' or 'crop'")
+        try:
+            exemplar_frac = [float(v) for v in json.loads(exemplar_box)]
+            ok = len(exemplar_frac) == 4 and all(0 <= v <= 1 for v in exemplar_frac) and exemplar_frac[0] < exemplar_frac[2] and exemplar_frac[1] < exemplar_frac[3]
+        except (ValueError, TypeError):
+            ok = False
+        if not ok:
+            raise HTTPException(400, "exemplar_box must be JSON [x0,y0,x1,y1] as fractions of the image (0..1) with x0<x1, y0<y1")
     t_req = time.perf_counter()
     try:
         img = service.decode_image(image.file.read())
     except Exception as e:
         raise HTTPException(400, f"cannot read image: {e}")
     decode_ms = (time.perf_counter() - t_req) * 1e3
-    result = service.run(img, plist, threshold, nms_iou, use_hyde, with_masks=with_masks, top_per_group=top_per_group)
+    exemplar = None
+    if exemplar_frac:
+        f = exemplar_frac
+        exemplar = {"box": [f[0] * img.width, f[1] * img.height, f[2] * img.width, f[3] * img.height], "mode": exemplar_mode, "with_text": exemplar_with_text}
+    result = service.run(img, plist, threshold, nms_iou, use_hyde, with_masks=with_masks, top_per_group=top_per_group, exemplar=exemplar)
     # timing.total_ms 只含 run()（推論 + 序列化），不含圖片解碼與回應組裝。要讓畫面數字貼近使用者實際等待的時間，另外提供：
     #   decode_ms = 圖片解碼＋縮放；server_ms = 本函式從開始到 run() 回傳（解碼 + 推論 + 序列化 + 組裝回應）。
     # 瀏覽器端的 client_ms − server_ms ≈ 上傳 + FastAPI 編 JSON + 下載 + 解析（server_ms 不含 FastAPI 把 dict 編成 JSON 的時間）。

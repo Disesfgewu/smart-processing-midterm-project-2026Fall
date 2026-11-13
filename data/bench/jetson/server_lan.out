@@ -1,0 +1,80 @@
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/.venv-jetson/lib/python3.10/site-packages/timm/models/layers/__init__.py:48: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/.venv-jetson/lib/python3.10/site-packages/timm/models/registry.py:4: FutureWarning: Importing from timm.models.registry is deprecated, please import via timm.models
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.models", FutureWarning)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/third_party/nanosam/nanosam/mobile_sam/modeling/tiny_vit_sam.py:656: UserWarning: Overwriting tiny_vit_5m_224 in registry with nanosam.mobile_sam.modeling.tiny_vit_sam.tiny_vit_5m_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  return register_model(fn_wrapper)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/third_party/nanosam/nanosam/mobile_sam/modeling/tiny_vit_sam.py:656: UserWarning: Overwriting tiny_vit_11m_224 in registry with nanosam.mobile_sam.modeling.tiny_vit_sam.tiny_vit_11m_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  return register_model(fn_wrapper)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/third_party/nanosam/nanosam/mobile_sam/modeling/tiny_vit_sam.py:656: UserWarning: Overwriting tiny_vit_21m_224 in registry with nanosam.mobile_sam.modeling.tiny_vit_sam.tiny_vit_21m_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  return register_model(fn_wrapper)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/third_party/nanosam/nanosam/mobile_sam/modeling/tiny_vit_sam.py:656: UserWarning: Overwriting tiny_vit_21m_384 in registry with nanosam.mobile_sam.modeling.tiny_vit_sam.tiny_vit_21m_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  return register_model(fn_wrapper)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/third_party/nanosam/nanosam/mobile_sam/modeling/tiny_vit_sam.py:656: UserWarning: Overwriting tiny_vit_21m_512 in registry with nanosam.mobile_sam.modeling.tiny_vit_sam.tiny_vit_21m_512. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  return register_model(fn_wrapper)
+[server] 埠 8000 已被佔用，改用 8001（要固定埠請設 PORT=…）
+[server] 載入模型中（Jetson 約 10~30 秒）… 網頁：區網內其他裝置開 http://140.116.86.214:8001（本機：http://127.0.0.1:8001）。注意：沒有登入驗證，只在可信任的網路使用
+2026-11-01 19:28:31,597 | INFO  | - | [lifespan.startup]: input=(), output=loading models
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/.venv-jetson/lib/python3.10/site-packages/torch/functional.py:554: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /opt/pytorch/aten/src/ATen/native/TensorShape.cpp:4317.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+2026-11-01 19:28:36,630 | INFO  | - | [NanoSamPredictor.__init__]: input=(backend=trt, encoder=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/resnet18_image_encoder.selftrain.engine, decoder=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/mobile_sam_mask_decoder.engine), output=provider=TensorRT, elapsed=524ms
+2026-11-01 19:28:36,762 | INFO  | - | [memutil.drop_file_cache]: input=(23 files), output=MemFree 1112MB -> 1958MB, Cached 2504MB -> 1656MB
+2026-11-01 19:28:36,763 | INFO  | - | [OpenVocabSegmenter.__init__]: input=(owl=google/owlvit-base-patch32, engine=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/owl_image_encoder_patch32.engine, sam=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/models/mobile_sam.pt, device=cuda), output=models loaded in 5.16s
+2026-11-01 19:28:37,027 | INFO  | - | [OpenVocabSegmenter.set_prompts]: input=(prompts=['an object'], groups={}), output=text_encodings(1, 512) for 1 queries, elapsed=254.3ms
+2026-11-01 19:28:37,028 | INFO  | - | [OpenVocabSegmenter.__call__]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['an object'], threshold=0.01, nms_iou=0.5, with_masks=True, top_per_group=False)
+[11/01/2026-19:28:37] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+2026-11-01 19:28:37,144 | INFO  | - | [OwlPredictor.predict]: input=(image=(640, 480), threshold=0.01, queries=1), output=0 raw boxes, labels=[], best_scores={'an object': None}
+2026-11-01 19:28:37,144 | INFO  | - | [torchvision.nms]: input=(0 boxes, iou=0.5), output=0 boxes kept
+2026-11-01 19:28:37,145 | INFO  | - | [OpenVocabSegmenter.primary]: input=(groups=1, detections=0), output={}
+2026-11-01 19:28:37,145 | INFO  | - | [OpenVocabSegmenter.__call__]: output=0 detections, owl=116.8ms, sam=0.0ms
+2026-11-01 19:28:37,736 | INFO  | - | [OpenVocabSegmenter.__call__]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['an object'], threshold=0.01, nms_iou=0.5, with_masks=True, top_per_group=False)
+2026-11-01 19:28:37,759 | INFO  | - | [OwlPredictor.predict]: input=(image=(640, 480), threshold=0.01, queries=1), output=0 raw boxes, labels=[], best_scores={'an object': None}
+2026-11-01 19:28:37,759 | INFO  | - | [torchvision.nms]: input=(0 boxes, iou=0.5), output=0 boxes kept
+2026-11-01 19:28:37,760 | INFO  | - | [OpenVocabSegmenter.primary]: input=(groups=1, detections=0), output={}
+2026-11-01 19:28:37,760 | INFO  | - | [OpenVocabSegmenter.__call__]: output=0 detections, owl=23.3ms, sam=0.0ms
+2026-11-01 19:28:37,989 | INFO  | - | [OpenVocabSegmenter.__call__]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['an object'], threshold=0.01, nms_iou=0.5, with_masks=True, top_per_group=False)
+2026-11-01 19:28:38,010 | INFO  | - | [OwlPredictor.predict]: input=(image=(640, 480), threshold=0.01, queries=1), output=0 raw boxes, labels=[], best_scores={'an object': None}
+2026-11-01 19:28:38,011 | INFO  | - | [torchvision.nms]: input=(0 boxes, iou=0.5), output=0 boxes kept
+2026-11-01 19:28:38,011 | INFO  | - | [OpenVocabSegmenter.primary]: input=(groups=1, detections=0), output={}
+2026-11-01 19:28:38,012 | INFO  | - | [OpenVocabSegmenter.__call__]: output=0 detections, owl=22.1ms, sam=0.0ms
+2026-11-01 19:28:38,238 | INFO  | - | [SegmentService.warmup]: input=(n=3), output=done in 1475ms
+2026-11-01 19:28:38,239 | INFO  | - | [SegmentService.__init__]: input=(sam_checkpoint=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/models/mobile_sam.pt, owl_engine=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/owl_image_encoder_patch32.engine), output=loaded in 5.2s on Orin
+2026-11-01 19:28:38,239 | INFO  | - | [OpenVocabSegmenter.set_sam_encoder]: input=(name=nanosam), output=active encoder = NanoSamPredictor
+[server] 後端：OWL = TensorRT 引擎 owl_image_encoder_patch32.engine | SAM = nanosam
+2026-11-01 19:28:38,241 | INFO  | - | [lifespan.startup]: input=(), output=ready
+[server] 就緒，可以開啟網頁了。
+2026-11-01 19:28:39,518 | INFO  | dc360931 | [API GET /]: input=(query={}, content_type=-, length=-)
+2026-11-01 19:28:39,529 | INFO  | dc360931 | [API GET /]: output=(status=200, elapsed=10.4ms)
+2026-11-01 19:28:39,542 | INFO  | 2a1625ec | [API GET /api/health]: input=(query={}, content_type=-, length=-)
+2026-11-01 19:28:39,570 | INFO  | 2a1625ec | [api.health]: input=(-), output={status: 'ok', backend: 'tensorrt', device: 'Orin', model_load_s: 5.165, uptime_s: 7.972, requests: 0}, elapsed=25.9ms
+2026-11-01 19:28:39,571 | INFO  | 2a1625ec | [API GET /api/health]: output=(status=200, elapsed=29.0ms)
+2026-11-01 19:28:39,583 | INFO  | d373f330 | [API GET /]: input=(query={}, content_type=-, length=-)
+2026-11-01 19:28:39,585 | INFO  | d373f330 | [API GET /]: output=(status=200, elapsed=2.1ms)
+2026-11-01 19:28:39,597 | INFO  | 467552d9 | [API GET /api/health]: input=(query={}, content_type=-, length=-)
+2026-11-01 19:28:39,623 | INFO  | 467552d9 | [api.health]: input=(-), output={status: 'ok', backend: 'tensorrt', device: 'Orin', model_load_s: 5.165, uptime_s: 8.025, requests: 0}, elapsed=24.8ms
+2026-11-01 19:28:39,624 | INFO  | 467552d9 | [API GET /api/health]: output=(status=200, elapsed=27.1ms)
+2026-11-01 19:28:39,636 | INFO  | 718394e1 | [API GET /]: input=(query={}, content_type=-, length=-)
+2026-11-01 19:28:39,638 | INFO  | 718394e1 | [API GET /]: output=(status=200, elapsed=2.0ms)
+2026-11-01 19:28:39,649 | INFO  | 833690a6 | [API GET /api/health]: input=(query={}, content_type=-, length=-)
+2026-11-01 19:28:39,675 | INFO  | 833690a6 | [api.health]: input=(-), output={status: 'ok', backend: 'tensorrt', device: 'Orin', model_load_s: 5.165, uptime_s: 8.078, requests: 0}, elapsed=25.0ms
+2026-11-01 19:28:39,676 | INFO  | 833690a6 | [API GET /api/health]: output=(status=200, elapsed=27.3ms)
+2026-11-01 19:28:39,691 | INFO  | e869434e | [API POST /api/segment]: input=(query={}, content_type=multipart/form-data; boundary=------------------------395919866b84e7c7, length=173537)
+2026-11-01 19:28:39,711 | INFO  | e869434e | [service.SegmentService.decode_image]: input=(data=bytes(len=173131)), output=PIL.Image(size=(640, 480), mode=RGB), elapsed=15.4ms
+2026-11-01 19:28:39,746 | INFO  | e869434e | [OpenVocabSegmenter.set_prompts]: input=(prompts=['a cat', 'a remote control'], groups={}), output=text_encodings(2, 512) for 2 queries, elapsed=34.7ms
+2026-11-01 19:28:39,747 | INFO  | e869434e | [OpenVocabSegmenter.__call__]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['a cat', 'a remote control'], threshold=0.1, nms_iou=0.5, with_masks=True, top_per_group=False)
+2026-11-01 19:28:39,786 | INFO  | e869434e | [OwlPredictor.predict]: input=(image=(640, 480), threshold=0.1, queries=2), output=4 raw boxes, labels=['a cat', 'a remote control'], best_scores={'a cat': 0.661, 'a remote control': 0.444}
+2026-11-01 19:28:39,810 | INFO  | e869434e | [torchvision.nms]: input=(4 boxes, iou=0.5), output=4 boxes kept
+2026-11-01 19:28:39,811 | INFO  | e869434e | [OpenVocabSegmenter.primary]: input=(groups=2, detections=4), output={'a cat': {'query': 'a cat', 'score': 0.6606329083442688}, 'a remote control': {'query': 'a remote control', 'score': 0.4439004957675934}}
+[11/01/2026-19:28:39] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+2026-11-01 19:28:39,910 | INFO  | e869434e | [SamPredictor.set_image]: input=(image=(640, 480)), output=image embedding ready, elapsed=98.1ms
+[11/01/2026-19:28:39] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+2026-11-01 19:28:39,923 | INFO  | e869434e | [SamPredictor.predict]: input=(label=a cat, query='a cat', score=0.66, box=[5, 53, 321, 470]), output=mask_area=51554px, sam_iou_pred=0.67
+2026-11-01 19:28:39,934 | INFO  | e869434e | [SamPredictor.predict]: input=(label=a cat, query='a cat', score=0.62, box=[304, 17, 641, 394]), output=mask_area=59142px, sam_iou_pred=0.70
+2026-11-01 19:28:39,945 | INFO  | e869434e | [SamPredictor.predict]: input=(label=a remote control, query='a remote control', score=0.44, box=[38, 72, 178, 116]), output=mask_area=4134px, sam_iou_pred=0.70
+2026-11-01 19:28:39,956 | INFO  | e869434e | [SamPredictor.predict]: input=(label=a remote control, query='a remote control', score=0.26, box=[335, 74, 371, 187]), output=mask_area=1906px, sam_iou_pred=0.71
+2026-11-01 19:28:39,956 | INFO  | e869434e | [OpenVocabSegmenter.__call__]: output=4 detections, owl=64.5ms, sam=144.5ms
+2026-11-01 19:28:39,992 | INFO  | e869434e | [service.SegmentService.run]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['a cat', 'a remote control'], threshold=0.1, nms_iou=0.5, use_hyde=False, with_masks=True, top_per_group=False), output={image: {width: 640, height: 480, original_width: 640, original_height: 480}, prompts: ['a cat', 'a remote control'], threshold: 0.1, nms_iou: 0.5, with_masks: True, top_per_group: False, hyde: {requested: False, applied: False, note: None, expanded: None, model: 'qwen3:4b', elapsed_ms: 0, cached: N…(len=776), elapsed=280.0ms
+2026-11-01 19:28:39,993 | INFO  | e869434e | [api.segment]: input=(image=UploadFile(filename=cats.jpg), prompts='a cat,a remote control', threshold=0.1, nms_iou=0.5, use_hyde=False, quiet=False, with_masks=True, top_per_group=False), output={image: {width: 640, height: 480, original_width: 640, original_height: 480}, prompts: ['a cat', 'a remote control'], threshold: 0.1, nms_iou: 0.5, with_masks: True, top_per_group: False, hyde: {requested: False, applied: False, note: None, expanded: None, model: 'qwen3:4b', elapsed_ms: 0, cached: N…(len=776), elapsed=297.4ms
+2026-11-01 19:28:39,996 | INFO  | e869434e | [API POST /api/segment]: output=(status=200, elapsed=305.9ms)
+2026-11-01 19:28:40,149 | INFO  | - | [CameraWorker.stop]: input=(), output=stopped (was_running=False)
+2026-11-01 19:28:40,150 | INFO  | - | [lifespan.shutdown]: input=(), output=bye

@@ -96,7 +96,6 @@ python -m server.main        # 有引擎就自動用 TensorRT（OWL + 自訓練 
 ```
 
 啟動時會印出實際使用的後端與網址。**Jetson 上預設監聽 `0.0.0.0`**，區網內其他裝置直接開啟動訊息裡印的 `http://<Jetson 的 IP>:8000`（8000 被佔用時是 8001，以印出的為準）。**沒有登入驗證**，請只在可信任的網路使用；要改成只有本機能連：`HOST=127.0.0.1 python -m server.main`（再用 `ssh -L 8000:127.0.0.1:8000 <user>@<jetson-ip>` 轉發）。連不上時先檢查防火牆（`sudo ufw status`）。
-**期中實驗報告（WSL 與 Nano 數據整合）**見 [docs/experiment-report.md](docs/experiment-report.md)。
 **Nano 上的完整量測報告**（延遲、FPS、功耗、記憶體、與官方對照、HyDE 模型比較）見 [docs/measurement-report.md](docs/measurement-report.md)。與 WSL（GTX 1060）數據的對照見 [docs/wsl-vs-jetson.md](docs/wsl-vs-jetson.md)。
 建引擎前請確認可用記憶體 ≥ 4GB（用 SSH、結束 gazebo / VS Code 遠端連線），見 [docs/record.md](docs/record.md) §13.2 第 7 點。
 

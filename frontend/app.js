@@ -119,12 +119,15 @@ function grab(srcEl, w, h) {
 const toBlob = (canvas) => new Promise((r) => canvas.toBlob(r, "image/jpeg", 0.85));
 
 async function callSegment(blob, quiet = false) {
-  const { prompts, hyde } = activeSet();
+  const set = activeSet();
+  const ex = state.exemplar && state.mode === "image" && blob === state.file ? state.exemplar : null;   // 以圖找圖只用在「圖片」模式、同一張圖
+  const prompts = ex ? [ex.label] : set.prompts, hyde = ex ? false : set.hyde;
   if (!prompts.length) throw new Error("請至少輸入一個提示詞");
   const fd = new FormData();
+  if (ex) { fd.append("exemplar_box", JSON.stringify(ex.box)); fd.append("exemplar_mode", ex.mode); }
   fd.append("image", blob, blob.name || "frame.jpg");
   fd.append("prompts", JSON.stringify(prompts));
-  fd.append("threshold", $("threshold").value);
+  fd.append("threshold", ex ? $("ex-th").value : $("threshold").value);   // 以圖找圖的分數會飽和，用自己的（很高的）門檻
   fd.append("nms_iou", $("nms").value);
   fd.append("use_hyde", hyde ? "true" : "false");   // 偵測端點只查快取，不會呼叫 LLM
   fd.append("quiet", quiet ? "true" : "false");
@@ -166,7 +169,7 @@ function accept(r, src, w, h, { history = true } = {}) {
 // ================= 圖片 =================
 function setFile(file) {
   if (!file || !file.type.startsWith("image/")) return showError("請選擇圖片檔");
-  showError(""); state.file = file;
+  showError(""); state.file = file; state.exemplar = null;
   const img = new Image();
   img.onload = () => {
     state.src = img; state.srcW = img.naturalWidth; state.srcH = img.naturalHeight; state.result = null;
@@ -189,7 +192,7 @@ async function run() {
   if (!state.file || state.busy) return;
   state.busy = true; showError(""); $("btn-run").disabled = true;
   try {
-    if (!(await ensureExpanded())) return;              // HyDE：先擴展完，才開始偵測
+    if (!state.exemplar && !(await ensureExpanded())) return;   // HyDE：先擴展完，才開始偵測（以圖找圖不用文字，略過）
     $("busy").textContent = "推論中…"; $("busy").hidden = false;
     accept(await callSegment(state.file), state.src, state.srcW, state.srcH); refreshLogs(); }
   catch (e) { showError(e.message); }
@@ -407,6 +410,8 @@ $("prompts").addEventListener("input", () => {
   // 瀏覽器攝影機／影片（HyDE 關閉）：迴圈每一幀都會讀取提示詞，下一幀即生效；HyDE 開啟則需按「套用」
 });
 const onParam = () => { if (state.srv.on) pushServerParams(); else if ($("auto").checked && state.mode === "image" && state.file) run(); };
+$("ex-th").addEventListener("input", (e) => { $("ex-th-out").textContent = (+e.target.value).toFixed(3).replace(/0$/, ""); });
+$("ex-th").addEventListener("change", () => { if (state.exemplar && state.mode === "image" && state.file && !state.busy) run(); });
 $("threshold").addEventListener("input", (e) => { $("th-out").textContent = (+e.target.value).toFixed(2); });
 $("nms").addEventListener("input", (e) => { $("nms-out").textContent = (+e.target.value).toFixed(2); });
 $("threshold").addEventListener("change", onParam); $("nms").addEventListener("change", onParam);
@@ -464,7 +469,7 @@ function draw() {
     if (d.mask_area != null && (style === "contour" || style === "both")) { ctx.lineWidth = lw * thick; ctx.strokeStyle = color; ctx.lineJoin = "round"; ctx.stroke(path); }
     if (style === "box" || d.mask_area == null) { ctx.lineWidth = lw; ctx.strokeStyle = color; const [x0, y0, x1, y1] = d.box; ctx.strokeRect(x0, y0, x1 - x0, y1 - y0); }
     const fs = Math.max(12, Math.round(Math.max(W, H) / 50)); ctx.font = `600 ${fs}px system-ui, sans-serif`;
-    const star = r.hyde && r.hyde.applied && d.primary, text = `${star ? "★ " : ""}${d.label} ${d.score.toFixed(2)}${calK && d.mask_area != null ? ` · ${(d.mask_area * calK * calK).toFixed(0)} mm²` : ""}`, tw = ctx.measureText(text).width, [x0, y0] = d.box, ty = Math.max(y0, fs + 4);
+    const star = r.hyde && r.hyde.applied && d.primary, text = `${star ? "★ " : ""}${d.exemplar ? "◎ " : ""}${d.label} ${d.score.toFixed(2)}${calK && d.mask_area != null ? ` · ${(d.mask_area * calK * calK).toFixed(0)} mm²` : ""}`, tw = ctx.measureText(text).width, [x0, y0] = d.box, ty = Math.max(y0, fs + 4);
     ctx.fillStyle = color; ctx.fillRect(x0, ty - fs - 4, tw + 8, fs + 6); ctx.fillStyle = "#fff"; ctx.fillText(text, x0 + 4, ty - 3);
   }
   drawCalibration();
@@ -479,11 +484,34 @@ canvas.addEventListener("mousemove", (e) => {
 });
 canvas.addEventListener("mouseleave", () => { $("tip").hidden = true; });
 
+// ---- 以圖找圖：點結果畫面上的框當範例 ----
+function hitDet(e) {
+  const rect = canvas.getBoundingClientRect(), sx = canvas.width / rect.width, x = (e.clientX - rect.left) * sx, y = (e.clientY - rect.top) * sx;
+  const byMask = [...state.paths].reverse().find(({ d, path }) => !state.hidden.has(d.label) && ctx.isPointInPath(path, x, y, "evenodd"));
+  if (byMask) return byMask.d;
+  const inBox = (state.result?.detections || []).filter((d) => !state.hidden.has(d.label) && x >= d.box[0] && x <= d.box[2] && y >= d.box[1] && y <= d.box[3]);   // 沒開遮罩時用框命中，取面積最小者
+  return inBox.sort((a, b) => a.box_area - b.box_area)[0] || null;
+}
+canvas.addEventListener("click", (e) => {
+  if (state.mode !== "image" || !state.result || !state.file || state.busy) return;
+  const d = hitDet(e); if (!d) return;
+  const W = state.srcW, H = state.srcH, c = (v, m) => Math.min(1, Math.max(0, v / m));
+  state.exemplar = { label: d.label, mode: $("ex-mode").value, box: [c(d.box[0], W), c(d.box[1], H), c(d.box[2], W), c(d.box[3], H)] };   // 比例座標：不受伺服器縮圖影響
+  run();
+});
+function renderExBar(r) {
+  const bar = $("ex-bar"); bar.replaceChildren();
+  bar.hidden = !r.exemplar; if (!r.exemplar) return;
+  const clear = el("button", { className: "ghost", type: "button" }, "清除範例，回到文字查詢");
+  clear.addEventListener("click", () => { state.exemplar = null; run(); });
+  bar.append(`◎ 以圖找圖（${r.exemplar.mode === "inplace" ? "原位" : "裁切"}）：以你點選的「${r.prompts[0]}」框為範例，找出長得像的（範例門檻 ${r.threshold}，共 ${r.detections.length} 個，含範例本身）。此模式的分數會偏高（許多不同的零件也常 ≥ 0.9），請看排序與框，不要把分數當信心：誤報太多就拉高「範例門檻」，漏掉就調低。 `, clear);
+}
+
 // ================= 顯示結果 =================
 function render(r, { skipDraw = false } = {}) {
   state.hidden = new Set([...state.hidden].filter((l) => r.prompts.includes(l)));
   if (!skipDraw) draw();
-  renderLegend(r); renderSummary(r); renderTiming(r); renderCheck(r); renderHyde(r);
+  renderLegend(r); renderSummary(r); renderTiming(r); renderCheck(r); renderHyde(r); renderExBar(r);
 }
 function renderLegend(r) {
   const box = $("legend"); box.replaceChildren();
@@ -553,6 +581,12 @@ function renderTiming(r) {
   add("影像大小", r.processed ? `${r.image.width}×${r.image.height}（後端縮至 ${r.processed.width}×${r.processed.height} 處理，座標已換算）` : `${r.image.width}×${r.image.height}`); add("原始框 → NMS 後", `${t.num_raw_boxes ?? "—"} → ${r.detections.length}`);
   add("SAM 編碼器", r.sam_encoder ? (encLabels[r.sam_encoder] || r.sam_encoder) : "—");
   add("SAM 平均每個框", r.detections.length ? `${fmt(t.sam_ms / r.detections.length)} ms（含整張影像編碼）` : "—"); add("後端", r.backend);
+  const ko = $("official-kv"); ko.replaceChildren(); const addo = (k, v) => ko.append(el("dt", { textContent: k }), el("dd", { textContent: v }));
+  const ms = (v) => (v == null ? "—（本幀沒有跑 SAM）" : `${fmt(v)} ms`);
+  addo("NanoOWL（OWL predict）", t.official_owl_ms != null ? `${fmt(t.official_owl_ms)} ms ≈ ${fmt(1000 / t.official_owl_ms)} FPS　（官方 TBD）` : "—");
+  addo("NanoSAM Image Encoder", `${ms(t.official_sam_encoder_ms)}　（官方 TBD；我們含前處理）`);
+  addo("NanoSAM Mask Decoder / 框", `${ms(t.official_sam_decoder_ms)}`);
+  addo("NanoSAM Full Pipeline（1 框）", `${ms(t.official_sam_full_ms)}　（官方 NanoSAM 27 / MobileSAM 146 ms）`);
   state.latencies.push(total); if (state.latencies.length > 40) state.latencies.shift(); spark();
 }
 function pushRun(r) {

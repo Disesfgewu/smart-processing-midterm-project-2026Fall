@@ -1,0 +1,1782 @@
+{
+  "image": "data/samples/cats.jpg",
+  "image_size": [
+    640,
+    480
+  ],
+  "power_mode": "MAXN_SUPER (nvpmodel 2)",
+  "date": "2026-11-04 14:28:18",
+  "thresholds": [
+    0.01,
+    0.03,
+    0.05,
+    0.1
+  ],
+  "gt_note": "cats.jpg = COCO val2017 000000039769：2 隻貓 + 2 個遙控器（人工目視，未載入標註檔）",
+  "configs": {
+    "mobilesam/plain": {
+      "sam_encoder": "mobilesam",
+      "prompt_set": "plain",
+      "queries": [
+        "a cat",
+        "a remote control"
+      ],
+      "best_scores": {
+        "cat": 0.6606,
+        "remote control": 0.4439
+      },
+      "stable_across_runs": true,
+      "summary_by_threshold": {
+        "0.01": {
+          "count": {
+            "cat": 21,
+            "remote control": 8
+          },
+          "mean_score": 0.0929,
+          "mean_sam_iou": 0.8949
+        },
+        "0.03": {
+          "count": {
+            "cat": 9,
+            "remote control": 2
+          },
+          "mean_score": 0.2161,
+          "mean_sam_iou": 0.92
+        },
+        "0.05": {
+          "count": {
+            "cat": 6,
+            "remote control": 2
+          },
+          "mean_score": 0.2828,
+          "mean_sam_iou": 0.9286
+        },
+        "0.1": {
+          "count": {
+            "cat": 2,
+            "remote control": 2
+          },
+          "mean_score": 0.4961,
+          "mean_sam_iou": 0.9695
+        }
+      },
+      "detections": [
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.6606,
+          "sam_iou": 0.944,
+          "area_px": 50024,
+          "box": [
+            5.3,
+            53.3,
+            320.6,
+            470.2
+          ],
+          "primary": true
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.6241,
+          "sam_iou": 0.9859,
+          "area_px": 58220,
+          "box": [
+            304.4,
+            16.6,
+            641.2,
+            394.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.4439,
+          "sam_iou": 0.9705,
+          "area_px": 4121,
+          "box": [
+            38.0,
+            71.7,
+            178.3,
+            116.4
+          ],
+          "primary": true
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.256,
+          "sam_iou": 0.9777,
+          "area_px": 1975,
+          "box": [
+            335.3,
+            74.2,
+            370.9,
+            187.4
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0779,
+          "sam_iou": 0.9557,
+          "area_px": 2402,
+          "box": [
+            108.1,
+            283.6,
+            215.3,
+            350.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0736,
+          "sam_iou": 0.7757,
+          "area_px": 137949,
+          "box": [
+            10.6,
+            26.0,
+            643.8,
+            480.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0704,
+          "sam_iou": 0.9016,
+          "area_px": 17719,
+          "box": [
+            348.8,
+            189.5,
+            527.5,
+            364.7
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0558,
+          "sam_iou": 0.9176,
+          "area_px": 3602,
+          "box": [
+            218.1,
+            154.2,
+            316.6,
+            240.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.047,
+          "sam_iou": 0.9191,
+          "area_px": 8607,
+          "box": [
+            351.9,
+            251.2,
+            474.4,
+            358.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0349,
+          "sam_iou": 0.9535,
+          "area_px": 2428,
+          "box": [
+            83.9,
+            282.7,
+            232.3,
+            395.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.033,
+          "sam_iou": 0.8191,
+          "area_px": 8429,
+          "box": [
+            183.0,
+            52.9,
+            315.8,
+            178.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.0291,
+          "sam_iou": 0.8423,
+          "area_px": 1901,
+          "box": [
+            51.5,
+            77.9,
+            128.5,
+            108.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.0272,
+          "sam_iou": 0.8757,
+          "area_px": 1112,
+          "box": [
+            266.2,
+            188.3,
+            306.2,
+            237.5
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0266,
+          "sam_iou": 0.803,
+          "area_px": 492,
+          "box": [
+            73.8,
+            77.4,
+            112.2,
+            102.0
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0225,
+          "sam_iou": 0.9109,
+          "area_px": 26284,
+          "box": [
+            100.2,
+            51.7,
+            321.6,
+            283.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0222,
+          "sam_iou": 0.9652,
+          "area_px": 25860,
+          "box": [
+            16.8,
+            184.6,
+            185.6,
+            468.3
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0213,
+          "sam_iou": 0.8322,
+          "area_px": 31973,
+          "box": [
+            18.1,
+            99.7,
+            221.1,
+            373.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.0191,
+          "sam_iou": 0.8548,
+          "area_px": 1695,
+          "box": [
+            79.0,
+            75.7,
+            148.5,
+            105.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.0185,
+          "sam_iou": 0.8537,
+          "area_px": 1387,
+          "box": [
+            336.2,
+            87.8,
+            355.6,
+            180.7
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0165,
+          "sam_iou": 0.9366,
+          "area_px": 45476,
+          "box": [
+            350.6,
+            35.9,
+            538.1,
+            333.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0153,
+          "sam_iou": 0.9372,
+          "area_px": 4244,
+          "box": [
+            31.4,
+            285.9,
+            230.3,
+            463.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0147,
+          "sam_iou": 0.8344,
+          "area_px": 4689,
+          "box": [
+            516.9,
+            48.5,
+            643.1,
+            143.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0145,
+          "sam_iou": 0.6999,
+          "area_px": 2334,
+          "box": [
+            474.1,
+            28.9,
+            648.8,
+            106.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0143,
+          "sam_iou": 0.9497,
+          "area_px": 32778,
+          "box": [
+            363.1,
+            24.6,
+            644.4,
+            210.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.012,
+          "sam_iou": 0.8951,
+          "area_px": 5414,
+          "box": [
+            482.5,
+            245.2,
+            581.2,
+            369.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0116,
+          "sam_iou": 0.9035,
+          "area_px": 16502,
+          "box": [
+            370.6,
+            21.2,
+            640.0,
+            123.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.0102,
+          "sam_iou": 0.9024,
+          "area_px": 962,
+          "box": [
+            572.5,
+            52.4,
+            636.9,
+            84.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0101,
+          "sam_iou": 0.9009,
+          "area_px": 5265,
+          "box": [
+            27.8,
+            307.3,
+            105.7,
+            474.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.01,
+          "sam_iou": 0.9359,
+          "area_px": 11693,
+          "box": [
+            -2.2,
+            42.2,
+            424.1,
+            136.1
+          ],
+          "primary": false
+        }
+      ]
+    },
+    "mobilesam/template": {
+      "sam_encoder": "mobilesam",
+      "prompt_set": "template",
+      "queries": [
+        "a photo of a cat",
+        "a photo of a remote control"
+      ],
+      "best_scores": {
+        "cat": 0.6504,
+        "remote control": 0.3996
+      },
+      "stable_across_runs": true,
+      "summary_by_threshold": {
+        "0.01": {
+          "count": {
+            "cat": 21,
+            "remote control": 6
+          },
+          "mean_score": 0.0948,
+          "mean_sam_iou": 0.8932
+        },
+        "0.03": {
+          "count": {
+            "cat": 9,
+            "remote control": 2
+          },
+          "mean_score": 0.2075,
+          "mean_sam_iou": 0.92
+        },
+        "0.05": {
+          "count": {
+            "cat": 6,
+            "remote control": 2
+          },
+          "mean_score": 0.2707,
+          "mean_sam_iou": 0.9286
+        },
+        "0.1": {
+          "count": {
+            "cat": 2,
+            "remote control": 2
+          },
+          "mean_score": 0.4767,
+          "mean_sam_iou": 0.9695
+        }
+      },
+      "detections": [
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.6504,
+          "sam_iou": 0.944,
+          "area_px": 50024,
+          "box": [
+            5.3,
+            53.3,
+            320.6,
+            470.2
+          ],
+          "primary": true
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.6173,
+          "sam_iou": 0.9859,
+          "area_px": 58220,
+          "box": [
+            304.4,
+            16.6,
+            641.2,
+            394.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.3996,
+          "sam_iou": 0.9705,
+          "area_px": 4121,
+          "box": [
+            38.0,
+            71.7,
+            178.3,
+            116.4
+          ],
+          "primary": true
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.2397,
+          "sam_iou": 0.9777,
+          "area_px": 1975,
+          "box": [
+            335.3,
+            74.2,
+            370.9,
+            187.4
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0711,
+          "sam_iou": 0.9557,
+          "area_px": 2402,
+          "box": [
+            108.1,
+            283.6,
+            215.3,
+            350.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0696,
+          "sam_iou": 0.9016,
+          "area_px": 17719,
+          "box": [
+            348.8,
+            189.5,
+            527.5,
+            364.7
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.063,
+          "sam_iou": 0.7757,
+          "area_px": 137949,
+          "box": [
+            10.6,
+            26.0,
+            643.8,
+            480.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0549,
+          "sam_iou": 0.9176,
+          "area_px": 3602,
+          "box": [
+            218.1,
+            154.2,
+            316.6,
+            240.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0485,
+          "sam_iou": 0.9191,
+          "area_px": 8607,
+          "box": [
+            351.9,
+            251.2,
+            474.4,
+            358.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0347,
+          "sam_iou": 0.8191,
+          "area_px": 8429,
+          "box": [
+            183.0,
+            52.9,
+            315.8,
+            178.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0334,
+          "sam_iou": 0.9535,
+          "area_px": 2428,
+          "box": [
+            83.9,
+            282.7,
+            232.3,
+            395.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.0257,
+          "sam_iou": 0.8423,
+          "area_px": 1901,
+          "box": [
+            51.5,
+            77.9,
+            128.5,
+            108.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.0255,
+          "sam_iou": 0.8757,
+          "area_px": 1112,
+          "box": [
+            266.2,
+            188.3,
+            306.2,
+            237.5
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0229,
+          "sam_iou": 0.9652,
+          "area_px": 25860,
+          "box": [
+            16.8,
+            184.6,
+            185.6,
+            468.3
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0223,
+          "sam_iou": 0.803,
+          "area_px": 492,
+          "box": [
+            73.8,
+            77.4,
+            112.2,
+            102.0
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0219,
+          "sam_iou": 0.8322,
+          "area_px": 31973,
+          "box": [
+            18.1,
+            99.7,
+            221.1,
+            373.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0196,
+          "sam_iou": 0.9109,
+          "area_px": 26284,
+          "box": [
+            100.2,
+            51.7,
+            321.6,
+            283.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0163,
+          "sam_iou": 0.9366,
+          "area_px": 45476,
+          "box": [
+            350.6,
+            35.9,
+            538.1,
+            333.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0159,
+          "sam_iou": 0.8344,
+          "area_px": 4689,
+          "box": [
+            516.9,
+            48.5,
+            643.1,
+            143.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.0156,
+          "sam_iou": 0.8548,
+          "area_px": 1695,
+          "box": [
+            79.0,
+            75.7,
+            148.5,
+            105.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0147,
+          "sam_iou": 0.9497,
+          "area_px": 32778,
+          "box": [
+            363.1,
+            24.6,
+            644.4,
+            210.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.0146,
+          "sam_iou": 0.8537,
+          "area_px": 1387,
+          "box": [
+            336.2,
+            87.8,
+            355.6,
+            180.7
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0144,
+          "sam_iou": 0.9372,
+          "area_px": 4244,
+          "box": [
+            31.4,
+            285.9,
+            230.3,
+            463.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0142,
+          "sam_iou": 0.6999,
+          "area_px": 2334,
+          "box": [
+            474.1,
+            28.9,
+            648.8,
+            106.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0125,
+          "sam_iou": 0.8951,
+          "area_px": 5414,
+          "box": [
+            482.5,
+            245.2,
+            581.2,
+            369.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0118,
+          "sam_iou": 0.9035,
+          "area_px": 16502,
+          "box": [
+            370.6,
+            21.2,
+            640.0,
+            123.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.01,
+          "sam_iou": 0.9009,
+          "area_px": 5265,
+          "box": [
+            27.8,
+            307.3,
+            105.7,
+            474.1
+          ],
+          "primary": false
+        }
+      ]
+    },
+    "nanosam/plain": {
+      "sam_encoder": "nanosam",
+      "prompt_set": "plain",
+      "queries": [
+        "a cat",
+        "a remote control"
+      ],
+      "best_scores": {
+        "cat": 0.6606,
+        "remote control": 0.4439
+      },
+      "stable_across_runs": true,
+      "summary_by_threshold": {
+        "0.01": {
+          "count": {
+            "cat": 21,
+            "remote control": 8
+          },
+          "mean_score": 0.0929,
+          "mean_sam_iou": 0.6942
+        },
+        "0.03": {
+          "count": {
+            "cat": 9,
+            "remote control": 2
+          },
+          "mean_score": 0.2161,
+          "mean_sam_iou": 0.6888
+        },
+        "0.05": {
+          "count": {
+            "cat": 6,
+            "remote control": 2
+          },
+          "mean_score": 0.2828,
+          "mean_sam_iou": 0.6872
+        },
+        "0.1": {
+          "count": {
+            "cat": 2,
+            "remote control": 2
+          },
+          "mean_score": 0.4961,
+          "mean_sam_iou": 0.6943
+        }
+      },
+      "detections": [
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.6606,
+          "sam_iou": 0.668,
+          "area_px": 51554,
+          "box": [
+            5.3,
+            53.3,
+            320.6,
+            470.2
+          ],
+          "primary": true
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.6241,
+          "sam_iou": 0.7021,
+          "area_px": 59142,
+          "box": [
+            304.4,
+            16.6,
+            641.2,
+            394.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.4439,
+          "sam_iou": 0.7012,
+          "area_px": 4134,
+          "box": [
+            38.0,
+            71.7,
+            178.3,
+            116.4
+          ],
+          "primary": true
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.256,
+          "sam_iou": 0.7059,
+          "area_px": 1906,
+          "box": [
+            335.3,
+            74.2,
+            370.9,
+            187.4
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0779,
+          "sam_iou": 0.6884,
+          "area_px": 2505,
+          "box": [
+            108.1,
+            283.6,
+            215.3,
+            350.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0736,
+          "sam_iou": 0.6085,
+          "area_px": 164847,
+          "box": [
+            10.6,
+            26.0,
+            643.8,
+            480.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0704,
+          "sam_iou": 0.694,
+          "area_px": 18515,
+          "box": [
+            348.8,
+            189.5,
+            527.5,
+            364.7
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0558,
+          "sam_iou": 0.7294,
+          "area_px": 3781,
+          "box": [
+            218.1,
+            154.2,
+            316.6,
+            240.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.047,
+          "sam_iou": 0.6998,
+          "area_px": 8564,
+          "box": [
+            351.9,
+            251.2,
+            474.4,
+            358.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0349,
+          "sam_iou": 0.6795,
+          "area_px": 3166,
+          "box": [
+            83.9,
+            282.7,
+            232.3,
+            395.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.033,
+          "sam_iou": 0.6999,
+          "area_px": 8183,
+          "box": [
+            183.0,
+            52.9,
+            315.8,
+            178.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.0291,
+          "sam_iou": 0.707,
+          "area_px": 2807,
+          "box": [
+            51.5,
+            77.9,
+            128.5,
+            108.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.0272,
+          "sam_iou": 0.7224,
+          "area_px": 1074,
+          "box": [
+            266.2,
+            188.3,
+            306.2,
+            237.5
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0266,
+          "sam_iou": 0.7119,
+          "area_px": 1035,
+          "box": [
+            73.8,
+            77.4,
+            112.2,
+            102.0
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0225,
+          "sam_iou": 0.6969,
+          "area_px": 16782,
+          "box": [
+            100.2,
+            51.7,
+            321.6,
+            283.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0222,
+          "sam_iou": 0.6789,
+          "area_px": 16276,
+          "box": [
+            16.8,
+            184.6,
+            185.6,
+            468.3
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0213,
+          "sam_iou": 0.6528,
+          "area_px": 32505,
+          "box": [
+            18.1,
+            99.7,
+            221.1,
+            373.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.0191,
+          "sam_iou": 0.7283,
+          "area_px": 2446,
+          "box": [
+            79.0,
+            75.7,
+            148.5,
+            105.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.0185,
+          "sam_iou": 0.6906,
+          "area_px": 1489,
+          "box": [
+            336.2,
+            87.8,
+            355.6,
+            180.7
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0165,
+          "sam_iou": 0.6543,
+          "area_px": 47913,
+          "box": [
+            350.6,
+            35.9,
+            538.1,
+            333.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0153,
+          "sam_iou": 0.7111,
+          "area_px": 6179,
+          "box": [
+            31.4,
+            285.9,
+            230.3,
+            463.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0147,
+          "sam_iou": 0.7374,
+          "area_px": 4739,
+          "box": [
+            516.9,
+            48.5,
+            643.1,
+            143.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0145,
+          "sam_iou": 0.7133,
+          "area_px": 1780,
+          "box": [
+            474.1,
+            28.9,
+            648.8,
+            106.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0143,
+          "sam_iou": 0.6738,
+          "area_px": 30520,
+          "box": [
+            363.1,
+            24.6,
+            644.4,
+            210.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.012,
+          "sam_iou": 0.7142,
+          "area_px": 4621,
+          "box": [
+            482.5,
+            245.2,
+            581.2,
+            369.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0116,
+          "sam_iou": 0.6914,
+          "area_px": 9575,
+          "box": [
+            370.6,
+            21.2,
+            640.0,
+            123.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.0102,
+          "sam_iou": 0.7109,
+          "area_px": 924,
+          "box": [
+            572.5,
+            52.4,
+            636.9,
+            84.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a cat",
+          "score": 0.0101,
+          "sam_iou": 0.6943,
+          "area_px": 3766,
+          "box": [
+            27.8,
+            307.3,
+            105.7,
+            474.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a remote control",
+          "score": 0.01,
+          "sam_iou": 0.665,
+          "area_px": 8816,
+          "box": [
+            -2.2,
+            42.2,
+            424.1,
+            136.1
+          ],
+          "primary": false
+        }
+      ]
+    },
+    "nanosam/template": {
+      "sam_encoder": "nanosam",
+      "prompt_set": "template",
+      "queries": [
+        "a photo of a cat",
+        "a photo of a remote control"
+      ],
+      "best_scores": {
+        "cat": 0.6504,
+        "remote control": 0.3996
+      },
+      "stable_across_runs": true,
+      "summary_by_threshold": {
+        "0.01": {
+          "count": {
+            "cat": 21,
+            "remote control": 6
+          },
+          "mean_score": 0.0948,
+          "mean_sam_iou": 0.6946
+        },
+        "0.03": {
+          "count": {
+            "cat": 9,
+            "remote control": 2
+          },
+          "mean_score": 0.2075,
+          "mean_sam_iou": 0.6888
+        },
+        "0.05": {
+          "count": {
+            "cat": 6,
+            "remote control": 2
+          },
+          "mean_score": 0.2707,
+          "mean_sam_iou": 0.6872
+        },
+        "0.1": {
+          "count": {
+            "cat": 2,
+            "remote control": 2
+          },
+          "mean_score": 0.4767,
+          "mean_sam_iou": 0.6943
+        }
+      },
+      "detections": [
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.6504,
+          "sam_iou": 0.668,
+          "area_px": 51554,
+          "box": [
+            5.3,
+            53.3,
+            320.6,
+            470.2
+          ],
+          "primary": true
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.6173,
+          "sam_iou": 0.7021,
+          "area_px": 59142,
+          "box": [
+            304.4,
+            16.6,
+            641.2,
+            394.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.3996,
+          "sam_iou": 0.7012,
+          "area_px": 4134,
+          "box": [
+            38.0,
+            71.7,
+            178.3,
+            116.4
+          ],
+          "primary": true
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.2397,
+          "sam_iou": 0.7059,
+          "area_px": 1906,
+          "box": [
+            335.3,
+            74.2,
+            370.9,
+            187.4
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0711,
+          "sam_iou": 0.6884,
+          "area_px": 2505,
+          "box": [
+            108.1,
+            283.6,
+            215.3,
+            350.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0696,
+          "sam_iou": 0.694,
+          "area_px": 18515,
+          "box": [
+            348.8,
+            189.5,
+            527.5,
+            364.7
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.063,
+          "sam_iou": 0.6085,
+          "area_px": 164847,
+          "box": [
+            10.6,
+            26.0,
+            643.8,
+            480.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0549,
+          "sam_iou": 0.7294,
+          "area_px": 3781,
+          "box": [
+            218.1,
+            154.2,
+            316.6,
+            240.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0485,
+          "sam_iou": 0.6998,
+          "area_px": 8564,
+          "box": [
+            351.9,
+            251.2,
+            474.4,
+            358.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0347,
+          "sam_iou": 0.6999,
+          "area_px": 8183,
+          "box": [
+            183.0,
+            52.9,
+            315.8,
+            178.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0334,
+          "sam_iou": 0.6795,
+          "area_px": 3166,
+          "box": [
+            83.9,
+            282.7,
+            232.3,
+            395.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.0257,
+          "sam_iou": 0.707,
+          "area_px": 2807,
+          "box": [
+            51.5,
+            77.9,
+            128.5,
+            108.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.0255,
+          "sam_iou": 0.7224,
+          "area_px": 1074,
+          "box": [
+            266.2,
+            188.3,
+            306.2,
+            237.5
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0229,
+          "sam_iou": 0.6789,
+          "area_px": 16276,
+          "box": [
+            16.8,
+            184.6,
+            185.6,
+            468.3
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0223,
+          "sam_iou": 0.7119,
+          "area_px": 1035,
+          "box": [
+            73.8,
+            77.4,
+            112.2,
+            102.0
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0219,
+          "sam_iou": 0.6528,
+          "area_px": 32505,
+          "box": [
+            18.1,
+            99.7,
+            221.1,
+            373.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0196,
+          "sam_iou": 0.6969,
+          "area_px": 16782,
+          "box": [
+            100.2,
+            51.7,
+            321.6,
+            283.6
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0163,
+          "sam_iou": 0.6543,
+          "area_px": 47913,
+          "box": [
+            350.6,
+            35.9,
+            538.1,
+            333.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0159,
+          "sam_iou": 0.7374,
+          "area_px": 4739,
+          "box": [
+            516.9,
+            48.5,
+            643.1,
+            143.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.0156,
+          "sam_iou": 0.7283,
+          "area_px": 2446,
+          "box": [
+            79.0,
+            75.7,
+            148.5,
+            105.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0147,
+          "sam_iou": 0.6738,
+          "area_px": 30520,
+          "box": [
+            363.1,
+            24.6,
+            644.4,
+            210.9
+          ],
+          "primary": false
+        },
+        {
+          "label": "remote control",
+          "query": "a photo of a remote control",
+          "score": 0.0146,
+          "sam_iou": 0.6906,
+          "area_px": 1489,
+          "box": [
+            336.2,
+            87.8,
+            355.6,
+            180.7
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0144,
+          "sam_iou": 0.7111,
+          "area_px": 6179,
+          "box": [
+            31.4,
+            285.9,
+            230.3,
+            463.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0142,
+          "sam_iou": 0.7133,
+          "area_px": 1780,
+          "box": [
+            474.1,
+            28.9,
+            648.8,
+            106.1
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0125,
+          "sam_iou": 0.7142,
+          "area_px": 4621,
+          "box": [
+            482.5,
+            245.2,
+            581.2,
+            369.8
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.0118,
+          "sam_iou": 0.6914,
+          "area_px": 9575,
+          "box": [
+            370.6,
+            21.2,
+            640.0,
+            123.2
+          ],
+          "primary": false
+        },
+        {
+          "label": "cat",
+          "query": "a photo of a cat",
+          "score": 0.01,
+          "sam_iou": 0.6943,
+          "area_px": 3766,
+          "box": [
+            27.8,
+            307.3,
+            105.7,
+            474.1
+          ],
+          "primary": false
+        }
+      ]
+    }
+  }
+}

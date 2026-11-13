@@ -1,0 +1,101 @@
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/.venv-jetson/lib/python3.10/site-packages/timm/models/layers/__init__.py:48: FutureWarning: Importing from timm.models.layers is deprecated, please import via timm.layers
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.layers", FutureWarning)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/.venv-jetson/lib/python3.10/site-packages/timm/models/registry.py:4: FutureWarning: Importing from timm.models.registry is deprecated, please import via timm.models
+  warnings.warn(f"Importing from {__name__} is deprecated, please import via timm.models", FutureWarning)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/third_party/nanosam/nanosam/mobile_sam/modeling/tiny_vit_sam.py:656: UserWarning: Overwriting tiny_vit_5m_224 in registry with nanosam.mobile_sam.modeling.tiny_vit_sam.tiny_vit_5m_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  return register_model(fn_wrapper)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/third_party/nanosam/nanosam/mobile_sam/modeling/tiny_vit_sam.py:656: UserWarning: Overwriting tiny_vit_11m_224 in registry with nanosam.mobile_sam.modeling.tiny_vit_sam.tiny_vit_11m_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  return register_model(fn_wrapper)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/third_party/nanosam/nanosam/mobile_sam/modeling/tiny_vit_sam.py:656: UserWarning: Overwriting tiny_vit_21m_224 in registry with nanosam.mobile_sam.modeling.tiny_vit_sam.tiny_vit_21m_224. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  return register_model(fn_wrapper)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/third_party/nanosam/nanosam/mobile_sam/modeling/tiny_vit_sam.py:656: UserWarning: Overwriting tiny_vit_21m_384 in registry with nanosam.mobile_sam.modeling.tiny_vit_sam.tiny_vit_21m_384. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  return register_model(fn_wrapper)
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/third_party/nanosam/nanosam/mobile_sam/modeling/tiny_vit_sam.py:656: UserWarning: Overwriting tiny_vit_21m_512 in registry with nanosam.mobile_sam.modeling.tiny_vit_sam.tiny_vit_21m_512. This is because the name being registered conflicts with an existing name. Please check if this is not expected.
+  return register_model(fn_wrapper)
+[server] 埠 8000 已被佔用，改用 8001（要固定埠請設 PORT=…）
+[server] 載入模型中（Jetson 約 10~30 秒）… 網頁：區網內其他裝置開 http://140.116.86.214:8001（本機：http://127.0.0.1:8001）。注意：沒有登入驗證，只在可信任的網路使用
+2026-11-01 19:43:46,987 | INFO  | - | [lifespan.startup]: input=(), output=loading models
+/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/.venv-jetson/lib/python3.10/site-packages/torch/functional.py:554: UserWarning: torch.meshgrid: in an upcoming release, it will be required to pass the indexing argument. (Triggered internally at /opt/pytorch/aten/src/ATen/native/TensorShape.cpp:4317.)
+  return _VF.meshgrid(tensors, **kwargs)  # type: ignore[attr-defined]
+2026-11-01 19:43:51,743 | INFO  | - | [NanoSamPredictor.__init__]: input=(backend=trt, encoder=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/resnet18_image_encoder.selftrain.engine, decoder=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/mobile_sam_mask_decoder.engine), output=provider=TensorRT, elapsed=528ms
+2026-11-01 19:43:51,856 | INFO  | - | [memutil.drop_file_cache]: input=(23 files), output=MemFree 615MB -> 1458MB, Cached 4110MB -> 3261MB
+2026-11-01 19:43:51,857 | INFO  | - | [OpenVocabSegmenter.__init__]: input=(owl=google/owlvit-base-patch32, engine=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/owl_image_encoder_patch32.engine, sam=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/models/mobile_sam.pt, device=cuda), output=models loaded in 4.87s
+2026-11-01 19:43:52,116 | INFO  | - | [OpenVocabSegmenter.set_prompts]: input=(prompts=['an object'], groups={}), output=text_encodings(1, 512) for 1 queries, elapsed=248.6ms
+2026-11-01 19:43:52,117 | INFO  | - | [OpenVocabSegmenter.__call__]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['an object'], threshold=0.01, nms_iou=0.5, with_masks=True, top_per_group=False)
+[11/01/2026-19:43:52] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+2026-11-01 19:43:52,223 | INFO  | - | [OwlPredictor.predict]: input=(image=(640, 480), threshold=0.01, queries=1), output=0 raw boxes, labels=[], best_scores={'an object': None}
+2026-11-01 19:43:52,223 | INFO  | - | [torchvision.nms]: input=(0 boxes, iou=0.5), output=0 boxes kept
+2026-11-01 19:43:52,224 | INFO  | - | [OpenVocabSegmenter.primary]: input=(groups=1, detections=0), output={}
+2026-11-01 19:43:52,224 | INFO  | - | [OpenVocabSegmenter.__call__]: output=0 detections, owl=107.3ms, sam=0.0ms
+2026-11-01 19:43:52,807 | INFO  | - | [OpenVocabSegmenter.__call__]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['an object'], threshold=0.01, nms_iou=0.5, with_masks=True, top_per_group=False)
+2026-11-01 19:43:52,830 | INFO  | - | [OwlPredictor.predict]: input=(image=(640, 480), threshold=0.01, queries=1), output=0 raw boxes, labels=[], best_scores={'an object': None}
+2026-11-01 19:43:52,830 | INFO  | - | [torchvision.nms]: input=(0 boxes, iou=0.5), output=0 boxes kept
+2026-11-01 19:43:52,831 | INFO  | - | [OpenVocabSegmenter.primary]: input=(groups=1, detections=0), output={}
+2026-11-01 19:43:52,831 | INFO  | - | [OpenVocabSegmenter.__call__]: output=0 detections, owl=23.1ms, sam=0.0ms
+2026-11-01 19:43:53,061 | INFO  | - | [OpenVocabSegmenter.__call__]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['an object'], threshold=0.01, nms_iou=0.5, with_masks=True, top_per_group=False)
+2026-11-01 19:43:53,083 | INFO  | - | [OwlPredictor.predict]: input=(image=(640, 480), threshold=0.01, queries=1), output=0 raw boxes, labels=[], best_scores={'an object': None}
+2026-11-01 19:43:53,084 | INFO  | - | [torchvision.nms]: input=(0 boxes, iou=0.5), output=0 boxes kept
+2026-11-01 19:43:53,084 | INFO  | - | [OpenVocabSegmenter.primary]: input=(groups=1, detections=0), output={}
+2026-11-01 19:43:53,084 | INFO  | - | [OpenVocabSegmenter.__call__]: output=0 detections, owl=22.4ms, sam=0.0ms
+2026-11-01 19:43:53,309 | INFO  | - | [SegmentService.warmup]: input=(n=3), output=done in 1452ms
+2026-11-01 19:43:53,310 | INFO  | - | [SegmentService.__init__]: input=(sam_checkpoint=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/models/mobile_sam.pt, owl_engine=/home/SMS_jetson_g4/midterm_P76154278/smart-processing-midterm-project-2026Fall/data/owl_image_encoder_patch32.engine), output=loaded in 4.9s on Orin
+2026-11-01 19:43:53,310 | INFO  | - | [OpenVocabSegmenter.set_sam_encoder]: input=(name=nanosam), output=active encoder = NanoSamPredictor
+[server] 後端：OWL = TensorRT 引擎 owl_image_encoder_patch32.engine | SAM = nanosam
+2026-11-01 19:43:53,312 | INFO  | - | [lifespan.startup]: input=(), output=ready
+[server] 就緒，可以開啟網頁了。
+2026-11-01 19:43:55,044 | INFO  | 2d203609 | [API POST /api/hyde/expand]: input=(query={}, content_type=multipart/form-data; boundary=------------------------50b35576e9dd05e9, length=152)
+2026-11-01 19:44:03,226 | INFO  | 2d203609 | [hyde.expand_prompts]: input=(concept='螺絲', n=5, model=qwen2.5:1.5b), output=['a screw', 'a fastener', 'a bolt', 'a machine screw', 'a screwdriver'], dropped=[], elapsed=8178ms
+2026-11-01 19:44:05,029 | INFO  | 2d203609 | [hyde.expand_prompts]: input=(concept='貓', n=5, model=qwen2.5:1.5b), output=['a cat', 'a feline', 'a domestic cat', 'a small carnivore', 'a furry feline'], dropped=[], elapsed=1803ms
+2026-11-01 19:44:05,029 | INFO  | 2d203609 | [api.hyde.expand]: input=(prompts='螺絲,貓'), output={groups: {螺絲: ['a screw', 'a fastener', 'a bolt', 'a machine screw', 'a screwdriver'], 貓: ['a cat', 'a feline', 'a domestic cat',…(len=160), model: 'qwen2.5:1.5b', elapsed_ms: 9981, cached: {螺絲: False, 貓: False}, dropped: {螺絲: [], 貓: []}}, elapsed=9981.5ms
+2026-11-01 19:44:05,030 | INFO  | 2d203609 | [API POST /api/hyde/expand]: output=(status=200, elapsed=9986.2ms)
+2026-11-01 19:44:05,116 | INFO  | 82daaf39 | [API POST /api/hyde/expand]: input=(query={}, content_type=multipart/form-data; boundary=------------------------e59c3066d1c86c39, length=149)
+2026-11-01 19:44:07,050 | INFO  | 82daaf39 | [hyde.expand_prompts]: input=(concept='hex nut', n=5, model=qwen2.5:1.5b), output=['hex nut', 'a hex nut', 'a hex bolt', 'a hexagonal bolt', 'a hex head bolt', 'a hexagonal screw'], dropped=[], elapsed=1932ms
+2026-11-01 19:44:07,050 | INFO  | 82daaf39 | [api.hyde.expand]: input=(prompts='hex nut'), output={groups: {hex nut: ['hex nut', 'a hex nut', 'a hex bolt', 'a hexagonal bolt', 'a hex head bolt', 'a hexagonal screw']}, model: 'qwen2.5:1.5b', elapsed_ms: 1932, cached: {hex nut: False}, dropped: {hex nut: []}}, elapsed=1932.3ms
+2026-11-01 19:44:07,051 | INFO  | 82daaf39 | [API POST /api/hyde/expand]: output=(status=200, elapsed=1935.9ms)
+2026-11-01 19:44:07,149 | INFO  | ca495f7a | [API POST /api/segment]: input=(query={}, content_type=multipart/form-data; boundary=------------------------9b07c1b18a071755, length=173628)
+2026-11-01 19:44:07,171 | INFO  | ca495f7a | [service.SegmentService.decode_image]: input=(data=bytes(len=173131)), output=PIL.Image(size=(640, 480), mode=RGB), elapsed=16.9ms
+2026-11-01 19:44:07,172 | WARNING | ca495f7a | [SegmentService.hyde_groups]: input=(prompts=['a cat', '螺絲']), output=not expanded yet → original prompts (no LLM call on detection path)
+2026-11-01 19:44:07,206 | INFO  | ca495f7a | [OpenVocabSegmenter.set_prompts]: input=(prompts=['a cat', '螺絲'], groups={}), output=text_encodings(2, 512) for 2 queries, elapsed=34.1ms
+2026-11-01 19:44:07,207 | INFO  | ca495f7a | [OpenVocabSegmenter.__call__]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['a cat', '螺絲'], threshold=0.1, nms_iou=0.5, with_masks=True, top_per_group=False)
+2026-11-01 19:44:07,248 | INFO  | ca495f7a | [OwlPredictor.predict]: input=(image=(640, 480), threshold=0.1, queries=2), output=2 raw boxes, labels=['a cat'], best_scores={'a cat': 0.661, '螺絲': 0.04}
+2026-11-01 19:44:07,279 | INFO  | ca495f7a | [torchvision.nms]: input=(2 boxes, iou=0.5), output=2 boxes kept
+2026-11-01 19:44:07,280 | INFO  | ca495f7a | [OpenVocabSegmenter.primary]: input=(groups=2, detections=2), output={'a cat': {'query': 'a cat', 'score': 0.6606329083442688}}
+[11/01/2026-19:44:07] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+2026-11-01 19:44:07,432 | INFO  | ca495f7a | [SamPredictor.set_image]: input=(image=(640, 480)), output=image embedding ready, elapsed=151.7ms
+[11/01/2026-19:44:07] [TRT] [W] Using default stream in enqueueV3() may lead to performance issues due to additional calls to cudaStreamSynchronize() by TensorRT to ensure correct synchronization. Please use non-default stream instead.
+2026-11-01 19:44:07,447 | INFO  | ca495f7a | [SamPredictor.predict]: input=(label=a cat, query='a cat', score=0.66, box=[5, 53, 321, 470]), output=mask_area=51554px, sam_iou_pred=0.67
+2026-11-01 19:44:07,459 | INFO  | ca495f7a | [SamPredictor.predict]: input=(label=a cat, query='a cat', score=0.62, box=[304, 17, 641, 394]), output=mask_area=59142px, sam_iou_pred=0.70
+2026-11-01 19:44:07,459 | INFO  | ca495f7a | [OpenVocabSegmenter.__call__]: output=2 detections, owl=73.0ms, sam=179.0ms
+2026-11-01 19:44:07,501 | INFO  | ca495f7a | [service.SegmentService.run]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['a cat', '螺絲'], threshold=0.1, nms_iou=0.5, use_hyde=True, with_masks=True, top_per_group=False), output={image: {width: 640, height: 480, original_width: 640, original_height: 480}, prompts: ['a cat', '螺絲'], threshold: 0.1, nms_iou: 0.5, with_masks: True, top_per_group: False, hyde: {requested: True, applied: False, note: '尚未擴展這組提示詞（請先按「擴展提示詞」；偵測期間不會呼叫 LLM）', expanded: None, model: 'qwen2.5:1.5b', ela…(len=782), elapsed=328.8ms
+2026-11-01 19:44:07,502 | INFO  | ca495f7a | [api.segment]: input=(image=UploadFile(filename=cats.jpg), prompts='a cat,螺絲', threshold=0.1, nms_iou=0.5, use_hyde=True, quiet=False, with_masks=True, top_per_group=False), output={image: {width: 640, height: 480, original_width: 640, original_height: 480}, prompts: ['a cat', '螺絲'], threshold: 0.1, nms_iou: 0.5, with_masks: True, top_per_group: False, hyde: {requested: True, applied: False, note: '尚未擴展這組提示詞（請先按「擴展提示詞」；偵測期間不會呼叫 LLM）', expanded: None, model: 'qwen2.5:1.5b', ela…(len=782), elapsed=347.6ms
+2026-11-01 19:44:07,504 | INFO  | ca495f7a | [API POST /api/segment]: output=(status=200, elapsed=355.4ms)
+2026-11-01 19:44:07,531 | INFO  | 00bc2a42 | [API POST /api/segment]: input=(query={}, content_type=multipart/form-data; boundary=------------------------ae180efc3e50bf62, length=173628)
+2026-11-01 19:44:07,540 | INFO  | 00bc2a42 | [service.SegmentService.decode_image]: input=(data=bytes(len=173131)), output=PIL.Image(size=(640, 480), mode=RGB), elapsed=5.9ms
+2026-11-01 19:44:07,541 | WARNING | 00bc2a42 | [SegmentService.hyde_groups]: input=(prompts=['a cat', '螺絲']), output=not expanded yet → original prompts (no LLM call on detection path)
+2026-11-01 19:44:07,541 | INFO  | 00bc2a42 | [OpenVocabSegmenter.__call__]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['a cat', '螺絲'], threshold=0.1, nms_iou=0.5, with_masks=True, top_per_group=False)
+2026-11-01 19:44:07,566 | INFO  | 00bc2a42 | [OwlPredictor.predict]: input=(image=(640, 480), threshold=0.1, queries=2), output=2 raw boxes, labels=['a cat'], best_scores={'a cat': 0.661, '螺絲': 0.04}
+2026-11-01 19:44:07,567 | INFO  | 00bc2a42 | [torchvision.nms]: input=(2 boxes, iou=0.5), output=2 boxes kept
+2026-11-01 19:44:07,568 | INFO  | 00bc2a42 | [OpenVocabSegmenter.primary]: input=(groups=2, detections=2), output={'a cat': {'query': 'a cat', 'score': 0.6606329083442688}}
+2026-11-01 19:44:07,597 | INFO  | 00bc2a42 | [SamPredictor.set_image]: input=(image=(640, 480)), output=image embedding ready, elapsed=28.4ms
+2026-11-01 19:44:07,615 | INFO  | 00bc2a42 | [SamPredictor.predict]: input=(label=a cat, query='a cat', score=0.66, box=[5, 53, 321, 470]), output=mask_area=51554px, sam_iou_pred=0.67
+2026-11-01 19:44:07,626 | INFO  | 00bc2a42 | [SamPredictor.predict]: input=(label=a cat, query='a cat', score=0.62, box=[304, 17, 641, 394]), output=mask_area=59142px, sam_iou_pred=0.70
+2026-11-01 19:44:07,626 | INFO  | 00bc2a42 | [OpenVocabSegmenter.__call__]: output=2 detections, owl=26.8ms, sam=57.9ms
+2026-11-01 19:44:07,658 | INFO  | 00bc2a42 | [service.SegmentService.run]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['a cat', '螺絲'], threshold=0.1, nms_iou=0.5, use_hyde=True, with_masks=True, top_per_group=False), output={image: {width: 640, height: 480, original_width: 640, original_height: 480}, prompts: ['a cat', '螺絲'], threshold: 0.1, nms_iou: 0.5, with_masks: True, top_per_group: False, hyde: {requested: True, applied: False, note: '尚未擴展這組提示詞（請先按「擴展提示詞」；偵測期間不會呼叫 LLM）', expanded: None, model: 'qwen2.5:1.5b', ela…(len=782), elapsed=116.7ms
+2026-11-01 19:44:07,659 | INFO  | 00bc2a42 | [api.segment]: input=(image=UploadFile(filename=cats.jpg), prompts='a cat,螺絲', threshold=0.1, nms_iou=0.5, use_hyde=True, quiet=False, with_masks=True, top_per_group=False), output={image: {width: 640, height: 480, original_width: 640, original_height: 480}, prompts: ['a cat', '螺絲'], threshold: 0.1, nms_iou: 0.5, with_masks: True, top_per_group: False, hyde: {requested: True, applied: False, note: '尚未擴展這組提示詞（請先按「擴展提示詞」；偵測期間不會呼叫 LLM）', expanded: None, model: 'qwen2.5:1.5b', ela…(len=782), elapsed=124.3ms
+2026-11-01 19:44:07,661 | INFO  | 00bc2a42 | [API POST /api/segment]: output=(status=200, elapsed=129.9ms)
+2026-11-01 19:44:07,686 | INFO  | d1203aed | [API POST /api/segment]: input=(query={}, content_type=multipart/form-data; boundary=------------------------0b4962bad7c7001a, length=173628)
+2026-11-01 19:44:07,695 | INFO  | d1203aed | [service.SegmentService.decode_image]: input=(data=bytes(len=173131)), output=PIL.Image(size=(640, 480), mode=RGB), elapsed=6.1ms
+2026-11-01 19:44:07,696 | WARNING | d1203aed | [SegmentService.hyde_groups]: input=(prompts=['a cat', '螺絲']), output=not expanded yet → original prompts (no LLM call on detection path)
+2026-11-01 19:44:07,696 | INFO  | d1203aed | [OpenVocabSegmenter.__call__]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['a cat', '螺絲'], threshold=0.1, nms_iou=0.5, with_masks=True, top_per_group=False)
+2026-11-01 19:44:07,721 | INFO  | d1203aed | [OwlPredictor.predict]: input=(image=(640, 480), threshold=0.1, queries=2), output=2 raw boxes, labels=['a cat'], best_scores={'a cat': 0.661, '螺絲': 0.04}
+2026-11-01 19:44:07,722 | INFO  | d1203aed | [torchvision.nms]: input=(2 boxes, iou=0.5), output=2 boxes kept
+2026-11-01 19:44:07,723 | INFO  | d1203aed | [OpenVocabSegmenter.primary]: input=(groups=2, detections=2), output={'a cat': {'query': 'a cat', 'score': 0.6606329083442688}}
+2026-11-01 19:44:07,750 | INFO  | d1203aed | [SamPredictor.set_image]: input=(image=(640, 480)), output=image embedding ready, elapsed=26.8ms
+2026-11-01 19:44:07,767 | INFO  | d1203aed | [SamPredictor.predict]: input=(label=a cat, query='a cat', score=0.66, box=[5, 53, 321, 470]), output=mask_area=51554px, sam_iou_pred=0.67
+2026-11-01 19:44:07,779 | INFO  | d1203aed | [SamPredictor.predict]: input=(label=a cat, query='a cat', score=0.62, box=[304, 17, 641, 394]), output=mask_area=59142px, sam_iou_pred=0.70
+2026-11-01 19:44:07,779 | INFO  | d1203aed | [OpenVocabSegmenter.__call__]: output=2 detections, owl=26.5ms, sam=56.1ms
+2026-11-01 19:44:07,811 | INFO  | d1203aed | [service.SegmentService.run]: input=(image=PIL.Image(size=(640, 480), mode=RGB), prompts=['a cat', '螺絲'], threshold=0.1, nms_iou=0.5, use_hyde=True, with_masks=True, top_per_group=False), output={image: {width: 640, height: 480, original_width: 640, original_height: 480}, prompts: ['a cat', '螺絲'], threshold: 0.1, nms_iou: 0.5, with_masks: True, top_per_group: False, hyde: {requested: True, applied: False, note: '尚未擴展這組提示詞（請先按「擴展提示詞」；偵測期間不會呼叫 LLM）', expanded: None, model: 'qwen2.5:1.5b', ela…(len=782), elapsed=115.1ms
+2026-11-01 19:44:07,812 | INFO  | d1203aed | [api.segment]: input=(image=UploadFile(filename=cats.jpg), prompts='a cat,螺絲', threshold=0.1, nms_iou=0.5, use_hyde=True, quiet=False, with_masks=True, top_per_group=False), output={image: {width: 640, height: 480, original_width: 640, original_height: 480}, prompts: ['a cat', '螺絲'], threshold: 0.1, nms_iou: 0.5, with_masks: True, top_per_group: False, hyde: {requested: True, applied: False, note: '尚未擴展這組提示詞（請先按「擴展提示詞」；偵測期間不會呼叫 LLM）', expanded: None, model: 'qwen2.5:1.5b', ela…(len=782), elapsed=122.8ms
+2026-11-01 19:44:07,814 | INFO  | d1203aed | [API POST /api/segment]: output=(status=200, elapsed=128.2ms)
+2026-11-01 19:44:07,963 | INFO  | - | [CameraWorker.stop]: input=(), output=stopped (was_running=False)
+2026-11-01 19:44:07,963 | INFO  | - | [lifespan.shutdown]: input=(), output=bye

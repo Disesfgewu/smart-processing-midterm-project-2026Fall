@@ -1,0 +1,231 @@
+{
+ "data/samples/cats.jpg": {
+  "note": "COCO 39769：2 貓 + 2 遙控器（目視）",
+  "concepts": [
+   "cat",
+   "remote control"
+  ],
+  "gt": [
+   [
+    "cat",
+    [
+     5,
+     55,
+     320,
+     470
+    ]
+   ],
+   [
+    "cat",
+    [
+     303,
+     15,
+     640,
+     395
+    ]
+   ],
+   [
+    "remote control",
+    [
+     38,
+     70,
+     180,
+     118
+    ]
+   ],
+   [
+    "remote control",
+    [
+     335,
+     73,
+     372,
+     187
+    ]
+   ]
+  ]
+ },
+ "data/samples/pexels-muffin-4584612.jpg": {
+  "note": "電路板特寫（目視：電容 7＝上方深色高電容 3（其中 1 根被畫面上緣截斷）＋小銀色 4、方形電感 3；2026-11-10 補標上方兩根深色電容，原本漏標）",
+  "concepts": [
+   "capacitor",
+   "inductor",
+   "microchip"
+  ],
+  "gt": [
+   [
+    "capacitor",
+    [
+     650,
+     535,
+     785,
+     720
+    ]
+   ],
+   [
+    "capacitor",
+    [
+     775,
+     485,
+     910,
+     665
+    ]
+   ],
+   [
+    "capacitor",
+    [
+     1000,
+     375,
+     1145,
+     555
+    ]
+   ],
+   [
+    "capacitor",
+    [
+     410,
+     645,
+     550,
+     835
+    ]
+   ],
+   [
+    "capacitor",
+    [
+     235,
+     0,
+     430,
+     420
+    ]
+   ],
+   [
+    "inductor",
+    [
+     520,
+     350,
+     770,
+     620
+    ]
+   ],
+   [
+    "inductor",
+    [
+     175,
+     510,
+     425,
+     785
+    ]
+   ],
+   [
+    "inductor",
+    [
+     880,
+     210,
+     1120,
+     470
+    ]
+   ],
+   [
+    "capacitor",
+    [
+     545,
+     0,
+     730,
+     290
+    ]
+   ],
+   [
+    "capacitor",
+    [
+     830,
+     0,
+     990,
+     165
+    ]
+   ]
+  ]
+ },
+ "data/samples/pexels-cmrcn-29224614.jpg": {
+  "note": "焊接工廠（目視：1 位工人、1 個法蘭鋼管、頭上有天車）",
+  "concepts": [
+   "person",
+   "steel pipe",
+   "overhead crane"
+  ],
+  "gt": [
+   [
+    "person",
+    [
+     215,
+     520,
+     415,
+     960
+    ]
+   ],
+   [
+    "steel pipe",
+    [
+     275,
+     690,
+     485,
+     860
+    ]
+   ],
+   [
+    "steel pipe",
+    [
+     555,
+     832,
+     682,
+     990
+    ]
+   ],
+   [
+    "overhead crane",
+    [
+     0,
+     10,
+     650,
+     370
+    ]
+   ]
+  ]
+ },
+ "data/samples/pexels-clicksbyrenjith-23948829.jpg": {
+  "note": "CNC 主軸與 3D 列印火箭（目視：1 主軸馬達、1 火箭、1 彈簧）",
+  "concepts": [
+   "spindle motor",
+   "toy rocket",
+   "spring"
+  ],
+  "gt": [
+   [
+    "toy rocket",
+    [
+     315,
+     845,
+     740,
+     1110
+    ]
+   ],
+   [
+    "spindle motor",
+    [
+     5,
+     0,
+     505,
+     455
+    ]
+   ],
+   [
+    "spring",
+    [
+     598,
+     448,
+     662,
+     706
+    ]
+   ]
+  ]
+ },
+ "_gt_note": "gt：目視估計的真值框，座標為『推論用縮圖後』的像素（cats 為原尺寸），誤差約 ±15 px；僅用於離線比較訊號，不是標註資料集。"
+}

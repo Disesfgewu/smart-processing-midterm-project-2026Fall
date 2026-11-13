@@ -11,7 +11,7 @@ import cv2
 import numpy as np
 import PIL.Image
 import torch
-from torchvision.ops import nms
+from torchvision.ops import box_iou, nms
 
 from applog import logger, summarize
 from memutil import drop_file_cache, hf_cache_dir
@@ -140,6 +140,58 @@ class OpenVocabSegmenter:
                     f"elapsed={(time.perf_counter() - t0) * 1e3:.1f}ms")
 
     @torch.no_grad()
+    def set_image_queries(self, exemplars: dict, mode: str = "crop", with_text: bool = False, select: str = "distinct"):
+        """以圖找圖（image-guided）：用範例物件的影像特徵取代（或加上）文字當 OWL 查詢，之後照常呼叫 seg(image, ...)。
+        exemplars：{概念: [(PIL 影像, [x0, y0, x1, y1] 範例框的像素座標), ...]}；同一概念多個範例取最高分（與 HyDE 的多描述相同）。
+        mode：
+          'crop'    把範例框單獨裁出、補成正方形再編碼（範例可以來自別張圖；物件在裁切裡占滿畫面，與目標圖的尺度不同）。
+          'inplace' 用範例所在整張圖自己的 patch 特徵（尺度與同圖目標一致；範例影像就是要搜尋的影像時才合理）。
+        with_text：每個概念另外加上文字查詢 "a {概念}"（文字＋影像融合，同概念取最高分）。
+        select：從「與範例框 IoU 最高（>= 最高值的 0.8 倍）的一批 patch」怎麼取查詢特徵——
+          'distinct'  取 class embedding 與整張圖平均最不像者（HF OwlViT image_guided_detection 的做法）；
+          'best_iou'  取 IoU 最高的那個 patch；
+          'mean'      取這一批的 class embedding 平均。
+        三者的穩定性（對影像雜訊）見 docs/image-query.md。
+        範例特徵只算一次（與文字編碼相同），不增加每張影像的推論成本。"""
+        if mode not in ("crop", "inplace"):
+            raise ValueError(f"mode must be 'crop' or 'inplace', got {mode!r}")
+        from nanoowl.owl_predictor import OwlEncodeTextOutput
+        t0 = time.perf_counter()
+        self.prompts = list(exemplars)
+        self.groups = {}
+        queries, q2c, embeds = [], [], []
+        if with_text:
+            texts = [f"a {p}" for p in self.prompts]
+            te = self.owl.encode_text(texts).text_embeds
+            for ci, t in enumerate(texts):
+                queries.append(t); q2c.append(ci); embeds.append(te[ci:ci + 1])
+        for ci, p in enumerate(self.prompts):
+            for k, (img, box) in enumerate(exemplars[p]):
+                tensor = self.owl.image_preprocessor.preprocess_pil_image(img)
+                b = torch.tensor([box], dtype=tensor.dtype, device=tensor.device)
+                full = torch.tensor([[0, 0, img.width, img.height]], dtype=tensor.dtype, device=tensor.device)
+                enc = self.owl.encode_rois(tensor, b if mode == "crop" else full, pad_square=(mode == "crop"))
+                boxes, cls = enc.pred_boxes[0], enc.image_class_embeds[0]            # 預測框為整張影像的像素座標
+                iou = box_iou(b, boxes)[0]
+                sel = torch.nonzero(iou >= iou.max() * 0.8).flatten()                 # 與範例框最接近的一批
+                if select == "distinct":
+                    embeds.append(cls[sel[(cls[sel] @ cls.mean(0)).argmin()]][None])      # 與全圖平均最不像的（最有辨識度）
+                elif select == "best_iou":
+                    embeds.append(cls[iou.argmax()][None])
+                elif select == "mean":
+                    n = cls[sel] / (torch.linalg.norm(cls[sel], dim=-1, keepdim=True) + 1e-6)
+                    embeds.append(n.mean(0, keepdim=True))
+                else:
+                    raise ValueError(f"select must be 'distinct', 'best_iou' or 'mean', got {select!r}")
+                queries.append(f"image:{p}#{k}"); q2c.append(ci)
+        self.queries = queries
+        self.query_concept = torch.tensor(q2c, dtype=torch.long, device=self.owl.device)
+        self.text_encodings = OwlEncodeTextOutput(text_embeds=torch.cat(embeds))
+        torch.cuda.synchronize()
+        logger.info(f"[OpenVocabSegmenter.set_image_queries]: input=(concepts={self.prompts}, mode={mode}, with_text={with_text}), "
+                    f"output={len(queries)} queries (select={select}), elapsed={(time.perf_counter() - t0) * 1e3:.1f}ms")
+
+    @torch.no_grad()
     def __call__(self, image: PIL.Image.Image, threshold=0.1, nms_iou=0.5, with_masks: bool = True, top_per_group: bool = False) -> List[Detection]:
         logger.info(f"[OpenVocabSegmenter.__call__]: input=(image={summarize(image)}, prompts={self.prompts}, "
                     f"threshold={threshold}, nms_iou={nms_iou}, with_masks={with_masks}, top_per_group={top_per_group})")
@@ -149,6 +201,8 @@ class OpenVocabSegmenter:
             # 以極低門檻取得所有候選，先記下各提示詞的最高分，再依使用者門檻過濾
             out = self.owl.predict(image=image, text=self.queries, text_encodings=self.text_encodings,
                                    threshold=min(threshold, 0.01), pad_square=False)
+            torch.cuda.synchronize()
+            t_owl = time.perf_counter()     # 官方 NanoOWL FPS 口徑 = owl.predict()（前處理 + TensorRT 編碼 + decode，不含 NMS）
             boxes, scores, qlabels = out.boxes, out.scores, out.labels
             labels = self.query_concept[qlabels] if len(qlabels) else qlabels     # 查詢索引 → 概念索引
             self.query_scores = {q: (float(scores[qlabels == i].max()) if bool((qlabels == i).any()) else None)
@@ -187,14 +241,18 @@ class OpenVocabSegmenter:
 
             # 3. SAM：影像編碼一次，之後每個框跑 decoder
             dets = []
+            sam_enc_ms = sam_dec_ms = None
             if len(boxes) and not with_masks:  # 只要框（計數用）：跳過 SAM，約快 2.5 倍
                 dets = [Detection(self.prompts[l], float(sc), b, None, None, self.queries[q], bool(pr))
                         for b, sc, l, q, pr in zip(boxes.cpu().numpy(), scores.cpu().numpy(), labels.cpu().numpy(), qlabels.cpu().numpy(), is_primary)]
                 logger.info(f"[OpenVocabSegmenter.__call__]: with_masks=False, output={len(dets)} boxes, SAM skipped")
             elif len(boxes):
                 self.sam.set_image(np.asarray(image.convert("RGB")))
+                torch.cuda.synchronize()
+                sam_enc_ms = (time.perf_counter() - t1) * 1e3     # 官方 NanoSAM「Image Encoder」口徑（我們含前處理；官方未說明）
                 logger.info(f"[SamPredictor.set_image]: input=(image={image.size}), output=image embedding ready, "
                             f"elapsed={(time.perf_counter() - t1) * 1e3:.1f}ms")
+                t_dec = time.perf_counter()
                 for box, score, label, ql, pr in zip(boxes.cpu().numpy(), scores.cpu().numpy(), labels.cpu().numpy(), qlabels.cpu().numpy(), is_primary):
                     masks, iou_pred, _ = self.sam.predict(box=box, multimask_output=False)
                     d = Detection(self.prompts[label], float(score), box, masks[0], float(iou_pred[0]), self.queries[ql], bool(pr))
@@ -202,11 +260,15 @@ class OpenVocabSegmenter:
                     logger.info(f"[SamPredictor.predict]: input=(label={d.label}, query={d.query!r}, score={d.score:.2f}, box={box.round(0).astype(int).tolist()}), "
                                 f"output=mask_area={d.area}px, sam_iou_pred={float(iou_pred[0]):.2f}")
             torch.cuda.synchronize()
+            if sam_enc_ms is not None:
+                sam_dec_ms = (time.perf_counter() - t_dec) * 1e3 / len(dets)   # 每個框的 decoder 平均（含遮罩後處理與搬回 CPU）
         except Exception as e:
             logger.error(f"[OpenVocabSegmenter.__call__]: input=(image={image.size}, prompts={self.prompts}), "
                          f"error={type(e).__name__}: {e}", exc_info=True)
             raise
-        self.timing = {"owl_ms": (t1 - t0) * 1e3, "sam_ms": (time.perf_counter() - t1) * 1e3, "num_raw_boxes": n_raw}
+        self.timing = {"owl_ms": (t1 - t0) * 1e3, "sam_ms": (time.perf_counter() - t1) * 1e3, "num_raw_boxes": n_raw,
+                       "official_owl_ms": (t_owl - t0) * 1e3, "official_sam_encoder_ms": sam_enc_ms, "official_sam_decoder_ms": sam_dec_ms,
+                       "official_sam_full_ms": (sam_enc_ms + sam_dec_ms) if sam_enc_ms is not None else None}
         logger.info(f"[OpenVocabSegmenter.__call__]: output={len(dets)} detections, "
                     f"owl={self.timing['owl_ms']:.1f}ms, sam={self.timing['sam_ms']:.1f}ms")
         return dets

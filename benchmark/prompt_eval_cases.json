@@ -1,0 +1,29 @@
+{
+  "_note": "提示詞比較評估集（題目功能要求 5）：count＝人工目視數出的『真實數量』（不是標註資料集）。bun／lime 影像取自使用者提供的兩支輸送帶影片的影格或裁切（data/samples/eval/）；lime 取近處裁切（遠處果實太小無法可靠計數）。styles：bare 單詞、category 加冠詞的類別式、descriptive 外觀描述式、technical 專業名稱／行話（沒有自然說法的概念為 null）；HyDE 由 bench_prompt_styles.py 另行產生。",
+  "images": {
+    "data/samples/cats.jpg": {"counts": {"cat": 2, "remote control": 2}},
+    "data/samples/pexels-muffin-4584612.jpg": {"counts": {"capacitor": 7, "inductor": 3}},
+    "data/samples/pexels-cmrcn-29224614.jpg": {"counts": {"person": 1}},
+    "data/samples/pexels-clicksbyrenjith-23948829.jpg": {"counts": {"toy rocket": 1, "spindle motor": 1}},
+    "data/samples/eval/buns_f055.jpg": {"counts": {"steamed bun": 2}},
+    "data/samples/eval/buns_f099.jpg": {"counts": {"steamed bun": 2}},
+    "data/samples/eval/buns_f143.jpg": {"counts": {"steamed bun": 2}},
+    "data/samples/eval/buns_f165.jpg": {"counts": {"steamed bun": 2}},
+    "data/samples/eval/limes_f224_crop.jpg": {"counts": {"citrus fruit": 2}},
+    "data/samples/eval/limes_f305_crop.jpg": {"counts": {"citrus fruit": 2}},
+    "data/samples/eval/limes_f346_crop.jpg": {"counts": {"citrus fruit": 3}}
+  },
+  "kind": {"cat": "everyday", "remote control": "everyday", "person": "everyday", "steamed bun": "everyday", "citrus fruit": "everyday",
+           "capacitor": "part", "inductor": "part", "toy rocket": "part", "spindle motor": "part"},
+  "styles": {
+    "cat": {"bare": "cat", "category": "a cat", "descriptive": "a furry animal with whiskers and pointed ears", "technical": null},
+    "remote control": {"bare": "remote control", "category": "a remote control", "descriptive": "a small rectangular handheld device with many buttons", "technical": "infrared TV remote controller"},
+    "capacitor": {"bare": "capacitor", "category": "a capacitor", "descriptive": "a cylindrical metal can component on a circuit board", "technical": "electrolytic capacitor"},
+    "inductor": {"bare": "inductor", "category": "an inductor", "descriptive": "a gray square metal block component with white letters", "technical": "SMD power inductor"},
+    "person": {"bare": "person", "category": "a person", "descriptive": "a man wearing a cap and safety glasses", "technical": "welder"},
+    "toy rocket": {"bare": "toy rocket", "category": "a toy rocket", "descriptive": "a small gray rocket shaped toy", "technical": "3D printed rocket model"},
+    "spindle motor": {"bare": "spindle motor", "category": "a spindle motor", "descriptive": "a large metal electric motor with a label plate", "technical": "CNC router spindle"},
+    "steamed bun": {"bare": "steamed bun", "category": "a steamed bun", "descriptive": "a round white dough ball with a twisted top", "technical": "baozi dumpling"},
+    "citrus fruit": {"bare": "citrus fruit", "category": "a citrus fruit", "descriptive": "a round green or yellow fruit with smooth skin", "technical": "Persian lime"}
+  }
+}

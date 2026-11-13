@@ -25,7 +25,6 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OFF = {"NANOSAM_ENCODER": "", "NANOSAM_DECODER": "", "SAM_ACTIVE": ""}
 CONFIGS = {   # key → (顯示名稱, 環境變數)
     "pytorch": ("PyTorch fp32：OWL + MobileSAM", {"OWL_ENGINE": "", **OFF}),
-    "student": ("PyTorch fp32：OWL + 自訓練 ResNet18 encoder（WSL / 無引擎的機器）", {"OWL_ENGINE": "", **{k: v for k, v in OFF.items() if k != "SAM_ACTIVE"}, "SAM_STUDENT": "data/eval/colab80_best.pth", "SAM_ACTIVE": "student"}),
     "owltrt_mobilesam": ("OWL TensorRT + MobileSAM（PyTorch fp32）", dict(OFF)),
     "owltrt_student": ("OWL TensorRT + 自訓練 ResNet18 encoder（PyTorch fp32）", {**OFF, "SAM_STUDENT": "data/eval/colab80_best.pth", "SAM_ACTIVE": "student"}),
     "trt": ("全 TensorRT：OWL + 自訓練 ResNet18 encoder（fp16）", {}),
@@ -49,17 +48,11 @@ def make_images(base):
 
 
 def tegrastats(duration_log):
-    """非 Jetson（WSL / 桌機）沒有 tegrastats → 回傳 None，該格就沒有功耗欄位，其餘照量。"""
-    try:
-        return subprocess.Popen(["tegrastats", "--interval", "500"], stdout=open(duration_log, "w"), stderr=subprocess.DEVNULL)
-    except OSError:
-        return None
+    return subprocess.Popen(["tegrastats", "--interval", "500"], stdout=open(duration_log, "w"), stderr=subprocess.DEVNULL)
 
 
 def parse_tegra(path):
     rows = []
-    if not os.path.exists(path):
-        return {}
     for line in open(path):
         if "VDD_IN" not in line:
             continue
@@ -126,8 +119,7 @@ def run_config(key, images, prompts, threshold, runs, warmup, port, logdir):
             time.sleep(1)
             rows = [one() for _ in range(runs)]
             time.sleep(1)
-            if tp:
-                tp.terminate(); tp.wait()
+            tp.terminate(); tp.wait()
             tm = lambda k: [j["timing"][k] for _, j in rows if k in j["timing"]]
             res["images"][size] = {"file": os.path.basename(img), "bytes": len(data), "client_wall_ms": stats([w for w, _ in rows]),
                                    "server_total_ms": stats(tm("total_ms")), "owl_ms": stats(tm("owl_ms")), "sam_ms": stats(tm("sam_ms")),
@@ -162,10 +154,7 @@ def main():
     os.chdir(ROOT)
     images = a.images or make_images("data/samples/cats.jpg")
     logdir = os.path.dirname(a.out); os.makedirs(logdir, exist_ok=True)
-    try:
-        power = subprocess.run(["nvpmodel", "-q"], capture_output=True, text=True).stdout.split("\n")[0:2]
-    except OSError:
-        power = ["（非 Jetson：沒有 nvpmodel）"]
+    power = subprocess.run(["nvpmodel", "-q"], capture_output=True, text=True).stdout.split("\n")[0:2]
     print(f"電源模式：{' '.join(power)} | 影像：{images} | 每組 {a.runs} 次（暖機 {a.warmup}）", flush=True)
     results = {"power_mode": " ".join(power), "prompts": a.prompts, "threshold": a.threshold, "runs": a.runs, "warmup": a.warmup, "configs": {}}
     for i, key in enumerate(a.configs.split(",")):

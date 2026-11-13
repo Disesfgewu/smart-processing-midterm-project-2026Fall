@@ -1,0 +1,48 @@
+{
+ "original_size": [
+  5184,
+  3456
+ ],
+ "exemplar0": {
+  "processed_size": [
+   4096,
+   2731
+  ],
+  "client_ms": 1822,
+  "n_dets": 9,
+  "flagged": 1,
+  "flagged_iou_with_exemplar_in_fraction_space": 0.82,
+  "n_with_contours": 9,
+  "scores": [
+   0.998,
+   0.998,
+   0.997,
+   0.997,
+   0.987,
+   0.974,
+   0.971,
+   0.967
+  ]
+ },
+ "exemplar2": {
+  "processed_size": [
+   4096,
+   2731
+  ],
+  "client_ms": 1562,
+  "n_dets": 8,
+  "flagged": 1,
+  "flagged_iou_with_exemplar_in_fraction_space": 0.835,
+  "n_with_contours": 8,
+  "scores": [
+   0.998,
+   0.996,
+   0.996,
+   0.995,
+   0.987,
+   0.973,
+   0.972,
+   0.965
+  ]
+ }
+}

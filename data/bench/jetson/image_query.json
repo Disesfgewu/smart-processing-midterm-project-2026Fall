@@ -1,0 +1,5636 @@
+{
+ "date": "2026-11-10 12:25:32",
+ "power_mode": "MAXN_SUPER (nvpmodel 2)",
+ "max_side": 1280,
+ "owl_engine": "data/owl_image_encoder_patch32.engine",
+ "setup_ms_mean": {
+  "text": 50.2,
+  "crop": 60.9,
+  "inplace": 50.8,
+  "text+crop": 106.0
+ },
+ "owl_ms_median": {
+  "text": 39.6,
+  "crop": 38.9,
+  "inplace": 35.9,
+  "text+crop": 38.4
+ },
+ "summary": {
+  "cats.jpg|cat|1-shot|text": {
+   "runs": 2,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "auc": 1.0,
+   "median_rank_of_targets": 1.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.387,
+   "mean_max_neg_score": 0.056
+  },
+  "cats.jpg|cat|1-shot|crop": {
+   "runs": 2,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "auc": 1.0,
+   "median_rank_of_targets": 1.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.849,
+   "mean_max_neg_score": 0.253
+  },
+  "cats.jpg|cat|1-shot|inplace": {
+   "runs": 2,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "auc": 1.0,
+   "median_rank_of_targets": 1.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.994,
+   "mean_max_neg_score": 0.572
+  },
+  "cats.jpg|cat|1-shot|text+crop": {
+   "runs": 2,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "auc": 1.0,
+   "median_rank_of_targets": 1.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.849,
+   "mean_max_neg_score": 0.253
+  },
+  "cats.jpg|remote control|1-shot|text": {
+   "runs": 2,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "auc": 1.0,
+   "median_rank_of_targets": 1.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.408,
+   "mean_max_neg_score": 0.069
+  },
+  "cats.jpg|remote control|1-shot|crop": {
+   "runs": 2,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "auc": 1.0,
+   "median_rank_of_targets": 1.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.406,
+   "mean_max_neg_score": 0.102
+  },
+  "cats.jpg|remote control|1-shot|inplace": {
+   "runs": 2,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "auc": 1.0,
+   "median_rank_of_targets": 1.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.946,
+   "mean_max_neg_score": 0.487
+  },
+  "cats.jpg|remote control|1-shot|text+crop": {
+   "runs": 2,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "auc": 1.0,
+   "median_rank_of_targets": 1.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.556,
+   "mean_max_neg_score": 0.102
+  },
+  "pexels-cmrcn-29224614.jpg|steel pipe|1-shot|text": {
+   "runs": 2,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "auc": 0.859,
+   "median_rank_of_targets": 20.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.007,
+   "mean_max_neg_score": 0.032
+  },
+  "pexels-cmrcn-29224614.jpg|steel pipe|1-shot|crop": {
+   "runs": 2,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "auc": 0.907,
+   "median_rank_of_targets": 33.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.103,
+   "mean_max_neg_score": 0.53
+  },
+  "pexels-cmrcn-29224614.jpg|steel pipe|1-shot|inplace": {
+   "runs": 2,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "auc": 0.958,
+   "median_rank_of_targets": 15.5,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.592,
+   "mean_max_neg_score": 0.915
+  },
+  "pexels-cmrcn-29224614.jpg|steel pipe|1-shot|text+crop": {
+   "runs": 2,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "auc": 0.886,
+   "median_rank_of_targets": 40.0,
+   "targets_never_found": 0,
+   "targets_total": 2,
+   "mean_pos_score": 0.103,
+   "mean_max_neg_score": 0.53
+  },
+  "pexels-muffin-4584612.jpg|capacitor|1-shot|text": {
+   "runs": 7,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "auc": 0.707,
+   "median_rank_of_targets": 23.5,
+   "targets_never_found": 0,
+   "targets_total": 42,
+   "mean_pos_score": 0.007,
+   "mean_max_neg_score": 0.024
+  },
+  "pexels-muffin-4584612.jpg|capacitor|1-shot|crop": {
+   "runs": 7,
+   "precision_at_m": 0.429,
+   "found_in_top_m": 0.429,
+   "auc": 0.822,
+   "median_rank_of_targets": 8.5,
+   "targets_never_found": 0,
+   "targets_total": 42,
+   "mean_pos_score": 0.162,
+   "mean_max_neg_score": 0.258
+  },
+  "pexels-muffin-4584612.jpg|capacitor|1-shot|inplace": {
+   "runs": 7,
+   "precision_at_m": 0.833,
+   "found_in_top_m": 0.833,
+   "auc": 0.87,
+   "median_rank_of_targets": 3.5,
+   "targets_never_found": 0,
+   "targets_total": 42,
+   "mean_pos_score": 0.81,
+   "mean_max_neg_score": 0.974
+  },
+  "pexels-muffin-4584612.jpg|capacitor|1-shot|text+crop": {
+   "runs": 7,
+   "precision_at_m": 0.31,
+   "found_in_top_m": 0.31,
+   "auc": 0.824,
+   "median_rank_of_targets": 11.5,
+   "targets_never_found": 0,
+   "targets_total": 42,
+   "mean_pos_score": 0.167,
+   "mean_max_neg_score": 0.264
+  },
+  "pexels-muffin-4584612.jpg|capacitor|2-shot|text": {
+   "runs": 21,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "auc": 0.709,
+   "median_rank_of_targets": 23,
+   "targets_never_found": 0,
+   "targets_total": 105,
+   "mean_pos_score": 0.007,
+   "mean_max_neg_score": 0.024
+  },
+  "pexels-muffin-4584612.jpg|capacitor|2-shot|crop": {
+   "runs": 21,
+   "precision_at_m": 0.552,
+   "found_in_top_m": 0.552,
+   "auc": 0.85,
+   "median_rank_of_targets": 5,
+   "targets_never_found": 0,
+   "targets_total": 105,
+   "mean_pos_score": 0.285,
+   "mean_max_neg_score": 0.416
+  },
+  "pexels-muffin-4584612.jpg|capacitor|2-shot|inplace": {
+   "runs": 21,
+   "precision_at_m": 0.819,
+   "found_in_top_m": 0.819,
+   "auc": 0.874,
+   "median_rank_of_targets": 3,
+   "targets_never_found": 0,
+   "targets_total": 105,
+   "mean_pos_score": 0.824,
+   "mean_max_neg_score": 0.98
+  },
+  "pexels-muffin-4584612.jpg|capacitor|2-shot|text+crop": {
+   "runs": 21,
+   "precision_at_m": 0.476,
+   "found_in_top_m": 0.476,
+   "auc": 0.85,
+   "median_rank_of_targets": 6,
+   "targets_never_found": 0,
+   "targets_total": 105,
+   "mean_pos_score": 0.287,
+   "mean_max_neg_score": 0.417
+  },
+  "pexels-muffin-4584612.jpg|inductor|1-shot|text": {
+   "runs": 3,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "auc": 0.793,
+   "median_rank_of_targets": 12.0,
+   "targets_never_found": 0,
+   "targets_total": 6,
+   "mean_pos_score": 0.002,
+   "mean_max_neg_score": 0.009
+  },
+  "pexels-muffin-4584612.jpg|inductor|1-shot|crop": {
+   "runs": 3,
+   "precision_at_m": 0.333,
+   "found_in_top_m": 0.333,
+   "auc": 0.871,
+   "median_rank_of_targets": 3.5,
+   "targets_never_found": 0,
+   "targets_total": 6,
+   "mean_pos_score": 0.052,
+   "mean_max_neg_score": 0.159
+  },
+  "pexels-muffin-4584612.jpg|inductor|1-shot|inplace": {
+   "runs": 3,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "auc": 0.954,
+   "median_rank_of_targets": 1.5,
+   "targets_never_found": 0,
+   "targets_total": 6,
+   "mean_pos_score": 0.869,
+   "mean_max_neg_score": 0.989
+  },
+  "pexels-muffin-4584612.jpg|inductor|1-shot|text+crop": {
+   "runs": 3,
+   "precision_at_m": 0.333,
+   "found_in_top_m": 0.333,
+   "auc": 0.899,
+   "median_rank_of_targets": 3.5,
+   "targets_never_found": 0,
+   "targets_total": 6,
+   "mean_pos_score": 0.058,
+   "mean_max_neg_score": 0.159
+  },
+  "pexels-muffin-4584612.jpg|inductor|2-shot|text": {
+   "runs": 3,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "auc": 0.792,
+   "median_rank_of_targets": 11,
+   "targets_never_found": 0,
+   "targets_total": 3,
+   "mean_pos_score": 0.002,
+   "mean_max_neg_score": 0.009
+  },
+  "pexels-muffin-4584612.jpg|inductor|2-shot|crop": {
+   "runs": 3,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "auc": 0.922,
+   "median_rank_of_targets": 3,
+   "targets_never_found": 0,
+   "targets_total": 3,
+   "mean_pos_score": 0.079,
+   "mean_max_neg_score": 0.181
+  },
+  "pexels-muffin-4584612.jpg|inductor|2-shot|inplace": {
+   "runs": 3,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "auc": 0.954,
+   "median_rank_of_targets": 1,
+   "targets_never_found": 0,
+   "targets_total": 3,
+   "mean_pos_score": 0.883,
+   "mean_max_neg_score": 0.989
+  },
+  "pexels-muffin-4584612.jpg|inductor|2-shot|text+crop": {
+   "runs": 3,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "auc": 0.919,
+   "median_rank_of_targets": 3,
+   "targets_never_found": 0,
+   "targets_total": 3,
+   "mean_pos_score": 0.079,
+   "mean_max_neg_score": 0.181
+  }
+ },
+ "controls": [
+  {
+   "concept": "cat",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-muffin-4584612.jpg",
+   "mode": "text",
+   "max_score": 0.0019
+  },
+  {
+   "concept": "cat",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-muffin-4584612.jpg",
+   "mode": "crop",
+   "max_score": 0.0102
+  },
+  {
+   "concept": "cat",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-muffin-4584612.jpg",
+   "mode": "text+crop",
+   "max_score": 0.0102
+  },
+  {
+   "concept": "cat",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "text",
+   "max_score": 0.0084
+  },
+  {
+   "concept": "cat",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "crop",
+   "max_score": 0.0079
+  },
+  {
+   "concept": "cat",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "text+crop",
+   "max_score": 0.02
+  },
+  {
+   "concept": "cat",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "text",
+   "max_score": 0.0073
+  },
+  {
+   "concept": "cat",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "crop",
+   "max_score": 0.023
+  },
+  {
+   "concept": "cat",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "text+crop",
+   "max_score": 0.026
+  },
+  {
+   "concept": "remote control",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-muffin-4584612.jpg",
+   "mode": "text",
+   "max_score": 0.0469
+  },
+  {
+   "concept": "remote control",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-muffin-4584612.jpg",
+   "mode": "crop",
+   "max_score": 0.1833
+  },
+  {
+   "concept": "remote control",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-muffin-4584612.jpg",
+   "mode": "text+crop",
+   "max_score": 0.4493
+  },
+  {
+   "concept": "remote control",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "text",
+   "max_score": 0.01
+  },
+  {
+   "concept": "remote control",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "crop",
+   "max_score": 0.0538
+  },
+  {
+   "concept": "remote control",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "text+crop",
+   "max_score": 0.0538
+  },
+  {
+   "concept": "remote control",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "text",
+   "max_score": 0.0379
+  },
+  {
+   "concept": "remote control",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "crop",
+   "max_score": 0.3162
+  },
+  {
+   "concept": "remote control",
+   "from": "data/samples/cats.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "text+crop",
+   "max_score": 0.3162
+  },
+  {
+   "concept": "capacitor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/cats.jpg",
+   "mode": "text",
+   "max_score": 0.0315
+  },
+  {
+   "concept": "capacitor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/cats.jpg",
+   "mode": "crop",
+   "max_score": 0.0666
+  },
+  {
+   "concept": "capacitor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/cats.jpg",
+   "mode": "text+crop",
+   "max_score": 0.0666
+  },
+  {
+   "concept": "capacitor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "text",
+   "max_score": 0.016
+  },
+  {
+   "concept": "capacitor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "crop",
+   "max_score": 0.1948
+  },
+  {
+   "concept": "capacitor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "text+crop",
+   "max_score": 0.1948
+  },
+  {
+   "concept": "capacitor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "text",
+   "max_score": 0.0303
+  },
+  {
+   "concept": "capacitor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "crop",
+   "max_score": 0.0994
+  },
+  {
+   "concept": "capacitor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "text+crop",
+   "max_score": 0.0994
+  },
+  {
+   "concept": "inductor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/cats.jpg",
+   "mode": "text",
+   "max_score": 0.0131
+  },
+  {
+   "concept": "inductor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/cats.jpg",
+   "mode": "crop",
+   "max_score": 0.3813
+  },
+  {
+   "concept": "inductor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/cats.jpg",
+   "mode": "text+crop",
+   "max_score": 0.3813
+  },
+  {
+   "concept": "inductor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "text",
+   "max_score": 0.013
+  },
+  {
+   "concept": "inductor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "crop",
+   "max_score": 0.1576
+  },
+  {
+   "concept": "inductor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-cmrcn-29224614.jpg",
+   "mode": "text+crop",
+   "max_score": 0.1576
+  },
+  {
+   "concept": "inductor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "text",
+   "max_score": 0.0304
+  },
+  {
+   "concept": "inductor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "crop",
+   "max_score": 0.1508
+  },
+  {
+   "concept": "inductor",
+   "from": "data/samples/pexels-muffin-4584612.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "text+crop",
+   "max_score": 0.1508
+  },
+  {
+   "concept": "steel pipe",
+   "from": "data/samples/pexels-cmrcn-29224614.jpg",
+   "on": "data/samples/cats.jpg",
+   "mode": "text",
+   "max_score": 0.0099
+  },
+  {
+   "concept": "steel pipe",
+   "from": "data/samples/pexels-cmrcn-29224614.jpg",
+   "on": "data/samples/cats.jpg",
+   "mode": "crop",
+   "max_score": 0.0607
+  },
+  {
+   "concept": "steel pipe",
+   "from": "data/samples/pexels-cmrcn-29224614.jpg",
+   "on": "data/samples/cats.jpg",
+   "mode": "text+crop",
+   "max_score": 0.0607
+  },
+  {
+   "concept": "steel pipe",
+   "from": "data/samples/pexels-cmrcn-29224614.jpg",
+   "on": "data/samples/pexels-muffin-4584612.jpg",
+   "mode": "text",
+   "max_score": 0.0084
+  },
+  {
+   "concept": "steel pipe",
+   "from": "data/samples/pexels-cmrcn-29224614.jpg",
+   "on": "data/samples/pexels-muffin-4584612.jpg",
+   "mode": "crop",
+   "max_score": 0.1031
+  },
+  {
+   "concept": "steel pipe",
+   "from": "data/samples/pexels-cmrcn-29224614.jpg",
+   "on": "data/samples/pexels-muffin-4584612.jpg",
+   "mode": "text+crop",
+   "max_score": 0.1031
+  },
+  {
+   "concept": "steel pipe",
+   "from": "data/samples/pexels-cmrcn-29224614.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "text",
+   "max_score": 0.0177
+  },
+  {
+   "concept": "steel pipe",
+   "from": "data/samples/pexels-cmrcn-29224614.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "crop",
+   "max_score": 0.2602
+  },
+  {
+   "concept": "steel pipe",
+   "from": "data/samples/pexels-cmrcn-29224614.jpg",
+   "on": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "mode": "text+crop",
+   "max_score": 0.2602
+  }
+ ],
+ "not_evaluable": [
+  {
+   "image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "person",
+   "instances": 1
+  },
+  {
+   "image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "overhead crane",
+   "instances": 1
+  },
+  {
+   "image": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "concept": "toy rocket",
+   "instances": 1
+  },
+  {
+   "image": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "concept": "spindle motor",
+   "instances": 1
+  },
+  {
+   "image": "data/samples/pexels-clicksbyrenjith-23948829.jpg",
+   "concept": "spring",
+   "instances": 1
+  }
+ ],
+ "records": [
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "text",
+   "n_targets": 1,
+   "n_dets": 168,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.39
+   ],
+   "max_neg_score": 0.05,
+   "top_score": 0.39
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "crop",
+   "n_targets": 1,
+   "n_dets": 166,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.7933
+   ],
+   "max_neg_score": 0.2736,
+   "top_score": 0.7933
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "inplace",
+   "n_targets": 1,
+   "n_dets": 168,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.9931
+   ],
+   "max_neg_score": 0.5954,
+   "top_score": 0.9931
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "text+crop",
+   "n_targets": 1,
+   "n_dets": 166,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.7933
+   ],
+   "max_neg_score": 0.2736,
+   "top_score": 0.7933
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "text",
+   "n_targets": 1,
+   "n_dets": 172,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.3842
+   ],
+   "max_neg_score": 0.0624,
+   "top_score": 0.3842
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "crop",
+   "n_targets": 1,
+   "n_dets": 169,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.9045
+   ],
+   "max_neg_score": 0.2318,
+   "top_score": 0.9045
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "inplace",
+   "n_targets": 1,
+   "n_dets": 173,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.9955
+   ],
+   "max_neg_score": 0.5479,
+   "top_score": 0.9955
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "cat",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "text+crop",
+   "n_targets": 1,
+   "n_dets": 169,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.9045
+   ],
+   "max_neg_score": 0.2318,
+   "top_score": 0.9045
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "text",
+   "n_targets": 1,
+   "n_dets": 288,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.2353
+   ],
+   "max_neg_score": 0.0689,
+   "top_score": 0.2353
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "crop",
+   "n_targets": 1,
+   "n_dets": 287,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.6684
+   ],
+   "max_neg_score": 0.0976,
+   "top_score": 0.6684
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "inplace",
+   "n_targets": 1,
+   "n_dets": 287,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.9516
+   ],
+   "max_neg_score": 0.3295,
+   "top_score": 0.9516
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "text+crop",
+   "n_targets": 1,
+   "n_dets": 287,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.6684
+   ],
+   "max_neg_score": 0.0976,
+   "top_score": 0.6684
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "text",
+   "n_targets": 1,
+   "n_dets": 295,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.5801
+   ],
+   "max_neg_score": 0.0689,
+   "top_score": 0.5801
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "crop",
+   "n_targets": 1,
+   "n_dets": 294,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.1435
+   ],
+   "max_neg_score": 0.1066,
+   "top_score": 0.1435
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "inplace",
+   "n_targets": 1,
+   "n_dets": 295,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.9403
+   ],
+   "max_neg_score": 0.6439,
+   "top_score": 0.9403
+  },
+  {
+   "image": "data/samples/cats.jpg",
+   "concept": "remote control",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "text+crop",
+   "n_targets": 1,
+   "n_dets": 293,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.4439
+   ],
+   "max_neg_score": 0.1066,
+   "top_score": 0.4439
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "text",
+   "n_targets": 6,
+   "n_dets": 344,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    167,
+    31,
+    18,
+    20,
+    23,
+    32
+   ],
+   "auc": 0.6752232142857143,
+   "pos_scores": [
+    0.0108,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "crop",
+   "n_targets": 6,
+   "n_dets": 344,
+   "precision_at_m": 0.3333333333333333,
+   "found_in_top_m": 0.3333333333333333,
+   "ranks": [
+    57,
+    3,
+    4,
+    17,
+    54,
+    20
+   ],
+   "auc": 0.7842261904761905,
+   "pos_scores": [
+    0.1768,
+    0.1628,
+    0.088,
+    0.0855,
+    0.0369,
+    0.0348,
+    0.0152,
+    0.0
+   ],
+   "max_neg_score": 0.2472,
+   "top_score": 0.2472
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "inplace",
+   "n_targets": 6,
+   "n_dets": 347,
+   "precision_at_m": 0.8333333333333334,
+   "found_in_top_m": 0.8333333333333334,
+   "ranks": [
+    2,
+    3,
+    1,
+    4,
+    6,
+    16
+   ],
+   "auc": 0.8539823008849557,
+   "pos_scores": [
+    0.9984,
+    0.9978,
+    0.9974,
+    0.9869,
+    0.9742,
+    0.9328,
+    0.4864,
+    0.0
+   ],
+   "max_neg_score": 0.9832,
+   "top_score": 0.9984
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "text+crop",
+   "n_targets": 6,
+   "n_dets": 344,
+   "precision_at_m": 0.3333333333333333,
+   "found_in_top_m": 0.3333333333333333,
+   "ranks": [
+    60,
+    3,
+    4,
+    17,
+    54,
+    20
+   ],
+   "auc": 0.7823660714285714,
+   "pos_scores": [
+    0.1768,
+    0.1628,
+    0.088,
+    0.0855,
+    0.0384,
+    0.0348,
+    0.0152,
+    0.0
+   ],
+   "max_neg_score": 0.2472,
+   "top_score": 0.2472
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "text",
+   "n_targets": 6,
+   "n_dets": 344,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    32,
+    19,
+    21,
+    24,
+    33
+   ],
+   "auc": 0.8058499364137346,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0087,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "crop",
+   "n_targets": 6,
+   "n_dets": 344,
+   "precision_at_m": 0.5,
+   "found_in_top_m": 0.5,
+   "ranks": [
+    1,
+    3,
+    2,
+    14,
+    32,
+    8
+   ],
+   "auc": 0.8418821534548537,
+   "pos_scores": [
+    0.0411,
+    0.0384,
+    0.0369,
+    0.0204,
+    0.018,
+    0.0084,
+    0.0
+   ],
+   "max_neg_score": 0.034,
+   "top_score": 0.0411
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "inplace",
+   "n_targets": 6,
+   "n_dets": 346,
+   "precision_at_m": 0.8333333333333334,
+   "found_in_top_m": 0.8333333333333334,
+   "ranks": [
+    2,
+    3,
+    1,
+    4,
+    6,
+    17
+   ],
+   "auc": 0.8533501896333755,
+   "pos_scores": [
+    0.9969,
+    0.9967,
+    0.9952,
+    0.9881,
+    0.9784,
+    0.907,
+    0.0
+   ],
+   "max_neg_score": 0.9824,
+   "top_score": 0.9969
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "text+crop",
+   "n_targets": 6,
+   "n_dets": 345,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    9,
+    13,
+    11,
+    10,
+    12,
+    30
+   ],
+   "auc": 0.8313609467455622,
+   "pos_scores": [
+    0.0411,
+    0.0395,
+    0.0384,
+    0.0384,
+    0.0369,
+    0.0241,
+    0.0
+   ],
+   "max_neg_score": 0.0577,
+   "top_score": 0.0577
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    2
+   ],
+   "mode": "text",
+   "n_targets": 6,
+   "n_dets": 342,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    167,
+    19,
+    21,
+    24,
+    32
+   ],
+   "auc": 0.6785179640718563,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0108,
+    0.0098,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    2
+   ],
+   "mode": "crop",
+   "n_targets": 6,
+   "n_dets": 343,
+   "precision_at_m": 0.16666666666666666,
+   "found_in_top_m": 0.16666666666666666,
+   "ranks": [
+    4,
+    40,
+    9,
+    17,
+    51,
+    14
+   ],
+   "auc": 0.7992537313432836,
+   "pos_scores": [
+    0.0411,
+    0.0331,
+    0.0268,
+    0.0259,
+    0.0155,
+    0.0109,
+    0.0056,
+    0.0
+   ],
+   "max_neg_score": 0.093,
+   "top_score": 0.093
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    2
+   ],
+   "mode": "inplace",
+   "n_targets": 6,
+   "n_dets": 344,
+   "precision_at_m": 0.8333333333333334,
+   "found_in_top_m": 0.8333333333333334,
+   "ranks": [
+    1,
+    3,
+    2,
+    4,
+    6,
+    11
+   ],
+   "auc": 0.8582589285714286,
+   "pos_scores": [
+    0.9974,
+    0.9972,
+    0.9966,
+    0.9872,
+    0.9754,
+    0.9456,
+    0.5607,
+    0.0
+   ],
+   "max_neg_score": 0.9791,
+   "top_score": 0.9974
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    2
+   ],
+   "mode": "text+crop",
+   "n_targets": 6,
+   "n_dets": 345,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    12,
+    57,
+    23,
+    13,
+    14,
+    32
+   ],
+   "auc": 0.7793026706231454,
+   "pos_scores": [
+    0.0411,
+    0.0395,
+    0.0384,
+    0.0331,
+    0.0268,
+    0.0155,
+    0.0056,
+    0.0
+   ],
+   "max_neg_score": 0.093,
+   "top_score": 0.093
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    3
+   ],
+   "mode": "text",
+   "n_targets": 6,
+   "n_dets": 347,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    167,
+    31,
+    20,
+    23,
+    32
+   ],
+   "auc": 0.6762536873156342,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    3
+   ],
+   "mode": "crop",
+   "n_targets": 6,
+   "n_dets": 347,
+   "precision_at_m": 0.5,
+   "found_in_top_m": 0.5,
+   "ranks": [
+    3,
+    12,
+    4,
+    5,
+    48,
+    11
+   ],
+   "auc": 0.8499262536873157,
+   "pos_scores": [
+    0.0729,
+    0.0692,
+    0.0513,
+    0.0371,
+    0.0344,
+    0.0313,
+    0.0145,
+    0.0
+   ],
+   "max_neg_score": 0.114,
+   "top_score": 0.114
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    3
+   ],
+   "mode": "inplace",
+   "n_targets": 6,
+   "n_dets": 350,
+   "precision_at_m": 0.6666666666666666,
+   "found_in_top_m": 0.6666666666666666,
+   "ranks": [
+    1,
+    2,
+    3,
+    4,
+    7,
+    19
+   ],
+   "auc": 0.8516081871345029,
+   "pos_scores": [
+    0.9978,
+    0.9971,
+    0.9963,
+    0.9828,
+    0.9732,
+    0.9228,
+    0.4699,
+    0.0
+   ],
+   "max_neg_score": 0.98,
+   "top_score": 0.9978
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    3
+   ],
+   "mode": "text+crop",
+   "n_targets": 6,
+   "n_dets": 349,
+   "precision_at_m": 0.3333333333333333,
+   "found_in_top_m": 0.3333333333333333,
+   "ranks": [
+    3,
+    24,
+    4,
+    7,
+    17,
+    19
+   ],
+   "auc": 0.8482404692082112,
+   "pos_scores": [
+    0.0729,
+    0.0692,
+    0.0513,
+    0.0384,
+    0.0371,
+    0.0344,
+    0.0313,
+    0.0
+   ],
+   "max_neg_score": 0.114,
+   "top_score": 0.114
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    4
+   ],
+   "mode": "text",
+   "n_targets": 6,
+   "n_dets": 318,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    168,
+    31,
+    19,
+    23,
+    32
+   ],
+   "auc": 0.6661290322580645,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    4
+   ],
+   "mode": "crop",
+   "n_targets": 6,
+   "n_dets": 320,
+   "precision_at_m": 0.8333333333333334,
+   "found_in_top_m": 0.8333333333333334,
+   "ranks": [
+    1,
+    4,
+    3,
+    2,
+    6,
+    8
+   ],
+   "auc": 0.8521634615384616,
+   "pos_scores": [
+    0.8729,
+    0.8679,
+    0.8576,
+    0.8506,
+    0.7682,
+    0.6036,
+    0.1253,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    4
+   ],
+   "mode": "inplace",
+   "n_targets": 6,
+   "n_dets": 320,
+   "precision_at_m": 0.8333333333333334,
+   "found_in_top_m": 0.8333333333333334,
+   "ranks": [
+    5,
+    2,
+    3,
+    4,
+    1,
+    8
+   ],
+   "auc": 0.8413461538461539,
+   "pos_scores": [
+    0.9906,
+    0.9896,
+    0.9855,
+    0.9853,
+    0.985,
+    0.9276,
+    0.1411,
+    0.0
+   ],
+   "max_neg_score": 0.9575,
+   "top_score": 0.9906
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    4
+   ],
+   "mode": "text+crop",
+   "n_targets": 6,
+   "n_dets": 320,
+   "precision_at_m": 0.8333333333333334,
+   "found_in_top_m": 0.8333333333333334,
+   "ranks": [
+    1,
+    4,
+    3,
+    2,
+    6,
+    8
+   ],
+   "auc": 0.8517628205128205,
+   "pos_scores": [
+    0.8729,
+    0.8679,
+    0.8576,
+    0.8506,
+    0.7682,
+    0.6036,
+    0.1253,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    5
+   ],
+   "mode": "text",
+   "n_targets": 6,
+   "n_dets": 338,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    167,
+    31,
+    19,
+    21,
+    32
+   ],
+   "auc": 0.675,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0108,
+    0.0088,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    5
+   ],
+   "mode": "crop",
+   "n_targets": 6,
+   "n_dets": 339,
+   "precision_at_m": 0.6666666666666666,
+   "found_in_top_m": 0.6666666666666666,
+   "ranks": [
+    8,
+    24,
+    5,
+    6,
+    1,
+    4
+   ],
+   "auc": 0.8508308157099698,
+   "pos_scores": [
+    0.5727,
+    0.4587,
+    0.3819,
+    0.3768,
+    0.3579,
+    0.2231,
+    0.1499,
+    0.0
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    5
+   ],
+   "mode": "inplace",
+   "n_targets": 6,
+   "n_dets": 340,
+   "precision_at_m": 0.8333333333333334,
+   "found_in_top_m": 0.8333333333333334,
+   "ranks": [
+    5,
+    2,
+    4,
+    3,
+    1,
+    7
+   ],
+   "auc": 0.8531626506024096,
+   "pos_scores": [
+    0.995,
+    0.9893,
+    0.9867,
+    0.984,
+    0.983,
+    0.9715,
+    0.3503,
+    0.0
+   ],
+   "max_neg_score": 0.9718,
+   "top_score": 0.995
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    5
+   ],
+   "mode": "text+crop",
+   "n_targets": 6,
+   "n_dets": 339,
+   "precision_at_m": 0.6666666666666666,
+   "found_in_top_m": 0.6666666666666666,
+   "ranks": [
+    8,
+    24,
+    5,
+    6,
+    1,
+    4
+   ],
+   "auc": 0.8508308157099698,
+   "pos_scores": [
+    0.5727,
+    0.4587,
+    0.3819,
+    0.3768,
+    0.3579,
+    0.2231,
+    0.1499,
+    0.0
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    6
+   ],
+   "mode": "text",
+   "n_targets": 6,
+   "n_dets": 348,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    169,
+    32,
+    19,
+    21,
+    24
+   ],
+   "auc": 0.7754503560955174,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0012,
+    0.0003
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    6
+   ],
+   "mode": "crop",
+   "n_targets": 6,
+   "n_dets": 351,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    49,
+    29,
+    63,
+    115,
+    10,
+    35
+   ],
+   "auc": 0.7757475083056479,
+   "pos_scores": [
+    0.0215,
+    0.0132,
+    0.0127,
+    0.0108,
+    0.0091,
+    0.0059,
+    0.0018
+   ],
+   "max_neg_score": 0.0388,
+   "top_score": 0.0388
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    6
+   ],
+   "mode": "inplace",
+   "n_targets": 6,
+   "n_dets": 350,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    5,
+    6,
+    2,
+    3,
+    4,
+    1
+   ],
+   "auc": 0.9783423573511038,
+   "pos_scores": [
+    0.9897,
+    0.9861,
+    0.9838,
+    0.9825,
+    0.9818,
+    0.9781,
+    0.5399
+   ],
+   "max_neg_score": 0.9656,
+   "top_score": 0.9897
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 1,
+   "exemplar_idx": [
+    6
+   ],
+   "mode": "text+crop",
+   "n_targets": 6,
+   "n_dets": 349,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    22,
+    69,
+    42,
+    23,
+    9,
+    11
+   ],
+   "auc": 0.8212197159565581,
+   "pos_scores": [
+    0.0395,
+    0.0384,
+    0.0297,
+    0.0291,
+    0.0197,
+    0.0132,
+    0.0018
+   ],
+   "max_neg_score": 0.0577,
+   "top_score": 0.0577
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    1
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 337,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    31,
+    18,
+    20,
+    23,
+    32
+   ],
+   "auc": 0.7804632426988922,
+   "pos_scores": [
+    0.0108,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0087,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    1
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 337,
+   "precision_at_m": 0.4,
+   "found_in_top_m": 0.4,
+   "ranks": [
+    3,
+    4,
+    17,
+    53,
+    20
+   ],
+   "auc": 0.7935548841893253,
+   "pos_scores": [
+    0.1768,
+    0.1628,
+    0.088,
+    0.0855,
+    0.0369,
+    0.0
+   ],
+   "max_neg_score": 0.2472,
+   "top_score": 0.2472
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    1
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 340,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    2,
+    1,
+    3,
+    5,
+    16
+   ],
+   "auc": 0.8288423153692615,
+   "pos_scores": [
+    0.9984,
+    0.9974,
+    0.9881,
+    0.9784,
+    0.9328,
+    0.0
+   ],
+   "max_neg_score": 0.9832,
+   "top_score": 0.9984
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    1
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 337,
+   "precision_at_m": 0.4,
+   "found_in_top_m": 0.4,
+   "ranks": [
+    3,
+    4,
+    17,
+    53,
+    20
+   ],
+   "auc": 0.7935548841893253,
+   "pos_scores": [
+    0.1768,
+    0.1628,
+    0.088,
+    0.0855,
+    0.0384,
+    0.0
+   ],
+   "max_neg_score": 0.2472,
+   "top_score": 0.2472
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    2
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 335,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    164,
+    18,
+    20,
+    23,
+    31
+   ],
+   "auc": 0.6380662020905923,
+   "pos_scores": [
+    0.0108,
+    0.0108,
+    0.0098,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    2
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 335,
+   "precision_at_m": 0.2,
+   "found_in_top_m": 0.2,
+   "ranks": [
+    55,
+    3,
+    16,
+    52,
+    19
+   ],
+   "auc": 0.7539198606271778,
+   "pos_scores": [
+    0.1628,
+    0.088,
+    0.0855,
+    0.0369,
+    0.0348,
+    0.0152,
+    0.0
+   ],
+   "max_neg_score": 0.2472,
+   "top_score": 0.2472
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    2
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 338,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    2,
+    1,
+    3,
+    6,
+    14
+   ],
+   "auc": 0.8347000431592576,
+   "pos_scores": [
+    0.9984,
+    0.9978,
+    0.9872,
+    0.9754,
+    0.9456,
+    0.5607,
+    0.0
+   ],
+   "max_neg_score": 0.9832,
+   "top_score": 0.9984
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    2
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 335,
+   "precision_at_m": 0.2,
+   "found_in_top_m": 0.2,
+   "ranks": [
+    58,
+    3,
+    16,
+    52,
+    19
+   ],
+   "auc": 0.7517421602787456,
+   "pos_scores": [
+    0.1628,
+    0.088,
+    0.0855,
+    0.0384,
+    0.0348,
+    0.0152,
+    0.0
+   ],
+   "max_neg_score": 0.2472,
+   "top_score": 0.2472
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    3
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 340,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    164,
+    30,
+    19,
+    22,
+    31
+   ],
+   "auc": 0.6353496353496354,
+   "pos_scores": [
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    3
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 340,
+   "precision_at_m": 0.2,
+   "found_in_top_m": 0.2,
+   "ranks": [
+    54,
+    3,
+    16,
+    51,
+    19
+   ],
+   "auc": 0.7558987558987559,
+   "pos_scores": [
+    0.1768,
+    0.088,
+    0.0855,
+    0.0369,
+    0.0348,
+    0.0152,
+    0.0
+   ],
+   "max_neg_score": 0.2472,
+   "top_score": 0.2472
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    3
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 343,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    1,
+    2,
+    3,
+    6,
+    17
+   ],
+   "auc": 0.8312074829931972,
+   "pos_scores": [
+    0.9978,
+    0.9974,
+    0.9869,
+    0.9742,
+    0.9328,
+    0.4864,
+    0.0
+   ],
+   "max_neg_score": 0.9832,
+   "top_score": 0.9978
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    3
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 340,
+   "precision_at_m": 0.2,
+   "found_in_top_m": 0.2,
+   "ranks": [
+    57,
+    3,
+    16,
+    51,
+    19
+   ],
+   "auc": 0.7537537537537538,
+   "pos_scores": [
+    0.1768,
+    0.088,
+    0.0855,
+    0.0384,
+    0.0348,
+    0.0152,
+    0.0
+   ],
+   "max_neg_score": 0.2472,
+   "top_score": 0.2472
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    4
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 311,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    165,
+    30,
+    18,
+    22,
+    31
+   ],
+   "auc": 0.6240601503759399,
+   "pos_scores": [
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    4
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 313,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    3,
+    2,
+    1,
+    5,
+    7
+   ],
+   "auc": 0.8314659197012139,
+   "pos_scores": [
+    0.8679,
+    0.8576,
+    0.8506,
+    0.7682,
+    0.6036,
+    0.1253,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8679
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    4
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 314,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    2,
+    3,
+    1,
+    4,
+    15
+   ],
+   "auc": 0.8306188925081434,
+   "pos_scores": [
+    0.9984,
+    0.9978,
+    0.9974,
+    0.9906,
+    0.9328,
+    0.4864,
+    0.0
+   ],
+   "max_neg_score": 0.9832,
+   "top_score": 0.9984
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    4
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 313,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    3,
+    2,
+    1,
+    5,
+    7
+   ],
+   "auc": 0.830999066293184,
+   "pos_scores": [
+    0.8679,
+    0.8576,
+    0.8506,
+    0.7682,
+    0.6036,
+    0.1253,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8679
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    5
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 331,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    164,
+    30,
+    18,
+    20,
+    31
+   ],
+   "auc": 0.6340388007054674,
+   "pos_scores": [
+    0.0108,
+    0.0108,
+    0.0088,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    5
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 332,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    23,
+    5,
+    6,
+    1,
+    4
+   ],
+   "auc": 0.8307692307692308,
+   "pos_scores": [
+    0.5727,
+    0.4587,
+    0.3819,
+    0.3768,
+    0.2231,
+    0.1499,
+    0.0
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    5
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 333,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    2,
+    3,
+    1,
+    4,
+    7
+   ],
+   "auc": 0.8343558282208589,
+   "pos_scores": [
+    0.9984,
+    0.9978,
+    0.9974,
+    0.995,
+    0.9715,
+    0.4864,
+    0.0
+   ],
+   "max_neg_score": 0.9832,
+   "top_score": 0.9984
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    5
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 332,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    23,
+    5,
+    6,
+    1,
+    4
+   ],
+   "auc": 0.8307692307692308,
+   "pos_scores": [
+    0.5727,
+    0.4587,
+    0.3819,
+    0.3768,
+    0.2231,
+    0.1499,
+    0.0
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    6
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 341,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    166,
+    31,
+    18,
+    20,
+    23
+   ],
+   "auc": 0.7442786069651741,
+   "pos_scores": [
+    0.0108,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0012,
+    0.0003
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    6
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 341,
+   "precision_at_m": 0.4,
+   "found_in_top_m": 0.4,
+   "ranks": [
+    56,
+    3,
+    4,
+    17,
+    53
+   ],
+   "auc": 0.8845771144278607,
+   "pos_scores": [
+    0.1768,
+    0.1628,
+    0.088,
+    0.0369,
+    0.0348,
+    0.0152
+   ],
+   "max_neg_score": 0.2472,
+   "top_score": 0.2472
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    6
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 343,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    2,
+    3,
+    1,
+    5,
+    4
+   ],
+   "auc": 0.9723046488625123,
+   "pos_scores": [
+    0.9984,
+    0.9978,
+    0.9974,
+    0.9897,
+    0.9869,
+    0.5399
+   ],
+   "max_neg_score": 0.9832,
+   "top_score": 0.9984
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    6
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 341,
+   "precision_at_m": 0.4,
+   "found_in_top_m": 0.4,
+   "ranks": [
+    59,
+    3,
+    4,
+    17,
+    53
+   ],
+   "auc": 0.882587064676617,
+   "pos_scores": [
+    0.1768,
+    0.1628,
+    0.088,
+    0.0384,
+    0.0348,
+    0.0152
+   ],
+   "max_neg_score": 0.2472,
+   "top_score": 0.2472
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    2
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 335,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    19,
+    21,
+    24,
+    32
+   ],
+   "auc": 0.7857142857142857,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0108,
+    0.0098,
+    0.0087,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    2
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 336,
+   "precision_at_m": 0.4,
+   "found_in_top_m": 0.4,
+   "ranks": [
+    4,
+    5,
+    18,
+    49,
+    15
+   ],
+   "auc": 0.7964646464646464,
+   "pos_scores": [
+    0.0411,
+    0.0384,
+    0.0268,
+    0.0259,
+    0.0109,
+    0.0
+   ],
+   "max_neg_score": 0.093,
+   "top_score": 0.093
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    2
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 338,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    1,
+    2,
+    3,
+    6,
+    12
+   ],
+   "auc": 0.8303212851405622,
+   "pos_scores": [
+    0.9974,
+    0.9972,
+    0.9881,
+    0.9784,
+    0.9456,
+    0.0
+   ],
+   "max_neg_score": 0.9824,
+   "top_score": 0.9974
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    2
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 338,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    12,
+    14,
+    13,
+    15,
+    32
+   ],
+   "auc": 0.7991967871485943,
+   "pos_scores": [
+    0.0411,
+    0.0395,
+    0.0384,
+    0.0384,
+    0.0268,
+    0.0
+   ],
+   "max_neg_score": 0.093,
+   "top_score": 0.093
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    3
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 340,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    31,
+    20,
+    23,
+    32
+   ],
+   "auc": 0.780938123752495,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0087,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    3
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 340,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    3,
+    4,
+    5,
+    46,
+    11
+   ],
+   "auc": 0.8078842315369261,
+   "pos_scores": [
+    0.0729,
+    0.0692,
+    0.0513,
+    0.0371,
+    0.0145,
+    0.0
+   ],
+   "max_neg_score": 0.114,
+   "top_score": 0.114
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    3
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 343,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    2,
+    3,
+    5,
+    18
+   ],
+   "auc": 0.827893175074184,
+   "pos_scores": [
+    0.9978,
+    0.9963,
+    0.9881,
+    0.9784,
+    0.9228,
+    0.0
+   ],
+   "max_neg_score": 0.9824,
+   "top_score": 0.9978
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    3
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 342,
+   "precision_at_m": 0.4,
+   "found_in_top_m": 0.4,
+   "ranks": [
+    3,
+    4,
+    7,
+    17,
+    19
+   ],
+   "auc": 0.8174603174603174,
+   "pos_scores": [
+    0.0729,
+    0.0692,
+    0.0513,
+    0.0384,
+    0.0371,
+    0.0
+   ],
+   "max_neg_score": 0.114,
+   "top_score": 0.114
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    4
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 311,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    31,
+    19,
+    23,
+    32
+   ],
+   "auc": 0.7765027322404372,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0087,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    4
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 313,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    3,
+    2,
+    5,
+    7
+   ],
+   "auc": 0.8327904451682954,
+   "pos_scores": [
+    0.8729,
+    0.8679,
+    0.8576,
+    0.7682,
+    0.6036,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    4
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 313,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    2,
+    3,
+    1,
+    4,
+    14
+   ],
+   "auc": 0.8295331161780674,
+   "pos_scores": [
+    0.9969,
+    0.9967,
+    0.9952,
+    0.9906,
+    0.9276,
+    0.0
+   ],
+   "max_neg_score": 0.9824,
+   "top_score": 0.9969
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    4
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 313,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    3,
+    2,
+    5,
+    7
+   ],
+   "auc": 0.8327904451682954,
+   "pos_scores": [
+    0.8729,
+    0.8679,
+    0.8576,
+    0.7682,
+    0.6036,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    5
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 331,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    31,
+    19,
+    21,
+    32
+   ],
+   "auc": 0.7815384615384615,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0108,
+    0.0088,
+    0.0087,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    5
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 332,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    8,
+    5,
+    6,
+    1,
+    4
+   ],
+   "auc": 0.831799591002045,
+   "pos_scores": [
+    0.5727,
+    0.4587,
+    0.3819,
+    0.3768,
+    0.3579,
+    0.0
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    5
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 333,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    2,
+    3,
+    1,
+    4,
+    7
+   ],
+   "auc": 0.8343527013251784,
+   "pos_scores": [
+    0.9969,
+    0.9967,
+    0.9952,
+    0.995,
+    0.9715,
+    0.0
+   ],
+   "max_neg_score": 0.9824,
+   "top_score": 0.9969
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    5
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 332,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    8,
+    5,
+    6,
+    1,
+    4
+   ],
+   "auc": 0.831799591002045,
+   "pos_scores": [
+    0.5727,
+    0.4587,
+    0.3819,
+    0.3768,
+    0.3579,
+    0.0
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    6
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 341,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    32,
+    19,
+    21,
+    24
+   ],
+   "auc": 0.9416666666666667,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0108,
+    0.0098,
+    0.0088
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    6
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 342,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    1,
+    4,
+    3,
+    14,
+    44
+   ],
+   "auc": 0.96973293768546,
+   "pos_scores": [
+    0.0411,
+    0.0384,
+    0.0369,
+    0.0215,
+    0.0127
+   ],
+   "max_neg_score": 0.0388,
+   "top_score": 0.0411
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    6
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 342,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    2,
+    3,
+    1,
+    5,
+    4
+   ],
+   "auc": 1.0,
+   "pos_scores": [
+    0.9969,
+    0.9967,
+    0.9952,
+    0.9897,
+    0.9881
+   ],
+   "max_neg_score": 0.9824,
+   "top_score": 0.9969
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    6
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 342,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    9,
+    14,
+    12,
+    10,
+    13
+   ],
+   "auc": 0.9744807121661722,
+   "pos_scores": [
+    0.0411,
+    0.0395,
+    0.0384,
+    0.0384,
+    0.0369
+   ],
+   "max_neg_score": 0.0577,
+   "top_score": 0.0577
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    3
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 338,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    164,
+    20,
+    23,
+    31
+   ],
+   "auc": 0.6391886059559776,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0098,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    3
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 338,
+   "precision_at_m": 0.2,
+   "found_in_top_m": 0.2,
+   "ranks": [
+    4,
+    12,
+    6,
+    48,
+    11
+   ],
+   "auc": 0.8256365990504964,
+   "pos_scores": [
+    0.0729,
+    0.0513,
+    0.0371,
+    0.0344,
+    0.0313,
+    0.0145,
+    0.0
+   ],
+   "max_neg_score": 0.114,
+   "top_score": 0.114
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    3
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 341,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    1,
+    2,
+    3,
+    6,
+    12
+   ],
+   "auc": 0.8370402053036784,
+   "pos_scores": [
+    0.9978,
+    0.9971,
+    0.9872,
+    0.9754,
+    0.9456,
+    0.5607,
+    0.0
+   ],
+   "max_neg_score": 0.98,
+   "top_score": 0.9978
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    3
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 340,
+   "precision_at_m": 0.2,
+   "found_in_top_m": 0.2,
+   "ranks": [
+    4,
+    24,
+    8,
+    17,
+    19
+   ],
+   "auc": 0.8232518232518232,
+   "pos_scores": [
+    0.0729,
+    0.0513,
+    0.0384,
+    0.0371,
+    0.0344,
+    0.0313,
+    0.0
+   ],
+   "max_neg_score": 0.114,
+   "top_score": 0.114
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    4
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 309,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    165,
+    19,
+    23,
+    31
+   ],
+   "auc": 0.6281929990539262,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0098,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    4
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 311,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    3,
+    2,
+    5,
+    7
+   ],
+   "auc": 0.8308270676691729,
+   "pos_scores": [
+    0.8729,
+    0.8679,
+    0.8506,
+    0.7682,
+    0.6036,
+    0.1253,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    4
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 312,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    3,
+    2,
+    4,
+    10
+   ],
+   "auc": 0.8360655737704918,
+   "pos_scores": [
+    0.9974,
+    0.9972,
+    0.9966,
+    0.9906,
+    0.9456,
+    0.5607,
+    0.0
+   ],
+   "max_neg_score": 0.9791,
+   "top_score": 0.9974
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    4
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 311,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    3,
+    2,
+    5,
+    7
+   ],
+   "auc": 0.8303571428571429,
+   "pos_scores": [
+    0.8729,
+    0.8679,
+    0.8506,
+    0.7682,
+    0.6036,
+    0.1253,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    5
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 329,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    164,
+    19,
+    21,
+    31
+   ],
+   "auc": 0.6379769299023957,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0108,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    5
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 330,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    7,
+    23,
+    5,
+    1,
+    4
+   ],
+   "auc": 0.8297213622291022,
+   "pos_scores": [
+    0.5727,
+    0.4587,
+    0.3768,
+    0.3579,
+    0.2231,
+    0.1499,
+    0.0
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    5
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 331,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    3,
+    2,
+    4,
+    7
+   ],
+   "auc": 0.8364197530864198,
+   "pos_scores": [
+    0.9974,
+    0.9972,
+    0.9966,
+    0.995,
+    0.9715,
+    0.5607,
+    0.0
+   ],
+   "max_neg_score": 0.9791,
+   "top_score": 0.9974
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    5
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 330,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    7,
+    23,
+    5,
+    1,
+    4
+   ],
+   "auc": 0.8297213622291022,
+   "pos_scores": [
+    0.5727,
+    0.4587,
+    0.3768,
+    0.3579,
+    0.2231,
+    0.1499,
+    0.0
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    6
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 339,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    166,
+    19,
+    21,
+    24
+   ],
+   "auc": 0.7487487487487487,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0108,
+    0.0098,
+    0.0012,
+    0.0003
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    6
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 340,
+   "precision_at_m": 0.2,
+   "found_in_top_m": 0.2,
+   "ranks": [
+    4,
+    44,
+    10,
+    19,
+    56
+   ],
+   "auc": 0.8782435129740519,
+   "pos_scores": [
+    0.0411,
+    0.0331,
+    0.0259,
+    0.0155,
+    0.0127,
+    0.0056
+   ],
+   "max_neg_score": 0.093,
+   "top_score": 0.093
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    6
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 341,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1,
+    3,
+    2,
+    5,
+    4
+   ],
+   "auc": 0.9736318407960199,
+   "pos_scores": [
+    0.9974,
+    0.9972,
+    0.9966,
+    0.9897,
+    0.9872,
+    0.5607
+   ],
+   "max_neg_score": 0.9791,
+   "top_score": 0.9974
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    2,
+    6
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 341,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    12,
+    59,
+    24,
+    13,
+    15
+   ],
+   "auc": 0.8706467661691543,
+   "pos_scores": [
+    0.0411,
+    0.0395,
+    0.0384,
+    0.0331,
+    0.0155,
+    0.0056
+   ],
+   "max_neg_score": 0.093,
+   "top_score": 0.093
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    4
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 314,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    165,
+    30,
+    22,
+    31
+   ],
+   "auc": 0.6254071661237784,
+   "pos_scores": [
+    0.0113,
+    0.0098,
+    0.0088,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    4
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 316,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    3,
+    2,
+    5,
+    7
+   ],
+   "auc": 0.8317152103559871,
+   "pos_scores": [
+    0.8729,
+    0.8576,
+    0.8506,
+    0.7682,
+    0.6036,
+    0.1253,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    4
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 317,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    2,
+    3,
+    4,
+    15
+   ],
+   "auc": 0.8299539170506912,
+   "pos_scores": [
+    0.9978,
+    0.9971,
+    0.9963,
+    0.9906,
+    0.9276,
+    0.4699,
+    0.0
+   ],
+   "max_neg_score": 0.98,
+   "top_score": 0.9978
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    4
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 316,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    3,
+    2,
+    5,
+    7
+   ],
+   "auc": 0.8312528895053167,
+   "pos_scores": [
+    0.8729,
+    0.8576,
+    0.8506,
+    0.7682,
+    0.6036,
+    0.1253,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    5
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 334,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    164,
+    30,
+    20,
+    31
+   ],
+   "auc": 0.6352118829183049,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0088,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    5
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 335,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    7,
+    23,
+    5,
+    1,
+    4
+   ],
+   "auc": 0.830574912891986,
+   "pos_scores": [
+    0.5727,
+    0.4587,
+    0.3819,
+    0.3579,
+    0.2231,
+    0.1499,
+    0.0
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    5
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 336,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    2,
+    3,
+    4,
+    7
+   ],
+   "auc": 0.8336951801997394,
+   "pos_scores": [
+    0.9978,
+    0.9971,
+    0.9963,
+    0.995,
+    0.9715,
+    0.4699,
+    0.0
+   ],
+   "max_neg_score": 0.98,
+   "top_score": 0.9978
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    5
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 335,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    7,
+    23,
+    5,
+    1,
+    4
+   ],
+   "auc": 0.830574912891986,
+   "pos_scores": [
+    0.5727,
+    0.4587,
+    0.3819,
+    0.3579,
+    0.2231,
+    0.1499,
+    0.0
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    6
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 344,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    166,
+    31,
+    20,
+    23
+   ],
+   "auc": 0.7460552268244576,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0012,
+    0.0003
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    6
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 344,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    3,
+    12,
+    4,
+    5,
+    54
+   ],
+   "auc": 0.9640039447731755,
+   "pos_scores": [
+    0.0729,
+    0.0692,
+    0.0513,
+    0.0344,
+    0.0313,
+    0.0145
+   ],
+   "max_neg_score": 0.114,
+   "top_score": 0.114
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    6
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 346,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1,
+    2,
+    3,
+    5,
+    4
+   ],
+   "auc": 0.9740196078431372,
+   "pos_scores": [
+    0.9978,
+    0.9971,
+    0.9963,
+    0.9897,
+    0.9828,
+    0.5399
+   ],
+   "max_neg_score": 0.98,
+   "top_score": 0.9978
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    3,
+    6
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 346,
+   "precision_at_m": 0.4,
+   "found_in_top_m": 0.4,
+   "ranks": [
+    3,
+    24,
+    4,
+    7,
+    18
+   ],
+   "auc": 0.9676470588235294,
+   "pos_scores": [
+    0.0729,
+    0.0692,
+    0.0513,
+    0.0384,
+    0.0344,
+    0.0313
+   ],
+   "max_neg_score": 0.114,
+   "top_score": 0.114
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    4,
+    5
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 305,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    165,
+    30,
+    19,
+    31
+   ],
+   "auc": 0.6236816874400767,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0088,
+    0.0087,
+    0.0012,
+    0.0003,
+    0.0
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    4,
+    5
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 306,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    4,
+    3,
+    2,
+    7
+   ],
+   "auc": 0.8337314859053989,
+   "pos_scores": [
+    0.8729,
+    0.8679,
+    0.8576,
+    0.8506,
+    0.6036,
+    0.1499,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    4,
+    5
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 307,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    4,
+    1,
+    3,
+    2,
+    6
+   ],
+   "auc": 0.8295238095238096,
+   "pos_scores": [
+    0.9896,
+    0.9867,
+    0.9855,
+    0.985,
+    0.9715,
+    0.3503,
+    0.0
+   ],
+   "max_neg_score": 0.9718,
+   "top_score": 0.9896
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    4,
+    5
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 306,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    4,
+    3,
+    2,
+    7
+   ],
+   "auc": 0.8337314859053989,
+   "pos_scores": [
+    0.8729,
+    0.8679,
+    0.8576,
+    0.8506,
+    0.6036,
+    0.1499,
+    0.0
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    4,
+    6
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 315,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    167,
+    31,
+    19,
+    23
+   ],
+   "auc": 0.7335490830636462,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0098,
+    0.0088,
+    0.0012,
+    0.0003
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    4,
+    6
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 317,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    4,
+    3,
+    2,
+    6
+   ],
+   "auc": 0.9689174705251876,
+   "pos_scores": [
+    0.8729,
+    0.8679,
+    0.8576,
+    0.8506,
+    0.7682,
+    0.1253
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    4,
+    6
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 317,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    5,
+    2,
+    3,
+    4,
+    1
+   ],
+   "auc": 0.9726688102893891,
+   "pos_scores": [
+    0.9906,
+    0.9896,
+    0.9861,
+    0.9853,
+    0.985,
+    0.5399
+   ],
+   "max_neg_score": 0.9656,
+   "top_score": 0.9906
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    4,
+    6
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 317,
+   "precision_at_m": 0.8,
+   "found_in_top_m": 0.8,
+   "ranks": [
+    1,
+    4,
+    3,
+    2,
+    6
+   ],
+   "auc": 0.9689174705251876,
+   "pos_scores": [
+    0.8729,
+    0.8679,
+    0.8576,
+    0.8506,
+    0.7682,
+    0.1253
+   ],
+   "max_neg_score": 0.797,
+   "top_score": 0.8729
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    5,
+    6
+   ],
+   "mode": "text",
+   "n_targets": 5,
+   "n_dets": 335,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    166,
+    31,
+    19,
+    21
+   ],
+   "auc": 0.7441742654508612,
+   "pos_scores": [
+    0.0113,
+    0.0108,
+    0.0108,
+    0.0088,
+    0.0012,
+    0.0003
+   ],
+   "max_neg_score": 0.0242,
+   "top_score": 0.0242
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    5,
+    6
+   ],
+   "mode": "crop",
+   "n_targets": 5,
+   "n_dets": 336,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    7,
+    23,
+    4,
+    5,
+    1
+   ],
+   "auc": 0.9656565656565657,
+   "pos_scores": [
+    0.5727,
+    0.3819,
+    0.3768,
+    0.3579,
+    0.2231,
+    0.1499
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    5,
+    6
+   ],
+   "mode": "inplace",
+   "n_targets": 5,
+   "n_dets": 337,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    5,
+    2,
+    4,
+    3,
+    1
+   ],
+   "auc": 0.973313192346425,
+   "pos_scores": [
+    0.995,
+    0.9893,
+    0.9867,
+    0.9861,
+    0.983,
+    0.5399
+   ],
+   "max_neg_score": 0.9718,
+   "top_score": 0.995
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "capacitor",
+   "n_instances": 7,
+   "shots": 2,
+   "exemplar_idx": [
+    5,
+    6
+   ],
+   "mode": "text+crop",
+   "n_targets": 5,
+   "n_dets": 336,
+   "precision_at_m": 0.6,
+   "found_in_top_m": 0.6,
+   "ranks": [
+    7,
+    23,
+    4,
+    5,
+    1
+   ],
+   "auc": 0.9656565656565657,
+   "pos_scores": [
+    0.5727,
+    0.3819,
+    0.3768,
+    0.3579,
+    0.2231,
+    0.1499
+   ],
+   "max_neg_score": 0.4787,
+   "top_score": 0.5727
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "text",
+   "n_targets": 2,
+   "n_dets": 331,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    12,
+    13
+   ],
+   "auc": 0.7996941896024465,
+   "pos_scores": [
+    0.0032,
+    0.003,
+    0.0011,
+    0.0002
+   ],
+   "max_neg_score": 0.0092,
+   "top_score": 0.0092
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "crop",
+   "n_targets": 2,
+   "n_dets": 329,
+   "precision_at_m": 0.5,
+   "found_in_top_m": 0.5,
+   "ranks": [
+    4,
+    2
+   ],
+   "auc": 0.9415384615384615,
+   "pos_scores": [
+    0.1615,
+    0.1387,
+    0.0995,
+    0.0099
+   ],
+   "max_neg_score": 0.1935,
+   "top_score": 0.1935
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "inplace",
+   "n_targets": 2,
+   "n_dets": 332,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    2,
+    1
+   ],
+   "auc": 0.961890243902439,
+   "pos_scores": [
+    0.9959,
+    0.9945,
+    0.955,
+    0.6454
+   ],
+   "max_neg_score": 0.9877,
+   "top_score": 0.9959
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "text+crop",
+   "n_targets": 2,
+   "n_dets": 329,
+   "precision_at_m": 0.5,
+   "found_in_top_m": 0.5,
+   "ranks": [
+    4,
+    2
+   ],
+   "auc": 0.94,
+   "pos_scores": [
+    0.1615,
+    0.1387,
+    0.0995,
+    0.0099
+   ],
+   "max_neg_score": 0.1935,
+   "top_score": 0.1935
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "text",
+   "n_targets": 2,
+   "n_dets": 337,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    8,
+    12
+   ],
+   "auc": 0.8460960960960962,
+   "pos_scores": [
+    0.0034,
+    0.003,
+    0.0011,
+    0.0003
+   ],
+   "max_neg_score": 0.0092,
+   "top_score": 0.0092
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "crop",
+   "n_targets": 2,
+   "n_dets": 339,
+   "precision_at_m": 0.5,
+   "found_in_top_m": 0.5,
+   "ranks": [
+    3,
+    1
+   ],
+   "auc": 0.9619402985074627,
+   "pos_scores": [
+    0.1404,
+    0.0537,
+    0.0332,
+    0.0088
+   ],
+   "max_neg_score": 0.1296,
+   "top_score": 0.1404
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "inplace",
+   "n_targets": 2,
+   "n_dets": 338,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    2,
+    1
+   ],
+   "auc": 0.9618263473053892,
+   "pos_scores": [
+    0.9948,
+    0.9916,
+    0.9443,
+    0.6401
+   ],
+   "max_neg_score": 0.9892,
+   "top_score": 0.9948
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "text+crop",
+   "n_targets": 2,
+   "n_dets": 337,
+   "precision_at_m": 0.5,
+   "found_in_top_m": 0.5,
+   "ranks": [
+    3,
+    1
+   ],
+   "auc": 0.9587087087087087,
+   "pos_scores": [
+    0.1404,
+    0.0537,
+    0.0332,
+    0.0088
+   ],
+   "max_neg_score": 0.1296,
+   "top_score": 0.1404
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    2
+   ],
+   "mode": "text",
+   "n_targets": 2,
+   "n_dets": 334,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    9,
+    12
+   ],
+   "auc": 0.7318181818181818,
+   "pos_scores": [
+    0.0034,
+    0.0032,
+    0.0003,
+    0.0002
+   ],
+   "max_neg_score": 0.0092,
+   "top_score": 0.0092
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    2
+   ],
+   "mode": "crop",
+   "n_targets": 2,
+   "n_dets": 336,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    44,
+    32
+   ],
+   "auc": 0.7093655589123867,
+   "pos_scores": [
+    0.0098,
+    0.0076,
+    0.0067,
+    0.0022,
+    0.001
+   ],
+   "max_neg_score": 0.155,
+   "top_score": 0.155
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    2
+   ],
+   "mode": "inplace",
+   "n_targets": 2,
+   "n_dets": 335,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    2,
+    1
+   ],
+   "auc": 0.9380664652567976,
+   "pos_scores": [
+    0.9949,
+    0.9939,
+    0.711,
+    0.5639
+   ],
+   "max_neg_score": 0.9896,
+   "top_score": 0.9949
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 1,
+   "exemplar_idx": [
+    2
+   ],
+   "mode": "text+crop",
+   "n_targets": 2,
+   "n_dets": 334,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    17,
+    14
+   ],
+   "auc": 0.796969696969697,
+   "pos_scores": [
+    0.0189,
+    0.0183,
+    0.0067,
+    0.0022
+   ],
+   "max_neg_score": 0.155,
+   "top_score": 0.155
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    1
+   ],
+   "mode": "text",
+   "n_targets": 1,
+   "n_dets": 316,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    11
+   ],
+   "auc": 0.9092356687898089,
+   "pos_scores": [
+    0.003,
+    0.0011
+   ],
+   "max_neg_score": 0.0092,
+   "top_score": 0.0092
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    1
+   ],
+   "mode": "crop",
+   "n_targets": 1,
+   "n_dets": 314,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    2
+   ],
+   "auc": 0.9903846153846154,
+   "pos_scores": [
+    0.1615,
+    0.0995
+   ],
+   "max_neg_score": 0.1935,
+   "top_score": 0.1935
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    1
+   ],
+   "mode": "inplace",
+   "n_targets": 1,
+   "n_dets": 316,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 0.9792993630573248,
+   "pos_scores": [
+    0.9959,
+    0.955
+   ],
+   "max_neg_score": 0.9892,
+   "top_score": 0.9959
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    1
+   ],
+   "mode": "text+crop",
+   "n_targets": 1,
+   "n_dets": 314,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    2
+   ],
+   "auc": 0.9903846153846154,
+   "pos_scores": [
+    0.1615,
+    0.0995
+   ],
+   "max_neg_score": 0.1935,
+   "top_score": 0.1935
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    2
+   ],
+   "mode": "text",
+   "n_targets": 1,
+   "n_dets": 313,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    11
+   ],
+   "auc": 0.6913183279742765,
+   "pos_scores": [
+    0.0032,
+    0.0002
+   ],
+   "max_neg_score": 0.0092,
+   "top_score": 0.0092
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    2
+   ],
+   "mode": "crop",
+   "n_targets": 1,
+   "n_dets": 313,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    3
+   ],
+   "auc": 0.8762057877813505,
+   "pos_scores": [
+    0.1387,
+    0.0099
+   ],
+   "max_neg_score": 0.1935,
+   "top_score": 0.1935
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    2
+   ],
+   "mode": "inplace",
+   "n_targets": 1,
+   "n_dets": 314,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 0.9375,
+   "pos_scores": [
+    0.9949,
+    0.6454
+   ],
+   "max_neg_score": 0.9896,
+   "top_score": 0.9949
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    0,
+    2
+   ],
+   "mode": "text+crop",
+   "n_targets": 1,
+   "n_dets": 313,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    3
+   ],
+   "auc": 0.8729903536977492,
+   "pos_scores": [
+    0.1387,
+    0.0099
+   ],
+   "max_neg_score": 0.1935,
+   "top_score": 0.1935
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    2
+   ],
+   "mode": "text",
+   "n_targets": 1,
+   "n_dets": 319,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    8
+   ],
+   "auc": 0.7760252365930599,
+   "pos_scores": [
+    0.0034,
+    0.0003
+   ],
+   "max_neg_score": 0.0092,
+   "top_score": 0.0092
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    2
+   ],
+   "mode": "crop",
+   "n_targets": 1,
+   "n_dets": 320,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    3
+   ],
+   "auc": 0.89937106918239,
+   "pos_scores": [
+    0.0537,
+    0.0088
+   ],
+   "max_neg_score": 0.155,
+   "top_score": 0.155
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    2
+   ],
+   "mode": "inplace",
+   "n_targets": 1,
+   "n_dets": 319,
+   "precision_at_m": 1.0,
+   "found_in_top_m": 1.0,
+   "ranks": [
+    1
+   ],
+   "auc": 0.9463722397476341,
+   "pos_scores": [
+    0.9939,
+    0.711
+   ],
+   "max_neg_score": 0.9896,
+   "top_score": 0.9939
+  },
+  {
+   "image": "data/samples/pexels-muffin-4584612.jpg",
+   "concept": "inductor",
+   "n_instances": 3,
+   "shots": 2,
+   "exemplar_idx": [
+    1,
+    2
+   ],
+   "mode": "text+crop",
+   "n_targets": 1,
+   "n_dets": 319,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    3
+   ],
+   "auc": 0.8943217665615142,
+   "pos_scores": [
+    0.0537,
+    0.0088
+   ],
+   "max_neg_score": 0.155,
+   "top_score": 0.155
+  },
+  {
+   "image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "steel pipe",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "text",
+   "n_targets": 1,
+   "n_dets": 351,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    32
+   ],
+   "auc": 0.8868194842406877,
+   "pos_scores": [
+    0.006,
+    0.0051
+   ],
+   "max_neg_score": 0.0324,
+   "top_score": 0.0324
+  },
+  {
+   "image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "steel pipe",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "crop",
+   "n_targets": 1,
+   "n_dets": 351,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    47
+   ],
+   "auc": 0.8638968481375359,
+   "pos_scores": [
+    0.0166,
+    0.0156
+   ],
+   "max_neg_score": 0.1673,
+   "top_score": 0.1673
+  },
+  {
+   "image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "steel pipe",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "inplace",
+   "n_targets": 1,
+   "n_dets": 351,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    19
+   ],
+   "auc": 0.9469914040114613,
+   "pos_scores": [
+    0.5016,
+    0.4904
+   ],
+   "max_neg_score": 0.8841,
+   "top_score": 0.8841
+  },
+  {
+   "image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "steel pipe",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    0
+   ],
+   "mode": "text+crop",
+   "n_targets": 1,
+   "n_dets": 350,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    61
+   ],
+   "auc": 0.8218390804597702,
+   "pos_scores": [
+    0.0166,
+    0.016
+   ],
+   "max_neg_score": 0.1673,
+   "top_score": 0.1673
+  },
+  {
+   "image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "steel pipe",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "text",
+   "n_targets": 1,
+   "n_dets": 362,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    8
+   ],
+   "auc": 0.8305555555555556,
+   "pos_scores": [
+    0.0136,
+    0.0032
+   ],
+   "max_neg_score": 0.0324,
+   "top_score": 0.0324
+  },
+  {
+   "image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "steel pipe",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "crop",
+   "n_targets": 1,
+   "n_dets": 363,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    19
+   ],
+   "auc": 0.9502762430939227,
+   "pos_scores": [
+    0.2774
+   ],
+   "max_neg_score": 0.8933,
+   "top_score": 0.8933
+  },
+  {
+   "image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "steel pipe",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "inplace",
+   "n_targets": 1,
+   "n_dets": 361,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    12
+   ],
+   "auc": 0.9694444444444444,
+   "pos_scores": [
+    0.7846
+   ],
+   "max_neg_score": 0.9455,
+   "top_score": 0.9455
+  },
+  {
+   "image": "data/samples/pexels-cmrcn-29224614.jpg",
+   "concept": "steel pipe",
+   "n_instances": 2,
+   "shots": 1,
+   "exemplar_idx": [
+    1
+   ],
+   "mode": "text+crop",
+   "n_targets": 1,
+   "n_dets": 362,
+   "precision_at_m": 0.0,
+   "found_in_top_m": 0.0,
+   "ranks": [
+    19
+   ],
+   "auc": 0.9501385041551247,
+   "pos_scores": [
+    0.2774
+   ],
+   "max_neg_score": 0.8933,
+   "top_score": 0.8933
+  }
+ ]
+}
